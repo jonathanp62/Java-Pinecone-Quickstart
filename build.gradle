@@ -42,6 +42,7 @@ plugins {
 apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
+	apiKey = 'etc/api-key.txt'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	project.group = 'net.jmp.pinecone.quickstart'
 	project.version = '0.1.0'
@@ -64,6 +65,7 @@ repositories {
 
 dependencies {
 	implementation		(libs.bundles.logging)
+	implementation		(libs.io.pinecone.pinecone.client)
 
 	runtimeOnly			(libs.bundles.logging.runtime)
 
@@ -91,6 +93,7 @@ tasks.withType(Javadoc).configureEach {
 
 tasks.register('execute', JavaExec) {
 	allJvmArgs = [useAssertions] as List<String>
+	systemProperty("app.apiKey", apiKey)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 	mainClass = javaMainClass

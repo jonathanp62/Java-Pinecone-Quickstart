@@ -55,6 +55,10 @@ public final class Main implements Runnable {
 
         this.logger.info("Pinecone Quickstart");
 
+        final Quickstart quickstart = new Quickstart();
+
+        quickstart.start();
+
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }

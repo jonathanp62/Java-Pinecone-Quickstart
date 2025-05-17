@@ -29,6 +29,7 @@
 .gradle
 .idea
 build
+etc/api-key.txt
 gradle/*
 !gradle/libs.versions.toml
 gradlew

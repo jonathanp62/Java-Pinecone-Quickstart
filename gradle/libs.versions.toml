@@ -30,12 +30,14 @@
 [versions]
 ch-qos-logback-logback-classic = "1.5.18"
 ch-qos-logback-logback-core = "1.5.18"
+io-pinecone-pinecone-client = "4.0.1"
 net-jmp-util-logging-logging-utilities = "1.2.0"
 org-slf4j-slf4j-api = "2.0.17"
 
 [libraries]
 ch-qos-logback-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "ch-qos-logback-logback-classic" }
 ch-qos-logback-logback-core = { module = "ch.qos.logback:logback-core", version.ref = "ch-qos-logback-logback-core" }
+io-pinecone-pinecone-client = { module = "io.pinecone:pinecone-client", version.ref = "io-pinecone-pinecone-client" }
 net-jmp-util-logging-logging-utilities = { module = "net.jmp.util.logging:logging-utilities", version.ref = "net-jmp-util-logging-logging-utilities" }
 org-slf4j-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "org-slf4j-slf4j-api" }
 

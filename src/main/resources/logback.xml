@@ -37,7 +37,7 @@
         </encoder>
     </appender>
 
-    <logger name="net.jmp.pinecone.quickstart" additivity="false" level="info">
+    <logger name="net.jmp.pinecone.quickstart" additivity="false" level="debug">
         <appender-ref ref="MAIN" />
     </logger>
 
