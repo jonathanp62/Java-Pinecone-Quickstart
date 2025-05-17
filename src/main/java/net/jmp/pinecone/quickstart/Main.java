@@ -28,11 +28,19 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import static net.jmp.util.logging.LoggerUtils.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /// The main application class.
 ///
 /// @version    0.1.0
 /// @since      0.1.0
 public final class Main implements Runnable {
+    /// The logger.
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
     /// The default constructor.
     private Main() {
         super();
@@ -41,7 +49,15 @@ public final class Main implements Runnable {
     /// The run method.
     @Override
     public void run() {
-        System.out.println("OK");
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        this.logger.info("Pinecone Quickstart");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 
     /// The main application entry point.
