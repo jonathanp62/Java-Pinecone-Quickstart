@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -68,10 +69,17 @@ public final class Quickstart {
         }
 
         final String apiKey = this.getApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
+        final boolean deleteIndex = Boolean.parseBoolean(System.getProperty("app.deleteIndex"));
         final Pinecone pinecone = new Pinecone.Builder(apiKey).build();
+        final String indexName = "quickstart";
 
         this.listIndexes(pinecone);
-        this.createIndex(pinecone);
+        this.createIndex(pinecone, indexName);
+        this.describeIndex(pinecone, indexName);
+
+        if (deleteIndex) {
+
+        }
     }
 
     /// Get the API key.
@@ -126,28 +134,55 @@ public final class Quickstart {
     /// Create the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    private void createIndex(final Pinecone pinecone) {
+    /// @param  indexName   java.lang.String
+    private void createIndex(final Pinecone pinecone, final String indexName) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone));
+            this.logger.trace(entryWith(pinecone, indexName));
         }
-
-        final String indexName = "quickstart";
 
         if (!indexExists(pinecone, indexName)) {
             this.logger.info("Creating index: {}", indexName);
 
             /* Embedding model llama-text-embed-v2 */
 
-            final IndexModel indexModel = pinecone.createServerlessIndex(
+            IndexModel indexModel = pinecone.createServerlessIndex(
                     indexName,
                     "cosine",   // cosine, euclidean, dot product
                     1024,              // 1024, 2048, 768, 512, 384
                     "aws",
                     "us-east-1",
                     DeletionProtection.DISABLED,
-                    new HashMap<>());
+                    new HashMap<>());   // Tags are key-value pairs that you can use to categorize and identify the index
+
+            /* The tags could have just as easily been included during create */
+
+            indexModel = pinecone.configureServerlessIndex(
+                    indexName,
+                    DeletionProtection.DISABLED,
+                    Map.of("env", "development")
+            );
         } else {
             this.logger.info("Index already exists: {}", indexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Describe the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  indexName   java.lang.String
+    private void describeIndex(final Pinecone pinecone, final String indexName) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, indexName));
+        }
+
+        final IndexModel indexModel = pinecone.describeIndex(indexName);
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Index: {}", indexModel.toJson());
         }
 
         if (this.logger.isTraceEnabled()) {

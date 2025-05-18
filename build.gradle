@@ -93,7 +93,19 @@ tasks.withType(Javadoc).configureEach {
 
 tasks.register('execute', JavaExec) {
 	allJvmArgs = [useAssertions] as List<String>
-	systemProperty("app.apiKey", apiKey)
+	systemProperties(
+			['app.apiKey': apiKey, 'app.deleteIndex': 'false']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('executeAndDelete', JavaExec) {
+	allJvmArgs = [useAssertions] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey, 'app.deleteIndex': 'true']
+	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 	mainClass = javaMainClass
