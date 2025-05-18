@@ -28,6 +28,7 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
 import java.io.IOException;
@@ -35,16 +36,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.openapitools.db_control.client.model.DeletionProtection;
 import org.openapitools.db_control.client.model.IndexList;
 import org.openapitools.db_control.client.model.IndexModel;
+
+import org.openapitools.inference.client.ApiException;
+import org.openapitools.inference.client.model.Embedding;
+import org.openapitools.inference.client.model.EmbeddingsList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.1.0
 /// @since      0.1.0
-public final class Quickstart {
+final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -76,6 +78,8 @@ public final class Quickstart {
         this.listIndexes(pinecone);
         this.createIndex(pinecone, indexName);
         this.describeIndex(pinecone, indexName);
+
+        final List<Embedding> embeddings = this.createEmbeddings(pinecone);
 
         if (deleteIndex) {
             this.deleteIndex(pinecone, indexName);
@@ -256,5 +260,61 @@ public final class Quickstart {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Create embeddings.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @return             java.util.List<io.pinecone.clients.model.Embedding>
+    private List<Embedding> createEmbeddings(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        List<Embedding> embeddingList = new ArrayList<>();
+
+        final Inference client = pinecone.getInferenceClient();
+        final UnstructuredText unstructuredText = new UnstructuredText();
+        final List<UnstructuredText.Text> inputs = unstructuredText.getTextList();
+        final List<String> textList = new ArrayList<>();
+
+        for (final UnstructuredText.Text text : inputs) {
+            textList.add(text.getText());
+        }
+
+        final String embeddingModel = "llama-text-embed-v2";
+
+        final Map<String, Object> parameters = new HashMap<>();
+
+        parameters.put("input_type", "query");
+        parameters.put("truncate", "END");
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Embedding model: {}", embeddingModel);
+            this.logger.debug("Parameters: {}", parameters);
+            this.logger.debug("Embedding text: {}", textList);
+        }
+
+        EmbeddingsList embeddings = null;
+
+        try {
+            embeddings = client.embed(embeddingModel, parameters, textList);
+        } catch (ApiException e) {
+            this.logger.error(e.getMessage());
+        }
+
+        if (embeddings != null) {
+            embeddingList = embeddings.getData();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Embeddings: {}", embeddings.toJson());
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(embeddingList));
+        }
+
+        return embeddingList;
     }
 }
