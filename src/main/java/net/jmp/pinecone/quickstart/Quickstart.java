@@ -78,7 +78,7 @@ public final class Quickstart {
         this.describeIndex(pinecone, indexName);
 
         if (deleteIndex) {
-
+            this.deleteIndex(pinecone, indexName);
         }
     }
 
@@ -161,6 +161,8 @@ public final class Quickstart {
                     DeletionProtection.DISABLED,
                     Map.of("env", "development")
             );
+
+            this.indexStatus(indexModel);
         } else {
             this.logger.info("Index already exists: {}", indexName);
         }
@@ -190,6 +192,24 @@ public final class Quickstart {
         }
     }
 
+    /// Delete the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  indexName   java.lang.String
+    private void deleteIndex(final Pinecone pinecone, final String indexName) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, indexName));
+        }
+
+        this.logger.info("Deleting index: {}", indexName);
+
+        pinecone.deleteIndex(indexName);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
     /// Check if the index exists.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
@@ -210,6 +230,7 @@ public final class Quickstart {
                 if (indexModel.getName().equals(indexName)) {
                     result = true;
 
+                    this.indexStatus(indexModel);
                     break;
                 }
             }
@@ -220,5 +241,20 @@ public final class Quickstart {
         }
 
         return result;
+    }
+
+    /// Index status.
+    ///
+    /// @param  indexModel  org.openapitools.db_control.client.model.IndexModel
+    private void indexStatus(final IndexModel indexModel) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(indexModel));
+        }
+
+        this.logger.info("Index status: {}", indexModel.getStatus());
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 }
