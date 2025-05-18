@@ -28,6 +28,9 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
+
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
@@ -80,6 +83,7 @@ final class Quickstart {
         this.describeIndex(pinecone, indexName);
 
         final List<Embedding> embeddings = this.createEmbeddings(pinecone);
+        final List<Struct> metadata = this.createMetadata(pinecone);
 
         if (deleteIndex) {
             this.deleteIndex(pinecone, indexName);
@@ -275,11 +279,11 @@ final class Quickstart {
 
         final Inference client = pinecone.getInferenceClient();
         final UnstructuredText unstructuredText = new UnstructuredText();
-        final List<UnstructuredText.Text> inputs = unstructuredText.getTextList();
-        final List<String> textList = new ArrayList<>();
+        final List<UnstructuredText.Text> textList = unstructuredText.getTextList();
+        final List<String> inputs = new ArrayList<>();
 
-        for (final UnstructuredText.Text text : inputs) {
-            textList.add(text.getText());
+        for (final UnstructuredText.Text text : textList) {
+            inputs.add(text.getText());
         }
 
         final String embeddingModel = "llama-text-embed-v2";
@@ -292,13 +296,13 @@ final class Quickstart {
         if (this.logger.isDebugEnabled()) {
             this.logger.debug("Embedding model: {}", embeddingModel);
             this.logger.debug("Parameters: {}", parameters);
-            this.logger.debug("Embedding text: {}", textList);
+            this.logger.debug("Embedding text: {}", inputs);
         }
 
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(embeddingModel, parameters, textList);
+            embeddings = client.embed(embeddingModel, parameters, inputs);
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
@@ -316,5 +320,39 @@ final class Quickstart {
         }
 
         return embeddingList;
+    }
+
+    /// Create metadata.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @return             java.util.List<com.google.protobuf.Struct>
+    private List<Struct> createMetadata(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        List<Struct> metadataList = new ArrayList<>();
+
+        final UnstructuredText unstructuredText = new UnstructuredText();
+        final List<UnstructuredText.Text> textList = unstructuredText.getTextList();
+
+        for (final UnstructuredText.Text text : textList) {
+            final Struct metadataStruct = Struct.newBuilder()
+                    .putFields("id", Value.newBuilder().setStringValue(text.getId()).build())
+                    .putFields("category", Value.newBuilder().setStringValue(text.getCategory()).build())
+                    .build();
+
+            metadataList.add(metadataStruct);
+        }
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Metadata: {}", metadataList);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(metadataList));
+        }
+
+        return metadataList;
     }
 }
