@@ -35,11 +35,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
+import org.openapitools.db_control.client.model.DeletionProtection;
 import org.openapitools.db_control.client.model.IndexList;
+import org.openapitools.db_control.client.model.IndexModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +70,7 @@ public final class Quickstart {
         final String apiKey = this.getApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
         final Pinecone pinecone = new Pinecone.Builder(apiKey).build();
 
+        this.listIndexes(pinecone);
         this.createIndex(pinecone);
     }
 
@@ -98,10 +104,10 @@ public final class Quickstart {
         return Optional.ofNullable(apiKey);
     }
 
-    /// Create the index.
+    /// List the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    private void createIndex(final Pinecone pinecone) {
+    private void listIndexes(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(pinecone));
         }
@@ -115,5 +121,69 @@ public final class Quickstart {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Create the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void createIndex(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        final String indexName = "quickstart";
+
+        if (!indexExists(pinecone, indexName)) {
+            this.logger.info("Creating index: {}", indexName);
+
+            /* Embedding model llama-text-embed-v2 */
+
+            final IndexModel indexModel = pinecone.createServerlessIndex(
+                    indexName,
+                    "cosine",   // cosine, euclidean, dot product
+                    1024,              // 1024, 2048, 768, 512, 384
+                    "aws",
+                    "us-east-1",
+                    DeletionProtection.DISABLED,
+                    new HashMap<>());
+        } else {
+            this.logger.info("Index already exists: {}", indexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Check if the index exists.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  indexName   java.lang.String
+    /// @return             boolean
+    private boolean indexExists(final Pinecone pinecone, final String indexName) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, indexName));
+        }
+
+        boolean result = false;
+
+        final IndexList indexList = pinecone.listIndexes();
+        final List<IndexModel> indexes = indexList.getIndexes();
+
+        if (indexes != null) {
+            for (final IndexModel indexModel : indexes) {
+                if (indexModel.getName().equals(indexName)) {
+                    result = true;
+
+                    break;
+                }
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
     }
 }
