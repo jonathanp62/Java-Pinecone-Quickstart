@@ -1,8 +1,9 @@
 /*
  * (#)build.gradle  0.1.0   05/17/2025
+ * (#)build.gradle  0.2.0   05/19/2025
  *
  * @author   Jonathan Parker
- * @version  0.1.0
+ * @version  0.2.0
  * @since    0.1.0
  *
  * MIT License
@@ -45,7 +46,7 @@ ext {
 	apiKey = 'etc/api-key.txt'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	project.group = 'net.jmp.pinecone.quickstart'
-	project.version = '0.1.0'
+	project.version = '0.2.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	useAssertions = '-ea'
 }
