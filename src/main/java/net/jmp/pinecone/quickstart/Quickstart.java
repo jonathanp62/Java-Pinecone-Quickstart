@@ -40,6 +40,8 @@ import static io.pinecone.commons.IndexInterface.buildUpsertVectorWithUnsignedIn
 import io.pinecone.proto.ListResponse;
 import io.pinecone.proto.UpsertResponse;
 
+import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
+import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.VectorWithUnsignedIndices;
 
 import java.io.IOException;
@@ -69,6 +71,9 @@ import org.slf4j.LoggerFactory;
 final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
+    /// The embedding model.
+    private final String embeddingModel = "llama-text-embed-v2";
 
     /// The default constructor.
     Quickstart() {
@@ -101,6 +106,7 @@ final class Quickstart {
         }
 
         this.describeIndex(pinecone, indexName);
+        this.queryIndex(pinecone, indexName, namespace);
 
         if (deleteIndex) {
             this.deleteIndex(pinecone, indexName);
@@ -351,15 +357,13 @@ final class Quickstart {
             inputs.add(text.getText());
         }
 
-        final String embeddingModel = "llama-text-embed-v2";
-
         final Map<String, Object> parameters = new HashMap<>();
 
         parameters.put("input_type", "query");
         parameters.put("truncate", "END");
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Embedding model: {}", embeddingModel);
+            this.logger.debug("Embedding model: {}", this.embeddingModel);
             this.logger.debug("Parameters: {}", parameters);
             this.logger.debug("Embedding text: {}", inputs);
         }
@@ -367,7 +371,7 @@ final class Quickstart {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(embeddingModel, parameters, inputs);
+            embeddings = client.embed(this.embeddingModel, parameters, inputs);
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
@@ -419,5 +423,88 @@ final class Quickstart {
         }
 
         return metadataList;
+    }
+
+    /// Query the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  indexName   java.lang.String
+    /// @param  namespace   java.lang.String
+    private void queryIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, indexName, namespace));
+        }
+
+        final String query = "Famous historical structures and monuments";
+        final List<Float> queryVector = this.queryToVector(pinecone, query);
+
+        this.logger.info("Querying index: {}", indexName);
+
+        final Index index = pinecone.getIndexConnection(indexName);
+        final QueryResponseWithUnsignedIndices queryResponse =
+                index.query(10,
+                        queryVector,
+                        null,
+                        null,
+                        null,
+                        namespace,
+                        null,
+                        true,
+                        true);
+
+        final List<ScoredVectorWithUnsignedIndices> matches = queryResponse.getMatchesList();
+
+        for (final ScoredVectorWithUnsignedIndices match : matches) {
+            final Struct metadata = match.getMetadata();
+            final Map<String, Value> fields = metadata.getFieldsMap();
+
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("ID      : {}", match.getId());
+                this.logger.info("Score   : {}", match.getScore());
+                this.logger.info("Category: {}", fields.get("category").getStringValue());
+                this.logger.info("Record  : {}", fields.get("id").getStringValue());
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Query to vector.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  query       java.lang.String
+    /// @return             java.util.List<java.lang.Float>
+    private List<Float> queryToVector(final Pinecone pinecone, final String query) {
+        final Map<String, Object> parameters = new HashMap<>();
+        final Inference client = pinecone.getInferenceClient();
+
+        List<Float> values = new ArrayList<>();
+
+        parameters.put("input_type", "query");
+        parameters.put("truncate", "END");
+
+        EmbeddingsList embeddings = null;
+
+        try {
+            embeddings = client.embed(this.embeddingModel, parameters, List.of(query));
+        } catch (ApiException e) {
+            this.logger.error(e.getMessage());
+        }
+
+        if (embeddings != null) {
+            final List<Embedding> embeddingsList = embeddings.getData();
+
+            assert embeddingsList.size() == 1;
+
+            values = embeddingsList.getFirst().getDenseEmbedding().getValues();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Query: {}: {}", query, embeddings.toJson());
+            }
+        }
+
+        return values;
     }
 }
