@@ -31,8 +31,16 @@ package net.jmp.pinecone.quickstart;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
+import io.pinecone.clients.Index;
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
+
+import static io.pinecone.commons.IndexInterface.buildUpsertVectorWithUnsignedIndices;
+
+import io.pinecone.proto.ListResponse;
+import io.pinecone.proto.UpsertResponse;
+
+import io.pinecone.unsigned_indices_model.VectorWithUnsignedIndices;
 
 import java.io.IOException;
 
@@ -77,13 +85,22 @@ final class Quickstart {
         final boolean deleteIndex = Boolean.parseBoolean(System.getProperty("app.deleteIndex"));
         final Pinecone pinecone = new Pinecone.Builder(apiKey).build();
         final String indexName = "quickstart";
+        final String namespace = "quickstart-namespace";
 
         this.listIndexes(pinecone);
-        this.createIndex(pinecone, indexName);
-        this.describeIndex(pinecone, indexName);
 
-        final List<Embedding> embeddings = this.createEmbeddings(pinecone);
-        final List<Struct> metadata = this.createMetadata(pinecone);
+        if (this.createIndex(pinecone, indexName)) {
+            this.loadIndex(pinecone, indexName, namespace);
+        } else {
+            final Index index = pinecone.getIndexConnection(indexName);
+            final ListResponse result = index.list(namespace);
+
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Vectors count: {}", result.getVectorsCount());
+            }
+        }
+
+        this.describeIndex(pinecone, indexName);
 
         if (deleteIndex) {
             this.deleteIndex(pinecone, indexName);
@@ -130,8 +147,8 @@ final class Quickstart {
 
         final IndexList indexList = pinecone.listIndexes();
 
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Index list: {}", indexList.toJson());
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("Index list: {}", indexList.toJson());
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -139,14 +156,18 @@ final class Quickstart {
         }
     }
 
-    /// Create the index.
+    /// Create the index. Return true
+    /// if the index was created.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     /// @param  indexName   java.lang.String
-    private void createIndex(final Pinecone pinecone, final String indexName) {
+    /// @return             boolean
+    private boolean createIndex(final Pinecone pinecone, final String indexName) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(pinecone, indexName));
         }
+
+        boolean result = false;
 
         if (!indexExists(pinecone, indexName)) {
             this.logger.info("Creating index: {}", indexName);
@@ -171,13 +192,17 @@ final class Quickstart {
             );
 
             this.indexStatus(indexModel);
+
+            result = true;
         } else {
             this.logger.info("Index already exists: {}", indexName);
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exit());
+            this.logger.trace(exitWith(result));
         }
+
+        return result;
     }
 
     /// Describe the index.
@@ -191,8 +216,8 @@ final class Quickstart {
 
         final IndexModel indexModel = pinecone.describeIndex(indexName);
 
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Index: {}", indexModel.toJson());
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("Index: {}", indexModel.toJson());
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -260,6 +285,46 @@ final class Quickstart {
         }
 
         this.logger.info("Index status: {}", indexModel.getStatus());
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  indexName   java.lang.String
+    /// @param  namespace   java.lang.String
+    private void loadIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, indexName, namespace));
+        }
+
+        final List<Embedding> embeddings = this.createEmbeddings(pinecone);
+        final List<Struct> metadata = this.createMetadata(pinecone);
+
+        assert embeddings.size() == metadata.size();
+
+        final List<VectorWithUnsignedIndices> vectors = new ArrayList<>(embeddings.size());
+
+        for (int i = 0; i < embeddings.size(); i++) {
+            final Embedding embedding = embeddings.get(i);
+            final Struct metadataStruct = metadata.get(i);
+
+            vectors.add(buildUpsertVectorWithUnsignedIndices("V" + i + 1, embedding.getDenseEmbedding().getValues(), null, null, metadataStruct));
+        }
+
+        this.logger.info("Loading index: {}", indexName);
+
+        final Index index = pinecone.getIndexConnection(indexName);
+
+        final UpsertResponse result = index.upsert(vectors, namespace);
+        final int upsertedCount = result.getUpsertedCount();
+        final int serializedSize = result.getSerializedSize();
+
+        this.logger.info("Upserted {} vectors", upsertedCount);
+        this.logger.info("Serialized size: {}", serializedSize);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
