@@ -51,32 +51,60 @@ final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The default constructor.
-    Quickstart() {
+    /// The embedding model.
+    private final String embeddingModel;
+
+    /// The index name.
+    private final String indexName;
+
+    /// The namespace.
+    private final String namespace;
+
+    /// The query text.
+    private final String queryText;
+
+    /// The constructor.
+    ///
+    /// @param  builder net.jmp.pinecone.quickstart.Quickstart.Builder
+    private Quickstart(final Builder builder) {
         super();
+
+        this.embeddingModel = builder.embeddingModel;
+        this.indexName = builder.indexName;
+        this.namespace = builder.namespace;
+        this.queryText = builder.queryText;
+    }
+
+    /// The builder method.
+    ///
+    /// @return net.jmp.pinecone.quickstart.Quickstart.Builder
+    static Builder builder() {
+        return new Builder();
     }
 
     /// The start method.
-    void start() {
+    ///
+    /// @param  operation   java.lang.String
+    void start(final String operation) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
+            this.logger.trace(entryWith(operation));
         }
 
         final String apiKey = this.getApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
         final Pinecone pinecone = new Pinecone.Builder(apiKey).build();
-        final String indexName = "quickstart";
-        final String namespace = "quickstart-namespace";
-
-        final String operation = System.getProperty("app.operation");
 
         switch (operation) {
-            case "create" -> this.createIndex(pinecone, indexName, namespace);
-            case "delete" -> this.deleteIndex(pinecone, indexName);
-            case "describe" -> this.describeIndex(pinecone, indexName, namespace);
+            case "create" -> this.createIndex(pinecone);
+            case "delete" -> this.deleteIndex(pinecone);
+            case "describe" -> this.describeIndex(pinecone);
             case "list" -> this.listIndexes(pinecone);
-            case "load" -> this.loadIndex(pinecone, indexName, namespace);
-            case "query" -> this.queryIndex(pinecone, indexName, namespace);
+            case "load" -> this.loadIndex(pinecone);
+            case "query" -> this.queryIndex(pinecone);
             default -> this.logger.error("Unknown operation: {}", operation);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
         }
     }
 
@@ -128,14 +156,12 @@ final class Quickstart {
     /// Create the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    private void createIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    private void createIndex(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone, indexName, namespace));
+            this.logger.trace(entryWith(pinecone));
         }
 
-        new CreateIndex(pinecone, indexName, namespace).operate();
+        new CreateIndex(pinecone, this.indexName, this.namespace).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -145,14 +171,12 @@ final class Quickstart {
     /// Describe the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    private void describeIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    private void describeIndex(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone, indexName, namespace));
+            this.logger.trace(entryWith(pinecone));
         }
 
-        new DescribeIndex(pinecone, indexName, namespace).operate();
+        new DescribeIndex(pinecone, this.indexName, this.namespace).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -162,13 +186,12 @@ final class Quickstart {
     /// Delete the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    private void deleteIndex(final Pinecone pinecone, final String indexName) {
+    private void deleteIndex(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone, indexName));
+            this.logger.trace(entryWith(pinecone));
         }
 
-        new DeleteIndex(pinecone, indexName, null).operate();
+        new DeleteIndex(pinecone, this.indexName, null).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -178,14 +201,17 @@ final class Quickstart {
     /// Load the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    private void loadIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    private void loadIndex(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone, indexName, namespace));
+            this.logger.trace(entryWith(pinecone));
         }
 
-        new LoadIndex(pinecone, indexName, namespace).operate();
+        new LoadIndex(
+                pinecone,
+                this.embeddingModel,
+                this.indexName,
+                this.namespace
+        ).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -195,17 +221,88 @@ final class Quickstart {
     /// Query the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    private void queryIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    private void queryIndex(final Pinecone pinecone) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone, indexName, namespace));
+            this.logger.trace(entryWith(pinecone));
         }
 
-        new QueryIndex(pinecone, indexName, namespace).operate();
+        new QueryIndex(
+                pinecone,
+                this.embeddingModel,
+                this.indexName,
+                this.namespace,
+                this.queryText
+        ).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
+        }
+    }
+
+    /// The builder class.
+    static class Builder {
+        /// The embedding model.
+        private String embeddingModel;
+
+        /// The index name.
+        private String indexName;
+
+        /// The namespace.
+        private String namespace;
+
+        /// The query text.
+        private String queryText;
+
+        /// The default constructor.
+        Builder() {
+            super();
+        }
+
+        /// Set the embedding model.
+        ///
+        /// @param  embeddingModel  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder embeddingModel(final String embeddingModel) {
+            this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace.
+        ///
+        /// @param  namespace   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Set the query text.
+        ///
+        /// @param  queryText   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder queryText(final String queryText) {
+            this.queryText = queryText;
+
+            return this;
+        }
+
+        /// Build the quickstart object.
+        ///
+        /// @return net.jmp.pinecone.quickstart.Quickstart
+        public Quickstart build() {
+            return new Quickstart(this);
         }
     }
 }

@@ -54,9 +54,6 @@ abstract class IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The embedding model.
-    protected static final String EMBEDDING_MODEL = "llama-text-embed-v2";
-
     /// The Pinecone client.
     protected final Pinecone pinecone;
 

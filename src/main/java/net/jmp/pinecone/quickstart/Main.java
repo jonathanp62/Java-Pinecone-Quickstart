@@ -53,11 +53,28 @@ public final class Main implements Runnable {
             this.logger.trace(entry());
         }
 
+        final String operation = System.getProperty("app.operation");
+        final String embeddingModel = System.getProperty("app.embeddingModel");
+        final String indexName = System.getProperty("app.indexName");
+        final String namespace = System.getProperty("app.namespace");
+        final String queryText = System.getProperty("app.queryText");
+
         this.logger.info("Pinecone Quickstart");
 
-        final Quickstart quickstart = new Quickstart();
+        this.logger.info("Operation      : {}", operation);
+        this.logger.info("Embedding Model: {}", embeddingModel);
+        this.logger.info("Index Name     : {}", indexName);
+        this.logger.info("Namespace      : {}", namespace);
+        this.logger.info("Query Text     : {}", queryText);
 
-        quickstart.start();
+        final Quickstart quickstart = Quickstart.builder()
+            .embeddingModel(embeddingModel)
+            .indexName(indexName)
+            .namespace(namespace)
+            .queryText(queryText)
+            .build();
+
+        quickstart.start(operation);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

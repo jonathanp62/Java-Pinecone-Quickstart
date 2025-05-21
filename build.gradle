@@ -44,11 +44,16 @@ apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
 	apiKey = 'etc/api-key.txt'
+	embeddingModel = 'llama-text-embed-v2'
+	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
+	indexName = 'quickstart'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
+	namespace = 'quickstart-namespace'
 	project.group = 'net.jmp.pinecone.quickstart'
 	project.version = '0.2.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
-	useAssertions = '-ea'
+	queryText = 'Famous historical structures and monuments'
+	useAssertions = '--enable-assertions'
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_24
@@ -93,9 +98,14 @@ tasks.withType(Javadoc).configureEach {
  */
 
 tasks.register('create', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'create']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'create']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -103,9 +113,14 @@ tasks.register('create', JavaExec) {
 }
 
 tasks.register('delete', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'delete']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'delete']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -113,9 +128,14 @@ tasks.register('delete', JavaExec) {
 }
 
 tasks.register('describe', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'describe']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'describe']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -123,9 +143,14 @@ tasks.register('describe', JavaExec) {
 }
 
 tasks.register('list', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'list']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'list']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -133,9 +158,14 @@ tasks.register('list', JavaExec) {
 }
 
 tasks.register('load', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'load']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'load']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -143,9 +173,14 @@ tasks.register('load', JavaExec) {
 }
 
 tasks.register('query', JavaExec) {
-	allJvmArgs = [useAssertions] as List<String>
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.operation': 'query']
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'query']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))

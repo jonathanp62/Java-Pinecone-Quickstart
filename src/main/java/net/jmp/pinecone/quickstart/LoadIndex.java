@@ -63,13 +63,22 @@ final  class LoadIndex extends IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    /// The embedding model.
+    private final String embeddingModel;
+
     /// The constructor.
     ///
-    /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    LoadIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    /// @param  pinecone        io.pinecone.clients.Pinecone
+    /// @param  embeddingModel  java.lang.String
+    /// @param  indexName       java.lang.String
+    /// @param  namespace       java.lang.String
+    LoadIndex(final Pinecone pinecone,
+              final String embeddingModel,
+              final String indexName,
+              final String namespace) {
         super(pinecone, indexName, namespace);
+
+        this.embeddingModel = embeddingModel;
     }
 
     /// The operate method.
@@ -139,7 +148,7 @@ final  class LoadIndex extends IndexOperation {
         parameters.put("truncate", "END");
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Embedding model: {}", EMBEDDING_MODEL);
+            this.logger.debug("Embedding model: {}", this.embeddingModel);
             this.logger.debug("Parameters: {}", parameters);
             this.logger.debug("Embedding text: {}", inputs);
         }
@@ -147,7 +156,7 @@ final  class LoadIndex extends IndexOperation {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(EMBEDDING_MODEL, parameters, inputs);
+            embeddings = client.embed(this.embeddingModel, parameters, inputs);
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }

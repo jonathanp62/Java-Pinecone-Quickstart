@@ -60,13 +60,28 @@ final class QueryIndex extends IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    /// The embedding model.
+    private final String embeddingModel;
+
+    /// The query text.
+    private final String queryText;
+
     /// The constructor.
     ///
-    /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    QueryIndex(final Pinecone pinecone, final String indexName, final String namespace) {
+    /// @param  pinecone        io.pinecone.clients.Pinecone
+    /// @param  embeddingModel  java.lang.String
+    /// @param  indexName       java.lang.String
+    /// @param  namespace       java.lang.String
+    /// @param  queryText       java.lang.String
+    QueryIndex(final Pinecone pinecone,
+               final String embeddingModel,
+               final String indexName,
+               final String namespace,
+               final String queryText) {
         super(pinecone, indexName, namespace);
+
+        this.embeddingModel = embeddingModel;
+        this.queryText = queryText;
     }
 
     /// The operate method.
@@ -77,8 +92,7 @@ final class QueryIndex extends IndexOperation {
         }
 
         if (this.indexExists() && this.isIndexLoaded()) {
-            final String query = "Famous historical structures and monuments";
-            final List<Float> queryVector = this.queryToVector(query);
+            final List<Float> queryVector = this.queryToVector(this.queryText);
 
             this.logger.info("Querying index: {}", indexName);
 
@@ -100,10 +114,13 @@ final class QueryIndex extends IndexOperation {
                 final Struct metadata = match.getMetadata();
                 final Map<String, Value> fields = metadata.getFieldsMap();
 
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Vector ID : {}", match.getId());
+                    this.logger.debug("Score     : {}", match.getScore());
+                    this.logger.debug("Category  : {}", fields.get("category").getStringValue());
+                }
+
                 if (this.logger.isInfoEnabled()) {
-                    this.logger.info("Vector ID : {}", match.getId());
-                    this.logger.info("Score     : {}", match.getScore());
-                    this.logger.info("Category  : {}", fields.get("category").getStringValue());
                     this.logger.info("Content ID: {}", fields.get("id").getStringValue());
                     this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
                 }
@@ -137,7 +154,7 @@ final class QueryIndex extends IndexOperation {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(EMBEDDING_MODEL, parameters, List.of(query));
+            embeddings = client.embed(this.embeddingModel, parameters, List.of(query));
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
