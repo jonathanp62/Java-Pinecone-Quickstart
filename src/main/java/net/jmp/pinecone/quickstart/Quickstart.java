@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-    
+
     /// The default constructor.
     Quickstart() {
         super();
