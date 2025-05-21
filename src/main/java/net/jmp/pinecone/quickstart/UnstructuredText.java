@@ -38,7 +38,7 @@ import java.util.Map;
 /// @since      0.1.0
 final class UnstructuredText {
     /// The text map. Use a linked hash map to preserve insertion order.
-    private final Map<String, Text> textMap = new LinkedHashMap<>(50);
+    private final Map<String, Text> textMap = LinkedHashMap.newLinkedHashMap(50);
 
     /// The default constructor.
     UnstructuredText() {

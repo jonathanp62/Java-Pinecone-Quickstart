@@ -92,20 +92,60 @@ tasks.withType(Javadoc).configureEach {
  * Execute with - gradle execute instead of gradle run
  */
 
-tasks.register('execute', JavaExec) {
+tasks.register('create', JavaExec) {
 	allJvmArgs = [useAssertions] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.deleteIndex': 'false']
+			['app.apiKey': apiKey, 'app.operation': 'create']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 	mainClass = javaMainClass
 }
 
-tasks.register('executeAndDelete', JavaExec) {
+tasks.register('delete', JavaExec) {
 	allJvmArgs = [useAssertions] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey, 'app.deleteIndex': 'true']
+			['app.apiKey': apiKey, 'app.operation': 'delete']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('describe', JavaExec) {
+	allJvmArgs = [useAssertions] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey, 'app.operation': 'describe']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('list', JavaExec) {
+	allJvmArgs = [useAssertions] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey, 'app.operation': 'list']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('load', JavaExec) {
+	allJvmArgs = [useAssertions] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey, 'app.operation': 'load']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('query', JavaExec) {
+	allJvmArgs = [useAssertions] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey, 'app.operation': 'query']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
