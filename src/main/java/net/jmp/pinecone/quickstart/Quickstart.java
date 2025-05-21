@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.2.0   05/21/2025
  * (#)Quickstart.java   0.1.0   05/17/2025
  *
  * @author   Jonathan Parker
@@ -66,14 +67,19 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.1.0
+/// @version    0.2.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The embedding model.
-    private final String embeddingModel = "llama-text-embed-v2";
+    private static final String EMBEDDING_MODEL = "llama-text-embed-v2";
+
+    /// The text map.
+    ///
+    /// @since  0.2.0
+    final Map<String, UnstructuredText.Text> textMap = new UnstructuredText().getTextMap();
 
     /// The default constructor.
     Quickstart() {
@@ -317,8 +323,9 @@ final class Quickstart {
         for (int i = 0; i < embeddings.size(); i++) {
             final Embedding embedding = embeddings.get(i);
             final Struct metadataStruct = metadata.get(i);
+            final String id = metadataStruct.getFieldsMap().get("id").getStringValue();
 
-            vectors.add(buildUpsertVectorWithUnsignedIndices("V" + i + 1, embedding.getDenseEmbedding().getValues(), null, null, metadataStruct));
+            vectors.add(buildUpsertVectorWithUnsignedIndices(id, embedding.getDenseEmbedding().getValues(), null, null, metadataStruct));
         }
 
         this.logger.info("Loading index: {}", indexName);
@@ -349,13 +356,13 @@ final class Quickstart {
         List<Embedding> embeddingList = new ArrayList<>();
 
         final Inference client = pinecone.getInferenceClient();
-        final UnstructuredText unstructuredText = new UnstructuredText();
-        final List<UnstructuredText.Text> textList = unstructuredText.getTextList();
         final List<String> inputs = new ArrayList<>();
 
-        for (final UnstructuredText.Text text : textList) {
-            inputs.add(text.getText());
+        for (final UnstructuredText.Text text : this.textMap.values()) {
+            inputs.add(text.getContent());
         }
+
+        /* The parameters relate to the embedding model */
 
         final Map<String, Object> parameters = new HashMap<>();
 
@@ -363,7 +370,7 @@ final class Quickstart {
         parameters.put("truncate", "END");
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Embedding model: {}", this.embeddingModel);
+            this.logger.debug("Embedding model: {}", EMBEDDING_MODEL);
             this.logger.debug("Parameters: {}", parameters);
             this.logger.debug("Embedding text: {}", inputs);
         }
@@ -371,7 +378,7 @@ final class Quickstart {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(this.embeddingModel, parameters, inputs);
+            embeddings = client.embed(EMBEDDING_MODEL, parameters, inputs);
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
@@ -402,13 +409,10 @@ final class Quickstart {
 
         List<Struct> metadataList = new ArrayList<>();
 
-        final UnstructuredText unstructuredText = new UnstructuredText();
-        final List<UnstructuredText.Text> textList = unstructuredText.getTextList();
-
-        for (final UnstructuredText.Text text : textList) {
+        for (final Map.Entry<String, UnstructuredText.Text> entry : this.textMap.entrySet()) {
             final Struct metadataStruct = Struct.newBuilder()
-                    .putFields("id", Value.newBuilder().setStringValue(text.getId()).build())
-                    .putFields("category", Value.newBuilder().setStringValue(text.getCategory()).build())
+                    .putFields("id", Value.newBuilder().setStringValue(entry.getKey()).build())
+                    .putFields("category", Value.newBuilder().setStringValue(entry.getValue().getCategory()).build())
                     .build();
 
             metadataList.add(metadataStruct);
@@ -459,10 +463,11 @@ final class Quickstart {
             final Map<String, Value> fields = metadata.getFieldsMap();
 
             if (this.logger.isInfoEnabled()) {
-                this.logger.info("ID      : {}", match.getId());
-                this.logger.info("Score   : {}", match.getScore());
-                this.logger.info("Category: {}", fields.get("category").getStringValue());
-                this.logger.info("Record  : {}", fields.get("id").getStringValue());
+                this.logger.info("Vector ID : {}", match.getId());
+                this.logger.info("Score     : {}", match.getScore());
+                this.logger.info("Category  : {}", fields.get("category").getStringValue());
+                this.logger.info("Content ID: {}", fields.get("id").getStringValue());
+                this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
             }
         }
 
@@ -488,7 +493,7 @@ final class Quickstart {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(this.embeddingModel, parameters, List.of(query));
+            embeddings = client.embed(EMBEDDING_MODEL, parameters, List.of(query));
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
