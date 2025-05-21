@@ -106,14 +106,14 @@ final  class LoadIndex extends IndexOperation {
 
             this.logger.info("Loading index: {}", this.indexName);
 
-            final Index index = this.pinecone.getIndexConnection(this.indexName);
+            try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+                final UpsertResponse result = index.upsert(vectors, this.namespace);
+                final int upsertedCount = result.getUpsertedCount();
+                final int serializedSize = result.getSerializedSize();
 
-            final UpsertResponse result = index.upsert(vectors, this.namespace);
-            final int upsertedCount = result.getUpsertedCount();
-            final int serializedSize = result.getSerializedSize();
-
-            this.logger.info("Upserted {} vectors", upsertedCount);
-            this.logger.info("Serialized size: {}", serializedSize);
+                this.logger.info("Upserted {} vectors", upsertedCount);
+                this.logger.info("Serialized size: {}", serializedSize);
+            }
         } else {
             this.logger.info("Index either does not exist or is already loaded: {}", this.indexName);
         }

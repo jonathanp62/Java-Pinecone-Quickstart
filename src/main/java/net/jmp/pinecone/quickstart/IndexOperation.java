@@ -120,9 +120,13 @@ abstract class IndexOperation {
             this.logger.trace(entry());
         }
 
-        final Index index = this.pinecone.getIndexConnection(this.indexName);
-        final ListResponse response = index.list(this.namespace);
-        final int vectorsCount = response.getVectorsCount();
+        int vectorsCount = 0;
+
+        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            final ListResponse response = index.list(this.namespace);
+
+            vectorsCount = response.getVectorsCount();
+        }
 
         if (this.logger.isDebugEnabled()) {
             this.logger.debug("Vectors count: {}", vectorsCount);

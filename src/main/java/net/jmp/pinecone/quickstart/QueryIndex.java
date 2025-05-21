@@ -96,33 +96,34 @@ final class QueryIndex extends IndexOperation {
 
             this.logger.info("Querying index: {}", indexName);
 
-            final Index index = pinecone.getIndexConnection(indexName);
-            final QueryResponseWithUnsignedIndices queryResponse =
-                    index.query(10,
-                            queryVector,
-                            null,
-                            null,
-                            null,
-                            this.namespace,
-                            null,
-                            true,
-                            true);
+            try (final Index index = this.pinecone.getIndexConnection(indexName)) {
+                final QueryResponseWithUnsignedIndices queryResponse =
+                        index.query(10,
+                                queryVector,
+                                null,
+                                null,
+                                null,
+                                this.namespace,
+                                null,
+                                true,
+                                true);
 
-            final List<ScoredVectorWithUnsignedIndices> matches = queryResponse.getMatchesList();
+                final List<ScoredVectorWithUnsignedIndices> matches = queryResponse.getMatchesList();
 
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
+                for (final ScoredVectorWithUnsignedIndices match : matches) {
+                    final Struct metadata = match.getMetadata();
+                    final Map<String, Value> fields = metadata.getFieldsMap();
 
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID : {}", match.getId());
-                    this.logger.debug("Score     : {}", match.getScore());
-                    this.logger.debug("Category  : {}", fields.get("category").getStringValue());
-                }
+                    if (this.logger.isDebugEnabled()) {
+                        this.logger.debug("Vector ID : {}", match.getId());
+                        this.logger.debug("Score     : {}", match.getScore());
+                        this.logger.debug("Category  : {}", fields.get("category").getStringValue());
+                    }
 
-                if (this.logger.isInfoEnabled()) {
-                    this.logger.info("Content ID: {}", fields.get("id").getStringValue());
-                    this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
+                    if (this.logger.isInfoEnabled()) {
+                        this.logger.info("Content ID: {}", fields.get("id").getStringValue());
+                        this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
+                    }
                 }
             }
         } else {

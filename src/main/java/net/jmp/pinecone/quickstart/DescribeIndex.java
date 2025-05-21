@@ -71,11 +71,12 @@ public class DescribeIndex extends IndexOperation {
                 this.logger.info("Index: {}", indexModel.toJson());
             }
 
-            final Index index = this.pinecone.getIndexConnection(this.indexName);
-            final ListResponse response = index.list(this.namespace);
+            try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+                final ListResponse response = index.list(this.namespace);
 
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("Vectors count: {}", response.getVectorsCount());
+                if (this.logger.isInfoEnabled()) {
+                    this.logger.info("Vectors count: {}", response.getVectorsCount());
+                }
             }
         } else {
             this.logger.info("Index does not exist: {}", this.indexName);
