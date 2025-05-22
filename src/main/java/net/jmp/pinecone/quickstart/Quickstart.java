@@ -60,6 +60,9 @@ final class Quickstart {
     /// The namespace.
     private final String namespace;
 
+    /// The reranking model.
+    private final String rerankingModel;
+
     /// The query text.
     private final String queryText;
 
@@ -72,6 +75,7 @@ final class Quickstart {
         this.embeddingModel = builder.embeddingModel;
         this.indexName = builder.indexName;
         this.namespace = builder.namespace;
+        this.rerankingModel = builder.rerankingModel;
         this.queryText = builder.queryText;
     }
 
@@ -263,6 +267,7 @@ final class Quickstart {
                 this.embeddingModel,
                 this.indexName,
                 this.namespace,
+                this.rerankingModel,
                 this.queryText
         ).operate();
 
@@ -281,6 +286,9 @@ final class Quickstart {
 
         /// The namespace.
         private String namespace;
+
+        /// The reranking model.
+        private String rerankingModel;
 
         /// The query text.
         private String queryText;
@@ -316,6 +324,16 @@ final class Quickstart {
         /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder namespace(final String namespace) {
             this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Set the reranking model.
+        ///
+        /// @param  rerankingModel  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder rerankingModel(final String rerankingModel) {
+            this.rerankingModel = rerankingModel;
 
             return this;
         }

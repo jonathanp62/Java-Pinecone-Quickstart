@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Main.java 0.2.0   05/22/2025
  * (#)Main.java 0.1.0   05/17/2025
  *
  * @author   Jonathan Parker
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /// The main application class.
 ///
-/// @version    0.1.0
+/// @version    0.2.0
 /// @since      0.1.0
 public final class Main implements Runnable {
     /// The logger.
@@ -57,6 +58,7 @@ public final class Main implements Runnable {
         final String embeddingModel = System.getProperty("app.embeddingModel");
         final String indexName = System.getProperty("app.indexName");
         final String namespace = System.getProperty("app.namespace");
+        final String rerankingModel = System.getProperty("app.rerankingModel");
         final String queryText = System.getProperty("app.queryText");
 
         this.logger.info("Pinecone Quickstart");
@@ -65,12 +67,14 @@ public final class Main implements Runnable {
         this.logger.info("Embedding Model: {}", embeddingModel);
         this.logger.info("Index Name     : {}", indexName);
         this.logger.info("Namespace      : {}", namespace);
+        this.logger.info("Reranking Model: {}", rerankingModel);
         this.logger.info("Query Text     : {}", queryText);
 
         final Quickstart quickstart = Quickstart.builder()
             .embeddingModel(embeddingModel)
             .indexName(indexName)
             .namespace(namespace)
+            .rerankingModel(rerankingModel)
             .queryText(queryText)
             .build();
 

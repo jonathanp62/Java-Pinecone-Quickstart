@@ -52,6 +52,7 @@ ext {
 	project.group = 'net.jmp.pinecone.quickstart'
 	project.version = '0.2.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
+	rerankingModel = 'bge-reranker-v2-m3'
 	queryText = 'Famous historical structures and monuments'
 	useAssertions = '--enable-assertions'
 }
@@ -104,6 +105,7 @@ tasks.register('create', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'create']
 	)
@@ -119,6 +121,7 @@ tasks.register('delete', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'delete']
 	)
@@ -134,6 +137,7 @@ tasks.register('describe', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'describe']
 	)
@@ -149,6 +153,7 @@ tasks.register('fetch', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'fetch']
 	)
@@ -164,6 +169,7 @@ tasks.register('list', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'list']
 	)
@@ -179,6 +185,7 @@ tasks.register('listIndexes', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'listIndexes']
 	)
@@ -194,6 +201,7 @@ tasks.register('load', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'load']
 	)
@@ -209,6 +217,7 @@ tasks.register('query', JavaExec) {
 			 'app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'query']
 	)

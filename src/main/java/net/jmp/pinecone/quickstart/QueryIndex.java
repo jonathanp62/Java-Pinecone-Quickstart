@@ -63,6 +63,9 @@ final class QueryIndex extends IndexOperation {
     /// The embedding model.
     private final String embeddingModel;
 
+    /// The reranking model.
+    private final String rerankingModel;
+
     /// The query text.
     private final String queryText;
 
@@ -72,15 +75,18 @@ final class QueryIndex extends IndexOperation {
     /// @param  embeddingModel  java.lang.String
     /// @param  indexName       java.lang.String
     /// @param  namespace       java.lang.String
+    /// @param  rerankingModel  java.lang.String
     /// @param  queryText       java.lang.String
     QueryIndex(final Pinecone pinecone,
                final String embeddingModel,
                final String indexName,
                final String namespace,
+               final String rerankingModel,
                final String queryText) {
         super(pinecone, indexName, namespace);
 
         this.embeddingModel = embeddingModel;
+        this.rerankingModel = rerankingModel;
         this.queryText = queryText;
     }
 
@@ -164,6 +170,7 @@ final class QueryIndex extends IndexOperation {
             this.logger.trace(entryWith(matches));
         }
 
+        this.logger.info("Reranking model: {}", this.rerankingModel);
         this.logger.info("Reranking results for {} matches", matches.size());
 
         if (this.logger.isTraceEnabled()) {
