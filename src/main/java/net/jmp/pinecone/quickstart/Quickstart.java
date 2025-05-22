@@ -97,7 +97,9 @@ final class Quickstart {
             case "create" -> this.createIndex(pinecone);
             case "delete" -> this.deleteIndex(pinecone);
             case "describe" -> this.describeIndex(pinecone);
-            case "list" -> this.listIndexes(pinecone);
+            case "fetch" -> this.fetchIndex(pinecone);
+            case "list" -> this.listIndex(pinecone);
+            case "listIndexes" -> this.listIndexes(pinecone);
             case "load" -> this.loadIndex(pinecone);
             case "query" -> this.queryIndex(pinecone);
             default -> this.logger.error("Unknown operation: {}", operation);
@@ -136,6 +138,36 @@ final class Quickstart {
         }
 
         return Optional.ofNullable(apiKey);
+    }
+
+    /// Fetch from the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void fetchIndex(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        new FetchIndex(pinecone, this.indexName, this.namespace).operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// List the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void listIndex(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        new ListIndex(pinecone, this.indexName, this.namespace).operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 
     /// List the indexes.

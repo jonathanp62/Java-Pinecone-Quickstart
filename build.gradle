@@ -142,6 +142,21 @@ tasks.register('describe', JavaExec) {
 	mainClass = javaMainClass
 }
 
+tasks.register('fetch', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'fetch']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
 tasks.register('list', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
@@ -151,6 +166,21 @@ tasks.register('list', JavaExec) {
 			 'app.namespace': namespace,
 			 'app.queryText': queryText,
 			 'app.operation': 'list']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('listIndexes', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.queryText': queryText,
+			 'app.operation': 'listIndexes']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
