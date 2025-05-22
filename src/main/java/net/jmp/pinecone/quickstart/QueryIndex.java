@@ -93,39 +93,9 @@ final class QueryIndex extends IndexOperation {
 
         if (this.indexExists() && this.isIndexLoaded()) {
             final List<Float> queryVector = this.queryToVector(this.queryText);
+            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
 
-            this.logger.info("Querying index: {}", indexName);
-
-            try (final Index index = this.pinecone.getIndexConnection(indexName)) {
-                final QueryResponseWithUnsignedIndices queryResponse =
-                        index.query(10,
-                                queryVector,
-                                null,
-                                null,
-                                null,
-                                this.namespace,
-                                null,
-                                true,
-                                true);
-
-                final List<ScoredVectorWithUnsignedIndices> matches = queryResponse.getMatchesList();
-
-                for (final ScoredVectorWithUnsignedIndices match : matches) {
-                    final Struct metadata = match.getMetadata();
-                    final Map<String, Value> fields = metadata.getFieldsMap();
-
-                    if (this.logger.isDebugEnabled()) {
-                        this.logger.debug("Vector ID : {}", match.getId());
-                        this.logger.debug("Score     : {}", match.getScore());
-                        this.logger.debug("Category  : {}", fields.get("category").getStringValue());
-                    }
-
-                    if (this.logger.isInfoEnabled()) {
-                        this.logger.info("Content ID: {}", fields.get("id").getStringValue());
-                        this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
-                    }
-                }
-            }
+            this.rerank(matches);
         } else {
             this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
         }
@@ -135,7 +105,73 @@ final class QueryIndex extends IndexOperation {
         }
     }
 
-    /// Query to vector.
+    /// Query the index using the query vector.
+    ///
+    /// @param  queryVector java.util.List<java.lang.Float>
+    /// @return             java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> query(final List<Float> queryVector) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(queryVector.toString()));
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
+
+        this.logger.info("Querying index: {}", indexName);
+
+        try (final Index index = this.pinecone.getIndexConnection(indexName)) {
+            final QueryResponseWithUnsignedIndices queryResponse =
+                    index.query(10,
+                            queryVector,
+                            null,
+                            null,
+                            null,
+                            this.namespace,
+                            null,
+                            true,
+                            true);
+
+            matches = queryResponse.getMatchesList();
+
+            for (final ScoredVectorWithUnsignedIndices match : matches) {
+                final Struct metadata = match.getMetadata();
+                final Map<String, Value> fields = metadata.getFieldsMap();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Vector ID : {}", match.getId());
+                    this.logger.debug("Score     : {}", match.getScore());
+                    this.logger.debug("Category  : {}", fields.get("category").getStringValue());
+                }
+
+                if (this.logger.isInfoEnabled()) {
+                    this.logger.info("Content ID: {}", fields.get("id").getStringValue());
+                    this.logger.info("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
+                }
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Rerank the results.
+    ///
+    /// @param  matches     java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private void rerank(final List<ScoredVectorWithUnsignedIndices> matches) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(matches));
+        }
+
+        this.logger.info("Reranking results for {} matches", matches.size());
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Convert the query text to a vector.
     ///
     /// @param  query       java.lang.String
     /// @return             java.util.List<java.lang.Float>
