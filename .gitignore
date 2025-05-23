@@ -29,7 +29,8 @@
 .gradle
 .idea
 build
-etc/api-key.txt
+etc/open-ai-api-key.txt
+etc/pinecone-api-key.txt
 gradle/*
 !gradle/libs.versions.toml
 gradlew

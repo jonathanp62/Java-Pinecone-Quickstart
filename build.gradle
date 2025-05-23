@@ -43,12 +43,13 @@ plugins {
 apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
-	apiKey = 'etc/api-key.txt'
 	embeddingModel = 'llama-text-embed-v2'
 	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
 	indexName = 'quickstart'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	namespace = 'quickstart-namespace'
+	openaiApiKey = 'etc/open-ai-api-key.txt'
+	pineconeApiKey = 'etc/pinecone-api-key.txt'
 	project.group = 'net.jmp.pinecone.quickstart'
 	project.version = '0.2.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
@@ -101,10 +102,11 @@ tasks.withType(Javadoc).configureEach {
 tasks.register('create', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'create']
@@ -117,10 +119,11 @@ tasks.register('create', JavaExec) {
 tasks.register('delete', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'delete']
@@ -133,10 +136,11 @@ tasks.register('delete', JavaExec) {
 tasks.register('describe', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'describe']
@@ -149,10 +153,11 @@ tasks.register('describe', JavaExec) {
 tasks.register('describeNamespace', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'describeNamespace']
@@ -165,10 +170,11 @@ tasks.register('describeNamespace', JavaExec) {
 tasks.register('fetch', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'fetch']
@@ -181,10 +187,11 @@ tasks.register('fetch', JavaExec) {
 tasks.register('list', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'list']
@@ -197,10 +204,11 @@ tasks.register('list', JavaExec) {
 tasks.register('listIndexes', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'listIndexes']
@@ -213,10 +221,11 @@ tasks.register('listIndexes', JavaExec) {
 tasks.register('listNamespaces', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'listNamespaces']
@@ -229,10 +238,11 @@ tasks.register('listNamespaces', JavaExec) {
 tasks.register('load', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'load']
@@ -245,10 +255,11 @@ tasks.register('load', JavaExec) {
 tasks.register('query', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
-			['app.apiKey': apiKey,
-			 'app.embeddingModel': embeddingModel,
+			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
 			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'query']

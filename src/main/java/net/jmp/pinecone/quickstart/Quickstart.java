@@ -66,6 +66,9 @@ final class Quickstart {
     /// The query text.
     private final String queryText;
 
+    /// The Open AI API key.
+    private String openAiApiKey;
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.Quickstart.Builder
@@ -94,8 +97,10 @@ final class Quickstart {
             this.logger.trace(entryWith(operation));
         }
 
-        final String apiKey = this.getApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
-        final Pinecone pinecone = new Pinecone.Builder(apiKey).build();
+        this.openAiApiKey = this.getOpenAIApiKey().orElseThrow(() -> new RuntimeException("OpenAI API key not found"));
+
+        final String pineconeApiKey = this.getPineconeApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
+        final Pinecone pinecone = new Pinecone.Builder(pineconeApiKey).build();
 
         switch (operation) {
             case "create" -> this.createIndex(pinecone);
@@ -116,15 +121,50 @@ final class Quickstart {
         }
     }
 
-    /// Get the API key.
+    /// Get the OpenAI API key.
     ///
-    /// @return     java.util.Optional<java.lang.String>
-    private Optional<String> getApiKey() {
+    /// @return java.util.Optional<java.lang.String>
+    private Optional<String> getOpenAIApiKey() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final String apiKeyFileName = System.getProperty("app.apiKey");
+        final Optional<String> apiKey = this.getApiKey("app.openaiApiKey");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(apiKey));
+        }
+
+        return apiKey;
+    }
+
+    /// Get the Pinecone API key.
+    ///
+    /// @return java.util.Optional<java.lang.String>
+    private Optional<String> getPineconeApiKey() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final Optional<String> apiKey = this.getApiKey("app.pineconeApiKey");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(apiKey));
+        }
+
+        return apiKey;
+    }
+
+    /// Get the API key.
+    ///
+    /// @param  propertyName    java.lang.String
+    /// @return                 java.util.Optional<java.lang.String>
+    private Optional<String> getApiKey(final String propertyName) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(propertyName));
+        }
+
+        final String apiKeyFileName = System.getProperty(propertyName);
 
         String apiKey = null;
 
@@ -132,8 +172,8 @@ final class Quickstart {
             apiKey = Files.readString(Paths.get(apiKeyFileName)).trim();
 
             if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Pinecone API key file: {}", apiKeyFileName);
-                this.logger.debug("Pinecone API key: {}", apiKey);
+                this.logger.debug("API key file: {}", apiKeyFileName);
+                this.logger.debug("API key: {}", apiKey);
             }
         } catch (final IOException ioe) {
             this.logger.error("Unable to read API key file: {}", apiKeyFileName, ioe);
@@ -300,7 +340,8 @@ final class Quickstart {
                 this.indexName,
                 this.namespace,
                 this.rerankingModel,
-                this.queryText
+                this.queryText,
+                this.openAiApiKey
         ).operate();
 
         if (this.logger.isTraceEnabled()) {

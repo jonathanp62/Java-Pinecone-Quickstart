@@ -71,6 +71,9 @@ final class QueryIndex extends IndexOperation {
     /// The query text.
     private final String queryText;
 
+    /// The OpenAI API key.
+    private final String openAiApiKey;
+
     /// The constructor.
     ///
     /// @param  pinecone        io.pinecone.clients.Pinecone
@@ -79,17 +82,20 @@ final class QueryIndex extends IndexOperation {
     /// @param  namespace       java.lang.String
     /// @param  rerankingModel  java.lang.String
     /// @param  queryText       java.lang.String
+    /// @param  openAiApiKey    java.lang.String
     QueryIndex(final Pinecone pinecone,
                final String embeddingModel,
                final String indexName,
                final String namespace,
                final String rerankingModel,
-               final String queryText) {
+               final String queryText,
+               final String openAiApiKey) {
         super(pinecone, indexName, namespace);
 
         this.embeddingModel = embeddingModel;
         this.rerankingModel = rerankingModel;
         this.queryText = queryText;
+        this.openAiApiKey = openAiApiKey;
     }
 
     /// The operate method.
