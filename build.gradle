@@ -73,6 +73,7 @@ repositories {
 
 dependencies {
 	implementation		(libs.bundles.logging)
+	implementation		(libs.com.openai.openai.java)
 	implementation		(libs.io.pinecone.pinecone.client)
 
 	runtimeOnly			(libs.bundles.logging.runtime)

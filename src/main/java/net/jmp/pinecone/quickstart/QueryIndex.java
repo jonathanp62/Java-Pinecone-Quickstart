@@ -31,6 +31,14 @@ package net.jmp.pinecone.quickstart;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+
+import com.openai.models.ChatModel;
+
+import com.openai.models.chat.completions.ChatCompletion;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
@@ -106,10 +114,24 @@ final class QueryIndex extends IndexOperation {
         }
 
         if (this.indexExists() && this.isIndexLoaded()) {
-            final List<Float> queryVector = this.queryToVector(this.queryText);
-            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
+//            final List<Float> queryVector = this.queryToVector(this.queryText);
+//            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
+//            final List<String> reranked = this.rerank(matches);
 
-            this.rerank(matches);
+            final List<String> reranked = new ArrayList<>();
+
+            reranked.add("The Taj Mahal is a mausoleum built by Emperor Shah Jahan.");
+            reranked.add("The Great Wall of China was built to protect against invasions.");
+            reranked.add("The Pyramids of Giza are among the Seven Wonders of the Ancient World.");
+            reranked.add("Rome was once the center of a vast empire.");
+            reranked.add("Leonardo da Vinci painted the Mona Lisa.");
+            reranked.add("The French Revolution began in 1789.");
+            reranked.add("Shakespeare wrote many famous plays, including Hamlet and Macbeth.");
+            reranked.add("The Industrial Revolution transformed manufacturing and transportation.");
+            reranked.add("Renewable energy sources include wind, solar, and hydroelectric power.");
+            reranked.add("Albert Einstein developed the theory of relativity.");
+
+            this.logger.info(this.rag(reranked));
         } else {
             this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
         }
@@ -170,7 +192,8 @@ final class QueryIndex extends IndexOperation {
     /// Rerank the results.
     ///
     /// @param  matches     java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    private void rerank(final List<ScoredVectorWithUnsignedIndices> matches) {
+    /// @return             java.util.List<java.lang.String>
+    private List<String> rerank(final List<ScoredVectorWithUnsignedIndices> matches) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(matches));
         }
@@ -224,6 +247,8 @@ final class QueryIndex extends IndexOperation {
             this.logger.error(e.getMessage());
         }
 
+        List<String> rankedContent = new ArrayList<>();
+
         if (result != null) {
             final List<RankedDocument> rankedDocuments = result.getData();
 
@@ -246,12 +271,122 @@ final class QueryIndex extends IndexOperation {
                 }
 
                 this.logger.info(content);
+
+                rankedContent.add(content);
             }
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exit());
+            this.logger.trace(exitWith(rankedContent));
         }
+
+        return rankedContent;
+    }
+
+    /// Generate a response.
+    ///
+    /// @param  rankedContent   java.util.List<java.lang.String>
+    /// @return                 java.lang.String
+    private String rag(final List<String> rankedContent) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(rankedContent));
+        }
+
+        String response = "";
+
+        OpenAIClient openai = null;
+
+        try {
+            openai = OpenAIOkHttpClient.builder()
+                    .apiKey(this.openAiApiKey)
+                    .build();
+
+            /* Construct the prompt */
+
+            final StringBuilder sb = new StringBuilder("Use the following content to answer the question:\n\n");
+
+            for (final String content : rankedContent) {
+                sb.append(content);
+                sb.append("\n");
+            }
+
+            sb.append("\nQuestion: ").append(this.queryText).append("\n");
+            final String prompt = sb.toString();
+
+            this.logger.info("Prompt: {}", prompt);
+            this.logger.info("Size  : {}", prompt.length());
+
+            final ChatCompletionCreateParams chatCompletionCreateParams = ChatCompletionCreateParams.builder()
+                    .model(ChatModel.GPT_4_1)
+                    .addUserMessage(prompt)
+                    .build();
+
+            final ChatCompletion chatCompletion = openai.chat().completions().create(chatCompletionCreateParams);
+
+            this.logger.debug(chatCompletion.toString());
+            /*
+                ChatCompletion{
+                    id=chatcmpl-BaSb6RUVQB7oOIjQsn0Jg5UGDm6kZ,
+                    choices=[
+                        Choice{
+                            finishReason=stop,
+                            index=0,
+                            logprobs=null,
+                            message=ChatCompletionMessage{
+                                content=Famous historical structures and monuments mentioned in the content include:
+
+                                - The Taj Mahal (mausoleum built by Emperor Shah Jahan)
+                                - The Great Wall of China (built to protect against invasions)
+                                - The Pyramids of Giza (among the Seven Wonders of the Ancient World),
+                            finishReason=stop,
+                            refusal=null,
+                            role=assistant,
+                            annotations=[],
+                            audio=,
+                            functionCall=,
+                            toolCalls=,
+                            additionalProperties={}
+                            },
+                            additionalProperties={}
+                        }
+                    ],
+                    created=1748029436,
+                    model=gpt-4.1-2025-04-14,
+                    object_=chat.completion,
+                    serviceTier=default,
+                    systemFingerprint=fp_2d9626f3cf,
+                    usage=CompletionUsage{completionTokens=59,
+                    promptTokens=139,
+                    totalTokens=198,
+                    completionTokensDetails=CompletionTokensDetails{
+                        acceptedPredictionTokens=0,
+                        audioTokens=0,
+                        reasoningTokens=0,
+                        rejectedPredictionTokens=0,
+                        additionalProperties={}
+                    },
+                    promptTokensDetails=PromptTokensDetails{
+                        acceptedPredictionTokens=0,
+                        audioTokens=0,
+                        cachedTokens=0,
+                        additionalProperties={}
+                    }, additionalProperties={}
+                    }, additionalProperties={}
+                }
+             */
+
+            response = chatCompletion.choices().getFirst().message().content().orElse("No response returned");
+        } finally {
+            if (openai != null) {
+                openai.close();
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(response));
+        }
+
+        return response;
     }
 
     /// Convert the query text to a vector.
