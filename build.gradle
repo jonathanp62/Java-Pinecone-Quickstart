@@ -146,6 +146,22 @@ tasks.register('describe', JavaExec) {
 	mainClass = javaMainClass
 }
 
+tasks.register('describeNamespace', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
+			 'app.queryText': queryText,
+			 'app.operation': 'describeNamespace']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
 tasks.register('fetch', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
@@ -188,6 +204,22 @@ tasks.register('listIndexes', JavaExec) {
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'listIndexes']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('listNamespaces', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.apiKey': apiKey,
+			 'app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.namespace': namespace,
+			 'app.rerankingModel': rerankingModel,
+			 'app.queryText': queryText,
+			 'app.operation': 'listNamespaces']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))

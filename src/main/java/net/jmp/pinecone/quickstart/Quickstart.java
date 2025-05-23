@@ -101,9 +101,11 @@ final class Quickstart {
             case "create" -> this.createIndex(pinecone);
             case "delete" -> this.deleteIndex(pinecone);
             case "describe" -> this.describeIndex(pinecone);
+            case "describeNamespace" -> this.describeNamespace(pinecone);
             case "fetch" -> this.fetchIndex(pinecone);
             case "list" -> this.listIndex(pinecone);
             case "listIndexes" -> this.listIndexes(pinecone);
+            case "listNamespaces" -> this.listNamespaces(pinecone);
             case "load" -> this.loadIndex(pinecone);
             case "query" -> this.queryIndex(pinecone);
             default -> this.logger.error("Unknown operation: {}", operation);
@@ -189,6 +191,21 @@ final class Quickstart {
         }
     }
 
+    /// List the namespaces.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void listNamespaces(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        new ListNamespaces(pinecone, this.indexName, null).operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
     /// Create the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
@@ -213,6 +230,21 @@ final class Quickstart {
         }
 
         new DescribeIndex(pinecone, this.indexName, this.namespace).operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Describe the namespace.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void describeNamespace(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        new DescribeNamespace(pinecone, this.indexName, this.namespace).operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
