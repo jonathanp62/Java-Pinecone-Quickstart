@@ -31,6 +31,12 @@ package net.jmp.pinecone.quickstart;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
+import com.mongodb.client.*;
+
+import static com.mongodb.client.model.Filters.eq;
+
+import com.mongodb.client.model.Projections;
+
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 
@@ -46,12 +52,15 @@ import io.pinecone.clients.Pinecone;
 import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.jmp.util.logging.LoggerUtils.*;
+
+import org.bson.Document;
+
+import org.bson.conversions.Bson;
+
+import org.bson.types.ObjectId;
 
 import org.openapitools.inference.client.ApiException;
 import org.openapitools.inference.client.model.Embedding;
@@ -82,6 +91,15 @@ final class QueryIndex extends IndexOperation {
     /// The OpenAI API key.
     private final String openAiApiKey;
 
+    /// The mongo client.
+    private final MongoClient mongoClient;
+
+    /// The collection name.
+    private final String collectionName;
+
+    /// The database name.
+    private final String dbName;
+
     /// The constructor.
     ///
     /// @param  pinecone        io.pinecone.clients.Pinecone
@@ -97,13 +115,17 @@ final class QueryIndex extends IndexOperation {
                final String namespace,
                final String rerankingModel,
                final String queryText,
-               final String openAiApiKey) {
+               final String openAiApiKey,
+               final MongoClient mongoClient) {
         super(pinecone, indexName, namespace);
 
         this.embeddingModel = embeddingModel;
         this.rerankingModel = rerankingModel;
         this.queryText = queryText;
         this.openAiApiKey = openAiApiKey;
+        this.mongoClient = mongoClient;
+        this.collectionName = System.getProperty("app.mongoDbCollection");
+        this.dbName = System.getProperty("app.mongoDbName");
     }
 
     /// The operate method.
@@ -161,11 +183,15 @@ final class QueryIndex extends IndexOperation {
                 final Map<String, Value> fields = metadata.getFieldsMap();
 
                 if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID : {}", match.getId());
-                    this.logger.debug("Score     : {}", match.getScore());
-                    this.logger.debug("Category  : {}", fields.get("category").getStringValue());
-                    this.logger.debug("Content ID: {}", fields.get("id").getStringValue());
-                    this.logger.debug("Content   : {}", this.textMap.get(fields.get("id").getStringValue()).getContent());
+                    this.logger.debug("Vector ID: {}", match.getId());
+                    this.logger.debug("Score    : {}", match.getScore());
+                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
+                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
+                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
+
+                    final Optional<UnstructuredTextDocument> content = this.getDocument(fields.get("mongoid").getStringValue());
+
+                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
                 }
             }
         }
@@ -191,17 +217,21 @@ final class QueryIndex extends IndexOperation {
 
         /* Create a list of documents to rerank. */
 
-        final List<Map<String, Object>> documents = new ArrayList<>();
+        final List<Map<String, Object>> documents = new ArrayList<>(matches.size());
 
         for (final ScoredVectorWithUnsignedIndices match : matches) {
             final Struct metadata = match.getMetadata();
             final Map<String, Value> fields = metadata.getFieldsMap();
-
             final Map<String, Object> document = new HashMap<>();
 
-            document.put("id", fields.get("id").getStringValue());
+            document.put("mongoid", fields.get("mongoid").getStringValue());
+            document.put("documentid", fields.get("documentid").getStringValue());
             document.put("category", fields.get("category").getStringValue());
-            document.put("content", this.textMap.get(fields.get("id").getStringValue()).getContent());
+
+            final Optional<UnstructuredTextDocument> content = this.getDocument(fields.get("mongoid").getStringValue());
+            final UnstructuredTextDocument doc = content.orElseThrow(() -> new RuntimeException("Could not find MongoDB document: " + fields.get("mongoid").getStringValue()));
+
+            document.put("content", doc.getContent());
 
             documents.add(document);
         }
@@ -235,7 +265,7 @@ final class QueryIndex extends IndexOperation {
             this.logger.error(e.getMessage());
         }
 
-        List<String> rankedContent = new ArrayList<>();
+        List<String> rankedContent = new ArrayList<>(matches.size());
 
         if (result != null) {
             final List<RankedDocument> rankedDocuments = result.getData();
@@ -249,12 +279,14 @@ final class QueryIndex extends IndexOperation {
 
                 assert document != null;
 
-                final String id = (String) document.get("id");
+                final String mongoId = (String) document.get("mongoid");
+                final String documentId = (String) document.get("documentid");
                 final String category = (String) document.get("category");
                 final String content = (String) document.get("content");
 
                 if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("ID      : {}", id);
+                    this.logger.debug("Mongo ID: {}", mongoId);
+                    this.logger.debug("Doc ID  : {}", documentId);
                     this.logger.debug("Category: {}", category);
                 }
 
@@ -372,5 +404,44 @@ final class QueryIndex extends IndexOperation {
         }
 
         return values;
+    }
+
+    /// Get a document from MongoDB.
+    ///
+    /// @param  mongoId java.lang.String
+    /// @return         java.util.Optional<net.jmp.pinecone.quickstart.UnstructuredTextDocument>
+    private Optional<UnstructuredTextDocument> getDocument(final String mongoId) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(mongoId));
+        }
+
+        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
+        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
+
+        final Bson projectionFields = Projections.fields(
+                Projections.include("id", "content", "category")
+        );
+
+        final Document mongoDocument = collection
+                .find(eq(new ObjectId(mongoId)))
+                .projection(projectionFields)
+                .first();
+
+        UnstructuredTextDocument document = null;
+
+        if (mongoDocument != null) {
+            document = new UnstructuredTextDocument(
+                    mongoId,
+                    mongoDocument.get("id").toString(),
+                    mongoDocument.get("content").toString(),
+                    mongoDocument.get("category").toString()
+            );
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(document));
+        }
+
+        return Optional.ofNullable(document);
     }
 }
