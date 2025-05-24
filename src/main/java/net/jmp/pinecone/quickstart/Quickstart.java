@@ -116,7 +116,7 @@ final class Quickstart {
                 case "list" -> this.listIndex(pinecone);
                 case "listIndexes" -> this.listIndexes(pinecone);
                 case "listNamespaces" -> this.listNamespaces(pinecone);
-                case "load" -> this.loadIndex(pinecone);
+                case "load" -> this.loadIndex(pinecone, mongoClient);
                 case "query" -> this.queryIndex(pinecone);
                 case "store" -> this.storeUnstructuredText(mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
@@ -346,16 +346,18 @@ final class Quickstart {
     /// Load the index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
-    private void loadIndex(final Pinecone pinecone) {
+    /// @param  mongoClient com.mongodb.client.MongoClient
+    private void loadIndex(final Pinecone pinecone, final MongoClient mongoClient) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pinecone));
+            this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
         new LoadIndex(
                 pinecone,
                 this.embeddingModel,
                 this.indexName,
-                this.namespace
+                this.namespace,
+                mongoClient
         ).operate();
 
         if (this.logger.isTraceEnabled()) {
