@@ -114,24 +114,12 @@ final class QueryIndex extends IndexOperation {
         }
 
         if (this.indexExists() && this.isIndexLoaded()) {
-//            final List<Float> queryVector = this.queryToVector(this.queryText);
-//            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
-//            final List<String> reranked = this.rerank(matches);
+            final List<Float> queryVector = this.queryToVector(this.queryText);
+            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
+            final List<String> reranked = this.rerank(matches);
+            final String summary = this.rag(reranked);
 
-            final List<String> reranked = new ArrayList<>();
-
-            reranked.add("The Taj Mahal is a mausoleum built by Emperor Shah Jahan.");
-            reranked.add("The Great Wall of China was built to protect against invasions.");
-            reranked.add("The Pyramids of Giza are among the Seven Wonders of the Ancient World.");
-            reranked.add("Rome was once the center of a vast empire.");
-            reranked.add("Leonardo da Vinci painted the Mona Lisa.");
-            reranked.add("The French Revolution began in 1789.");
-            reranked.add("Shakespeare wrote many famous plays, including Hamlet and Macbeth.");
-            reranked.add("The Industrial Revolution transformed manufacturing and transportation.");
-            reranked.add("Renewable energy sources include wind, solar, and hydroelectric power.");
-            reranked.add("Albert Einstein developed the theory of relativity.");
-
-            this.logger.info(this.rag(reranked));
+            this.logger.info(summary);
         } else {
             this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
         }
@@ -254,7 +242,7 @@ final class QueryIndex extends IndexOperation {
 
             for (final RankedDocument rankedDocument : rankedDocuments) {
                 if (this.logger.isDebugEnabled()) {
-                    this.logger.info("Document: {}", rankedDocument.toJson());
+                    this.logger.debug("Document: {}", rankedDocument.toJson());
                 }
 
                 final Map<String, Object> document = rankedDocument.getDocument();
@@ -293,7 +281,6 @@ final class QueryIndex extends IndexOperation {
         }
 
         String response = "";
-
         OpenAIClient openai = null;
 
         try {
@@ -321,59 +308,13 @@ final class QueryIndex extends IndexOperation {
                     .addUserMessage(prompt)
                     .build();
 
+            /* Send the prompt to OpenAI */
+            
             final ChatCompletion chatCompletion = openai.chat().completions().create(chatCompletionCreateParams);
 
-            this.logger.debug(chatCompletion.toString());
-            /*
-                ChatCompletion{
-                    id=chatcmpl-BaSb6RUVQB7oOIjQsn0Jg5UGDm6kZ,
-                    choices=[
-                        Choice{
-                            finishReason=stop,
-                            index=0,
-                            logprobs=null,
-                            message=ChatCompletionMessage{
-                                content=Famous historical structures and monuments mentioned in the content include:
-
-                                - The Taj Mahal (mausoleum built by Emperor Shah Jahan)
-                                - The Great Wall of China (built to protect against invasions)
-                                - The Pyramids of Giza (among the Seven Wonders of the Ancient World),
-                            finishReason=stop,
-                            refusal=null,
-                            role=assistant,
-                            annotations=[],
-                            audio=,
-                            functionCall=,
-                            toolCalls=,
-                            additionalProperties={}
-                            },
-                            additionalProperties={}
-                        }
-                    ],
-                    created=1748029436,
-                    model=gpt-4.1-2025-04-14,
-                    object_=chat.completion,
-                    serviceTier=default,
-                    systemFingerprint=fp_2d9626f3cf,
-                    usage=CompletionUsage{completionTokens=59,
-                    promptTokens=139,
-                    totalTokens=198,
-                    completionTokensDetails=CompletionTokensDetails{
-                        acceptedPredictionTokens=0,
-                        audioTokens=0,
-                        reasoningTokens=0,
-                        rejectedPredictionTokens=0,
-                        additionalProperties={}
-                    },
-                    promptTokensDetails=PromptTokensDetails{
-                        acceptedPredictionTokens=0,
-                        audioTokens=0,
-                        cachedTokens=0,
-                        additionalProperties={}
-                    }, additionalProperties={}
-                    }, additionalProperties={}
-                }
-             */
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug(chatCompletion.toString());   // See etc/open-ai-chat-completion.txt
+            }
 
             response = chatCompletion.choices().getFirst().message().content().orElse("No response returned");
         } finally {
