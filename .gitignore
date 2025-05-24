@@ -30,6 +30,7 @@
 .gradle
 .idea
 build
+etc/mongo-db-uri.txt
 etc/open-ai-api-key.txt
 etc/pinecone-api-key.txt
 gradle/*

@@ -309,7 +309,7 @@ final class QueryIndex extends IndexOperation {
                     .build();
 
             /* Send the prompt to OpenAI */
-            
+
             final ChatCompletion chatCompletion = openai.chat().completions().create(chatCompletionCreateParams);
 
             if (this.logger.isDebugEnabled()) {

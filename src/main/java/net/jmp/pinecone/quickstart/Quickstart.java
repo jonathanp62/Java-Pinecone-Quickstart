@@ -29,6 +29,9 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+
 import io.pinecone.clients.Pinecone;
 
 import java.io.IOException;
@@ -99,21 +102,25 @@ final class Quickstart {
 
         this.openAiApiKey = this.getOpenAIApiKey().orElseThrow(() -> new RuntimeException("OpenAI API key not found"));
 
+        final String mongoDbUri = this.getMongoDbUri().orElseThrow(() -> new RuntimeException("MongoDB URI not found"));
         final String pineconeApiKey = this.getPineconeApiKey().orElseThrow(() -> new RuntimeException("Pinecone API key not found"));
         final Pinecone pinecone = new Pinecone.Builder(pineconeApiKey).build();
 
-        switch (operation) {
-            case "create" -> this.createIndex(pinecone);
-            case "delete" -> this.deleteIndex(pinecone);
-            case "describe" -> this.describeIndex(pinecone);
-            case "describeNamespace" -> this.describeNamespace(pinecone);
-            case "fetch" -> this.fetchIndex(pinecone);
-            case "list" -> this.listIndex(pinecone);
-            case "listIndexes" -> this.listIndexes(pinecone);
-            case "listNamespaces" -> this.listNamespaces(pinecone);
-            case "load" -> this.loadIndex(pinecone);
-            case "query" -> this.queryIndex(pinecone);
-            default -> this.logger.error("Unknown operation: {}", operation);
+        try (final MongoClient mongoClient = MongoClients.create(mongoDbUri)) {
+            switch (operation) {
+                case "create" -> this.createIndex(pinecone);
+                case "delete" -> this.deleteIndex(pinecone);
+                case "describe" -> this.describeIndex(pinecone);
+                case "describeNamespace" -> this.describeNamespace(pinecone);
+                case "fetch" -> this.fetchIndex(pinecone);
+                case "list" -> this.listIndex(pinecone);
+                case "listIndexes" -> this.listIndexes(pinecone);
+                case "listNamespaces" -> this.listNamespaces(pinecone);
+                case "load" -> this.loadIndex(pinecone);
+                case "query" -> this.queryIndex(pinecone);
+                case "store" -> this.storeUnstructuredText(mongoClient);
+                default -> this.logger.error("Unknown operation: {}", operation);
+            }
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -184,6 +191,36 @@ final class Quickstart {
         }
 
         return Optional.ofNullable(apiKey);
+    }
+
+    /// Get the MongoDB URI.
+    ///
+    /// @return java.util.Optional<java.lang.String>
+    private Optional<String> getMongoDbUri() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final String mongoDbUriFileName = System.getProperty("app.mongoDbUri");
+
+        String mongoDbUri = null;
+
+        try {
+            mongoDbUri = Files.readString(Paths.get(mongoDbUriFileName)).trim();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("MongoDb URI file: {}", mongoDbUriFileName);
+                this.logger.debug("MongoDb URI: {}", mongoDbUri);
+            }
+        } catch (final IOException ioe) {
+            this.logger.error("Unable to read MongoDb URI file: {}", mongoDbUriFileName, ioe);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(mongoDbUri));
+        }
+
+        return Optional.ofNullable(mongoDbUri);
     }
 
     /// Fetch from the index.
@@ -343,6 +380,21 @@ final class Quickstart {
                 this.queryText,
                 this.openAiApiKey
         ).operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Store the unstructured text.
+    ///
+    /// @param  mongoClient io.mongodb.client.MongoClient
+    private void storeUnstructuredText(final MongoClient mongoClient) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(mongoClient));
+        }
+
+        new StoreUnstructuredText(mongoClient).store();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

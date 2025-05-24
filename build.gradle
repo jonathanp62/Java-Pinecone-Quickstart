@@ -47,6 +47,9 @@ ext {
 	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
 	indexName = 'quickstart'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
+	mongoDbCollection = 'quickstart'
+	mongoDbName = 'pinecone_quickstart'
+	mongoDbUri = 'etc/mongo-db-uri.txt'
 	namespace = 'quickstart-namespace'
 	openaiApiKey = 'etc/open-ai-api-key.txt'
 	pineconeApiKey = 'etc/pinecone-api-key.txt'
@@ -75,6 +78,7 @@ dependencies {
 	implementation		(libs.bundles.logging)
 	implementation		(libs.com.openai.openai.java)
 	implementation		(libs.io.pinecone.pinecone.client)
+	implementation		(libs.org.mongodb.mongodb.driver.sync)
 
 	runtimeOnly			(libs.bundles.logging.runtime)
 
@@ -105,6 +109,9 @@ tasks.register('create', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -122,6 +129,9 @@ tasks.register('delete', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -139,6 +149,9 @@ tasks.register('describe', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -156,6 +169,9 @@ tasks.register('describeNamespace', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -173,6 +189,9 @@ tasks.register('fetch', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -190,6 +209,9 @@ tasks.register('list', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -207,6 +229,9 @@ tasks.register('listIndexes', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -224,6 +249,9 @@ tasks.register('listNamespaces', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -241,6 +269,9 @@ tasks.register('load', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
@@ -258,12 +289,35 @@ tasks.register('query', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
 			 'app.namespace': namespace,
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': queryText,
 			 'app.operation': 'query']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('store', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.mongoDbUri': mongoDbUri,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
+			 'app.rerankingModel': rerankingModel,
+			 'app.queryText': queryText,
+			 'app.operation': 'store']
 	)
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
