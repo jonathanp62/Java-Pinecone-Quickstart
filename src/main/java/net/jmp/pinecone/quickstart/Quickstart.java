@@ -41,6 +41,8 @@ import java.nio.file.Paths;
 
 import java.util.*;
 
+import net.jmp.pinecone.quickstart.create.CreateIndex;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
@@ -291,7 +293,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new CreateIndex(pinecone, this.indexName, this.namespace).operate();
+        final CreateIndex createIndex = CreateIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        createIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

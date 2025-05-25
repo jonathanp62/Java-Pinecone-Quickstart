@@ -109,6 +109,7 @@ final class QueryIndex extends IndexOperation {
     /// @param  rerankingModel  java.lang.String
     /// @param  queryText       java.lang.String
     /// @param  openAiApiKey    java.lang.String
+    /// @param  mongoClient     io.mongodb.client.MongoClient
     QueryIndex(final Pinecone pinecone,
                final String embeddingModel,
                final String indexName,
