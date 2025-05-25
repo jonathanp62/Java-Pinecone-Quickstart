@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.fetch;
 
 /*
  * (#)FetchIndex.java   0.2.0   05/22/2025
@@ -39,6 +39,8 @@ import io.pinecone.proto.Vector;
 import java.util.List;
 import java.util.Map;
 
+import net.jmp.pinecone.quickstart.IndexOperation;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
@@ -48,22 +50,27 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-final class FetchIndex extends IndexOperation {
+public final class FetchIndex extends IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The constructor.
     ///
-    /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    FetchIndex(final Pinecone pinecone, final String indexName, final String namespace) {
-        super(pinecone, indexName, namespace);
+    /// @param  builder     net.jmp.pinecone.quickstart.fetch.FetchIndex.Builder
+    private FetchIndex(final Builder builder) {
+        super(builder.pinecone, builder.indexName, builder.namespace);
+    }
+
+    /// Return an instance of the builder class.
+    ///
+    /// @return net.jmp.pinecone.quickstart.fetch.FetchIndex.Builder
+    public static Builder builder() {
+        return new Builder();
     }
 
     /// The operate method.
     @Override
-    protected void operate() {
+    public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
@@ -96,6 +103,60 @@ final class FetchIndex extends IndexOperation {
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
+        }
+    }
+
+    /// The builder class.
+    public static class Builder {
+        /// The Pinecone client.
+        private Pinecone pinecone;
+
+        /// The index name.
+        private String indexName;
+
+        /// The namespace.
+        private String namespace;
+
+        /// The default constructor.
+        private Builder() {
+            super();
+        }
+
+        ///  Set the Pinecone client.
+        ///
+        /// @param  pinecone    io.pinecone.clients.Pinecone
+        /// @return             net.jmp.pinecone.quickstart.fetch.FetchIndex.Builder
+        public Builder pinecone(final Pinecone pinecone) {
+            this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.fetch.FetchIndex.Builder
+        public Builder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace.
+        ///
+        /// @param  namespace   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.fetch.FetchIndex.Builder
+        public Builder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Build the object.
+        ///
+        /// @return net.jmp.pinecone.quickstart.fetch.FetchIndex
+        public FetchIndex build() {
+            return new FetchIndex(this);
         }
     }
 }

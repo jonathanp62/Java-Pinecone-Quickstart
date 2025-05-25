@@ -45,6 +45,7 @@ import net.jmp.pinecone.quickstart.create.CreateIndex;
 import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
+import net.jmp.pinecone.quickstart.fetch.FetchIndex;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -236,7 +237,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new FetchIndex(pinecone, this.indexName, this.namespace).operate();
+        final FetchIndex fetchIndex = FetchIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        fetchIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
