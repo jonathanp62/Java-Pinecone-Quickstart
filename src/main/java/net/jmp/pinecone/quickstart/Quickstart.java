@@ -42,6 +42,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import net.jmp.pinecone.quickstart.create.CreateIndex;
+import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -344,7 +345,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new DeleteIndex(pinecone, this.indexName, null).operate();
+        final DeleteIndex deleteIndex = DeleteIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        deleteIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
