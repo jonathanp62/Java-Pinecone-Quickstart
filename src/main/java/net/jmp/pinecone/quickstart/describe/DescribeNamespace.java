@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.describe;
 
 /*
  * (#)DescribeNamespace.java    0.2.0   05/22/2025
@@ -36,6 +36,8 @@ import io.pinecone.proto.NamespaceSummary;
 
 import java.util.Map;
 
+import net.jmp.pinecone.quickstart.IndexOperation;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
@@ -51,16 +53,21 @@ public class DescribeNamespace extends IndexOperation {
 
     /// The constructor.
     ///
-    /// @param  pinecone    io.pinecone.clients.Pinecone
-    /// @param  indexName   java.lang.String
-    /// @param  namespace   java.lang.String
-    DescribeNamespace(final Pinecone pinecone, final String indexName, final String namespace) {
-        super(pinecone, indexName, namespace);
+    /// @param  builder     net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+    private DescribeNamespace(final Builder builder) {
+        super(builder.pinecone, builder.indexName, builder.namespace);
+    }
+
+    /// Return an instance of the builder class.
+    ///
+    /// @return net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+    public static Builder builder() {
+        return new Builder();
     }
 
     /// The operate method.
     @Override
-    protected void operate() {
+    public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
@@ -82,6 +89,60 @@ public class DescribeNamespace extends IndexOperation {
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
+        }
+    }
+
+    /// The builder class.
+    public static class Builder {
+        /// The Pinecone instance.
+        private Pinecone pinecone;
+
+        /// The index name.
+        private String indexName;
+
+        /// The namespace name.
+        private String namespace;
+
+        /// The default constructor.
+        public Builder() {
+            super();
+        }
+
+        /// Set the Pinecone client.
+        ///
+        /// @param  pinecone    io.pinecone.clients.Pinecone
+        /// @return             net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+        public Builder pinecone(final Pinecone pinecone) {
+            this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+        public Builder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace name.
+        ///
+        /// @param  namespace   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+        public Builder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Build the object.
+        ///
+        /// @return net.jmp.pinecone.quickstart.describe.DescribeNamespace
+        public DescribeNamespace build() {
+            return new DescribeNamespace(this);
         }
     }
 }

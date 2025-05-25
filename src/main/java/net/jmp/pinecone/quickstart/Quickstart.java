@@ -43,6 +43,8 @@ import java.util.*;
 
 import net.jmp.pinecone.quickstart.create.CreateIndex;
 import net.jmp.pinecone.quickstart.delete.DeleteIndex;
+import net.jmp.pinecone.quickstart.describe.DescribeIndex;
+import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -315,7 +317,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new DescribeIndex(pinecone, this.indexName, this.namespace).operate();
+        final DescribeIndex describeIndex = DescribeIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        describeIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -330,7 +338,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new DescribeNamespace(pinecone, this.indexName, this.namespace).operate();
+        final DescribeNamespace describeNamespace = DescribeNamespace.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        describeNamespace.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
