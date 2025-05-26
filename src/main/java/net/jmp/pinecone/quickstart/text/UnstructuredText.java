@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.text;
 
 /*
+ * (#)UnstructuredText.java 0.3.0   05/26/2025
  * (#)UnstructuredText.java 0.2.0   05/21/2025
  * (#)UnstructuredText.java 0.1.0   05/18/2025
  *
@@ -29,16 +30,18 @@ package net.jmp.pinecone.quickstart.text;
  * SOFTWARE.
  */
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-/// The quickstart class.
+/// The unstructured text class.
 ///
-/// @version    0.2.0
+/// @version    0.6.0
 /// @since      0.1.0
 public final class UnstructuredText {
     /// The text map. Use a linked hash map to preserve insertion order.
     private final Map<String, Text> textMap = LinkedHashMap.newLinkedHashMap(50);
+
+    /// The categories.
+    private final Set<String> catgeories = new LinkedHashSet<>();
 
     /// The default constructor.
     public UnstructuredText() {
@@ -99,6 +102,35 @@ public final class UnstructuredText {
         this.textMap.put("rec48", new Text("Vincent van Gogh painted Starry Night.", "art"));
         this.textMap.put("rec49", new Text("Airplanes fly due to the principles of lift and aerodynamics.", "physics"));
         this.textMap.put("rec50", new Text("Renewable energy sources include wind, solar, and hydroelectric power.", "energy"));
+        this.textMap.put("rec51", new Text("On July 2, 1937, Amelia Earhart disappeared over the Pacific Ocean while attempting to become the first female pilot to circumnavigate the world.", "history"));
+        this.textMap.put("rec52", new Text("Clara Schumann composed solo piano pieces, a piano concerto, chamber music, choral pieces, and songs.", "music"));
+        this.textMap.put("rec53", new Text("Sally Ride joined NASA in 1978, and in 1983 became the first American woman and the third woman to fly in space.", "history"));
+        this.textMap.put("rec54", new Text("The Freedom of Information Act is a US federal law that grants the public access to records held by federal agencies.", "government"));
+        this.textMap.put("rec55", new Text("The human skeleton is composed of around 270 bones at birth – this total decreases to around 206 bones by adulthood after some bones get fused together.", "biology"));
+        this.textMap.put("rec56", new Text("Sapphires are a variety of the mineral corundum, consisting primarily of aluminum oxide with trace amounts of other elements.", "geology"));
+        this.textMap.put("rec57", new Text("Marie Curie was the first woman to win a Nobel Prize, the first person to win a Nobel Prize twice, and the only person to win a Nobel Prize in two scientific fields.", "history"));
+        this.textMap.put("rec58", new Text("Finnish is considered a difficult language for English speakers to learn due to its unique structure and grammatical features.", "language"));
+        this.textMap.put("rec59", new Text("A watch complication is any function on a watch beyond displaying hours, minutes, and seconds.", "technology"));
+        this.textMap.put("rec60", new Text("Lake Superior is the largest freshwater lake in the world by surface area and the third-largest freshwater lake by volume, holding 10% of the fresh water in all of the world's rivers and lakes.", "geogrpahy"));
+        this.textMap.put("rec61", new Text("A tariff or import tax is a duty imposed by a national government, customs territory, or supranational union on imports of goods and is paid by the importer.", "economics"));
+        this.textMap.put("rec62", new Text("Bicycles were introduced in the 19th century in Europe.", "transportation"));
+        this.textMap.put("rec63", new Text("Catherine II, most commonly known as Catherine the Great, was the reigning empress of Russia from 1762 to 1796.", "history"));
+        this.textMap.put("rec64", new Text("Madeleine Jana Korbel Albright was an American diplomat and political scientist who served as the 64th United States secretary of state under President Bill Clinton from 1997 to 2001.", "history"));
+        this.textMap.put("rec65", new Text("Nancy Patricia Pelosi is an American politician who was the 52nd speaker of the United States House of Representatives, serving from 2007 to 2011 and again from 2019 to 2023.", "history"));
+        this.textMap.put("rec66", new Text("Teeth are hard, calcified structures found in the oral cavity of vertebrates, including humans.", "biology"));
+        this.textMap.put("rec67", new Text("The banjo is a stringed instrument with a thin membrane stretched over a frame or cavity to form a resonator.", "music"));
+        this.textMap.put("rec68", new Text("A flying buttress is a specific form of buttress composed of an arched structure that extends from the upper portion of a wall to a pier of great mass.", "architecture"));
+        this.textMap.put("rec69", new Text("A quilt is a multi-layered textile, traditionally composed of two or more layers of fabric or fiber.", "sewing"));
+        this.textMap.put("rec70", new Text("Recycling is the process of converting waste materials into new materials and objects.", "waste management"));
+        this.textMap.put("rec71", new Text("Dander refers to the tiny, dead flakes of skin shed by animals, including humans, with fur, hair, or feathers.", "biology"));
+        this.textMap.put("rec72", new Text("Sautéing is a quick cooking method that uses a small amount of fat to cook food over high heat.", "food science"));
+        this.textMap.put("rec73", new Text("Zeus is a sky and thunder god in ancient Greek religion and mythology, who rules as king of the gods on Mount Olympus.", "mythology"));
+        this.textMap.put("rec74", new Text("Siddhartha Gautama, most commonly referred to as the Buddha, was a wandering ascetic and religious teacher who lived in South Asia during the 6th or 5th century BCE and founded Buddhism.", "religion"));
+        this.textMap.put("rec75", new Text("An internal combustion engine (ICE) is a heat engine where the combustion of a fuel occurs in a cylinder, directly producing mechanical energy from the heat.", "science"));
+
+        for (final Map.Entry<String, Text> entry : this.textMap.entrySet()) {
+            this.catgeories.add(entry.getValue().getCategory());
+        }
     }
 
     /// Get the text map.
@@ -106,6 +138,13 @@ public final class UnstructuredText {
     /// @return     java.util.Map<java.lang.String, net.jmp.pinecone.quickstart.text.UnstructuredText.Text>
     public Map<String, Text> getTextMap() {
         return this.textMap;
+    }
+
+    /// Get the categories.
+    ///
+    /// @return     java.util.Set<java.lang.String>
+    public Set<String> getCategories() {
+        return this.catgeories;
     }
 
     /// Get the text by key.
