@@ -30,14 +30,6 @@ package net.jmp.pinecone.quickstart.query;
 
 import com.mongodb.client.*;
 
-import com.openai.client.OpenAIClient;
-import com.openai.client.okhttp.OpenAIOkHttpClient;
-
-import com.openai.models.ChatModel;
-
-import com.openai.models.chat.completions.ChatCompletion;
-import com.openai.models.chat.completions.ChatCompletionCreateParams;
-
 import io.pinecone.clients.Pinecone;
 
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
@@ -116,7 +108,8 @@ public final class QueryIndex extends Operation {
                 .build();
 
             final List<String> reranked = reranker.rerank(matches);
-            final String summary = this.rag(reranked);
+            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText);
+            final String summary = summarizer.summarize(reranked);
 
             this.logger.info(summary);
         } else {
@@ -126,65 +119,6 @@ public final class QueryIndex extends Operation {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
-    }
-
-    /// Generate a response.
-    ///
-    /// @param  rankedContent   java.util.List<java.lang.String>
-    /// @return                 java.lang.String
-    private String rag(final List<String> rankedContent) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(rankedContent));
-        }
-
-        String response = "";
-        OpenAIClient openai = null;
-
-        try {
-            openai = OpenAIOkHttpClient.builder()
-                    .apiKey(this.openAiApiKey)
-                    .build();
-
-            /* Construct the prompt */
-
-            final StringBuilder sb = new StringBuilder("Use the following content to answer the question:\n\n");
-
-            for (final String content : rankedContent) {
-                sb.append(content);
-                sb.append("\n");
-            }
-
-            sb.append("\nQuestion: ").append(this.queryText).append("\n");
-            final String prompt = sb.toString();
-
-            this.logger.info("Prompt: {}", prompt);
-            this.logger.info("Size  : {}", prompt.length());
-
-            final ChatCompletionCreateParams chatCompletionCreateParams = ChatCompletionCreateParams.builder()
-                    .model(ChatModel.GPT_4_1)
-                    .addUserMessage(prompt)
-                    .build();
-
-            /* Send the prompt to OpenAI */
-
-            final ChatCompletion chatCompletion = openai.chat().completions().create(chatCompletionCreateParams);
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug(chatCompletion.toString());   // See etc/open-ai-chat-completion.txt
-            }
-
-            response = chatCompletion.choices().getFirst().message().content().orElse("No response returned");
-        } finally {
-            if (openai != null) {
-                openai.close();
-            }
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(response));
-        }
-
-        return response;
     }
 
     /// The builder class.
