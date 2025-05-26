@@ -484,7 +484,7 @@ final class Quickstart {
             .dbName(this.mongoDbName)
             .build();
 
-        storeUnstructuredText.store();
+        storeUnstructuredText.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

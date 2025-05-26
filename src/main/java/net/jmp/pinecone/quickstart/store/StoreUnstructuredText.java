@@ -39,6 +39,8 @@ import com.mongodb.client.result.InsertManyResult;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.jmp.pinecone.quickstart.Operation;
+
 import net.jmp.pinecone.quickstart.text.UnstructuredText;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -52,28 +54,24 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-public final class StoreUnstructuredText {
+public final class StoreUnstructuredText extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-
-    /// The mongo client.
-    private final MongoClient mongoClient;
-
-    /// The collection name.
-    private final String collectionName;
-
-    /// The database name.
-    private final String dbName;
 
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
     private StoreUnstructuredText(final Builder builder) {
-        super();
-
-        this.mongoClient = builder.mongoClient;
-        this.collectionName = builder.collectionName;
-        this.dbName = builder.dbName;
+        super(null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                builder.mongoClient,
+                builder.collectionName,
+                builder.dbName);
     }
 
     /// Return the builder.
@@ -84,7 +82,8 @@ public final class StoreUnstructuredText {
     }
 
     /// The store method.
-    public void store() {
+    @Override
+    public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }

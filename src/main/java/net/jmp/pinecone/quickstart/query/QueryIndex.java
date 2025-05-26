@@ -54,7 +54,7 @@ import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
 import java.util.*;
 
-import net.jmp.pinecone.quickstart.IndexOperation;
+import net.jmp.pinecone.quickstart.Operation;
 
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
@@ -79,44 +79,24 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-public final class QueryIndex extends IndexOperation {
+public final class QueryIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The embedding model.
-    private final String embeddingModel;
-
-    /// The reranking model.
-    private final String rerankingModel;
-
-    /// The query text.
-    private final String queryText;
-
-    /// The OpenAI API key.
-    private final String openAiApiKey;
-
-    /// The mongo client.
-    private final MongoClient mongoClient;
-
-    /// The collection name.
-    private final String collectionName;
-
-    /// The database name.
-    private final String dbName;
-
     /// The constructor.
     ///
-    /// @param  builder         net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+    /// @param  builder net.jmp.pinecone.quickstart.query.QueryIndex.Builder
     private QueryIndex(final Builder builder) {
-        super(builder.pinecone, builder.indexName, builder.namespace);
-
-        this.embeddingModel = builder.embeddingModel;
-        this.rerankingModel = builder.rerankingModel;
-        this.queryText = builder.queryText;
-        this.openAiApiKey = builder.openAiApiKey;
-        this.mongoClient = builder.mongoClient;
-        this.collectionName = builder.collectionName;
-        this.dbName = builder.dbName;
+        super(builder.pinecone,
+                builder.embeddingModel,
+                builder.indexName,
+                builder.namespace,
+                builder.rerankingModel,
+                builder.queryText,
+                builder.openAiApiKey,
+                builder.mongoClient,
+                builder.collectionName,
+                builder.dbName);
     }
 
     /// Return the builder.

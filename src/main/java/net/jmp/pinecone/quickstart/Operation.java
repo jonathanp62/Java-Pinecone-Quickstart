@@ -1,7 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
- * (#)IndexOperation.java   0.2.0   05/21/2025
+ * (#)Operation.java    0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
  *
@@ -28,6 +28,8 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import com.mongodb.client.MongoClient;
+
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
 
@@ -52,12 +54,15 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-public abstract class IndexOperation {
+public abstract class Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The Pinecone client.
     protected final Pinecone pinecone;
+
+    /// The embedding model.
+    protected final String embeddingModel;
 
     /// The index name.
     protected final String indexName;
@@ -65,20 +70,61 @@ public abstract class IndexOperation {
     /// The namespace.
     protected final String namespace;
 
+    /// The reranking model.
+    protected final String rerankingModel;
+
+    /// The query text.
+    protected final String queryText;
+
+    /// The OpenAI API key.
+    protected final String openAiApiKey;
+
+    /// The MongoDB client.
+    protected final MongoClient mongoClient;
+
+    /// The MongoDB collection name.
+    protected final String collectionName;
+
+    /// The MongoDB database name.
+    protected final String dbName;
+
     /// The text map.
     protected final Map<String, UnstructuredText.Text> textMap = new UnstructuredText().getTextMap();
 
     /// The constructor.
     ///
-    /// @param pinecone  io.pinecone.clients.Pinecone
-    /// @param indexName java.lang.String
-    /// @param namespace java.lang.String
-    protected IndexOperation(final Pinecone pinecone, final String indexName, final String namespace) {
+    /// @param pinecone         io.pinecone.clients.Pinecone
+    /// @param embeddingModel   java.lang.String
+    /// @param indexName        java.lang.String
+    /// @param namespace        java.lang.String
+    /// @param rerankingModel   java.lang.String
+    /// @param queryText        java.lang.String
+    /// @param openAiApiKey     java.lang.String
+    /// @param mongoClient      com.mongodb.client.MongoClient
+    /// @param collectionName   java.lang.String
+    /// @param dbName           java.lang.String
+    protected Operation(final Pinecone pinecone,
+                         final String embeddingModel,
+                         final String indexName,
+                         final String namespace,
+                         final String rerankingModel,
+                         final String queryText,
+                         final String openAiApiKey,
+                         final MongoClient mongoClient,
+                         final String collectionName,
+                         final String dbName) {
         super();
 
         this.pinecone = pinecone;
+        this.embeddingModel = embeddingModel;
         this.indexName = indexName;
         this.namespace = namespace;
+        this.rerankingModel = rerankingModel;
+        this.queryText = queryText;
+        this.openAiApiKey = openAiApiKey;
+        this.mongoClient = mongoClient;
+        this.collectionName = collectionName;
+        this.dbName = dbName;
     }
 
     /// The operate method.

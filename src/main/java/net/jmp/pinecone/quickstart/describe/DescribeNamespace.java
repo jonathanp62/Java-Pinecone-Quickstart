@@ -36,7 +36,7 @@ import io.pinecone.proto.NamespaceSummary;
 
 import java.util.Map;
 
-import net.jmp.pinecone.quickstart.IndexOperation;
+import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -47,15 +47,24 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-public class DescribeNamespace extends IndexOperation {
+public class DescribeNamespace extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The constructor.
     ///
-    /// @param  builder     net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+    /// @param  builder net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
     private DescribeNamespace(final Builder builder) {
-        super(builder.pinecone, builder.indexName, builder.namespace);
+        super(builder.pinecone,
+                null,
+                builder.indexName,
+                builder.namespace,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     /// Return an instance of the builder class.

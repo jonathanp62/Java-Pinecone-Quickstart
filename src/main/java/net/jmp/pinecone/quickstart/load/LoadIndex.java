@@ -53,7 +53,7 @@ import java.util.*;
 
 import java.util.stream.Collectors;
 
-import net.jmp.pinecone.quickstart.IndexOperation;
+import net.jmp.pinecone.quickstart.Operation;
 
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
@@ -74,32 +74,24 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-public final class LoadIndex extends IndexOperation {
+public final class LoadIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The embedding model.
-    private final String embeddingModel;
-
-    /// The mongo client.
-    private final MongoClient mongoClient;
-
-    /// The collection name.
-    private final String collectionName;
-
-    /// The database name.
-    private final String dbName;
-
     /// The constructor.
     ///
-    /// @param  builder         net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+    /// @param  builder net.jmp.pinecone.quickstart.load.LoadIndex.Builder
     private LoadIndex(final Builder builder) {
-        super(builder.pinecone, builder.indexName, builder.namespace);
-
-        this.embeddingModel = builder.embeddingModel;
-        this.mongoClient = builder.mongoClient;
-        this.collectionName = builder.collectionName;
-        this.dbName = builder.dbName;
+        super(builder.pinecone,
+                builder.embeddingModel,
+                builder.indexName,
+                builder.namespace,
+                null,
+                null,
+                null,
+                builder.mongoClient,
+                builder.collectionName,
+                builder.dbName);
     }
 
     /// Return the builder.
