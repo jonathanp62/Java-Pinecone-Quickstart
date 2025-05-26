@@ -57,22 +57,31 @@ public final class Main implements Runnable {
         final String operation = System.getProperty("app.operation");
         final String embeddingModel = System.getProperty("app.embeddingModel");
         final String indexName = System.getProperty("app.indexName");
+        final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
+        final String mongoDbName = System.getProperty("app.mongoDbName");
+        final String mongoDbUriFile = System.getProperty("app.mongoDbUri");
         final String namespace = System.getProperty("app.namespace");
         final String rerankingModel = System.getProperty("app.rerankingModel");
         final String queryText = System.getProperty("app.queryText");
 
         this.logger.info("Pinecone Quickstart");
 
-        this.logger.info("Operation      : {}", operation);
-        this.logger.info("Embedding Model: {}", embeddingModel);
-        this.logger.info("Index Name     : {}", indexName);
-        this.logger.info("Namespace      : {}", namespace);
-        this.logger.info("Reranking Model: {}", rerankingModel);
-        this.logger.info("Query Text     : {}", queryText);
+        this.logger.info("Operation         : {}", operation);
+        this.logger.info("Embedding Model   : {}", embeddingModel);
+        this.logger.info("Index Name        : {}", indexName);
+        this.logger.info("MongoDB Collection: {}", mongoDbCollection);
+        this.logger.info("MongoDB Name      : {}", mongoDbName);
+        this.logger.info("MongoDB URI File  : {}", mongoDbUriFile);
+        this.logger.info("Namespace         : {}", namespace);
+        this.logger.info("Reranking Model   : {}", rerankingModel);
+        this.logger.info("Query Text        : {}", queryText);
 
         final Quickstart quickstart = Quickstart.builder()
             .embeddingModel(embeddingModel)
             .indexName(indexName)
+            .mongoDbCollection(mongoDbCollection)
+            .mongoDbName(mongoDbName)
+            .mongoDbUriFile(mongoDbUriFile)
             .namespace(namespace)
             .rerankingModel(rerankingModel)
             .queryText(queryText)

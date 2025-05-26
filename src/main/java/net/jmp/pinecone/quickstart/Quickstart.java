@@ -72,6 +72,15 @@ final class Quickstart {
     /// The index name.
     private final String indexName;
 
+    /// The MongoDB collection.
+    private final String mongoDbCollection;
+
+    /// The MongoDB name.
+    private final String mongoDbName;
+
+    /// The MongoDB URI file name.
+    private final String mongoDbUriFile;
+
     /// The namespace.
     private final String namespace;
 
@@ -92,6 +101,9 @@ final class Quickstart {
 
         this.embeddingModel = builder.embeddingModel;
         this.indexName = builder.indexName;
+        this.mongoDbCollection = builder.mongoDbCollection;
+        this.mongoDbName = builder.mongoDbName;
+        this.mongoDbUriFile = builder.mongoDbUriFile;
         this.namespace = builder.namespace;
         this.rerankingModel = builder.rerankingModel;
         this.queryText = builder.queryText;
@@ -213,7 +225,7 @@ final class Quickstart {
             this.logger.trace(entry());
         }
 
-        final String mongoDbUriFileName = System.getProperty("app.mongoDbUri");
+        final String mongoDbUriFileName = this.mongoDbUriFile;
 
         String mongoDbUri = null;
 
@@ -418,8 +430,8 @@ final class Quickstart {
             .namespace(this.namespace)
             .embeddingModel(this.embeddingModel)
             .mongoClient(mongoClient)
-            .collectionName(System.getProperty("app.mongoDbCollection"))
-            .dbName(System.getProperty("app.mongoDbName"))
+            .collectionName(this.mongoDbCollection)
+            .dbName(this.mongoDbName)
             .build();
 
         loadIndex.operate();
@@ -447,8 +459,8 @@ final class Quickstart {
             .queryText(this.queryText)
             .openAiApiKey(this.openAiApiKey)
             .mongoClient(mongoClient)
-            .collectionName(System.getProperty("app.mongoDbCollection"))
-            .dbName(System.getProperty("app.mongoDbName"))
+            .collectionName(this.mongoDbCollection)
+            .dbName(this.mongoDbName)
             .build();
 
         queryIndex.operate();
@@ -468,8 +480,8 @@ final class Quickstart {
 
         final StoreUnstructuredText storeUnstructuredText = StoreUnstructuredText.builder()
             .mongoClient(mongoClient)
-            .collectionName(System.getProperty("app.mongoDbCollection"))
-            .dbName(System.getProperty("app.mongoDbName"))
+            .collectionName(this.mongoDbCollection)
+            .dbName(this.mongoDbName)
             .build();
 
         storeUnstructuredText.store();
@@ -486,6 +498,15 @@ final class Quickstart {
 
         /// The index name.
         private String indexName;
+
+        /// The MongoDb collection.
+        private String mongoDbCollection;
+
+        /// The MongoDb name.
+        private String mongoDbName;
+
+        /// The MongoDb URI file name.
+        private String mongoDbUriFile;
 
         /// The namespace.
         private String namespace;
@@ -517,6 +538,36 @@ final class Quickstart {
         /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the MongoDb collection.
+        ///
+        /// @param  mongoDbCollection   java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder mongoDbCollection(final String mongoDbCollection) {
+            this.mongoDbCollection = mongoDbCollection;
+
+            return this;
+        }
+
+        /// Set the MongoDb name.
+        ///
+        /// @param  mongoDbName java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder mongoDbName(final String mongoDbName) {
+            this.mongoDbName = mongoDbName;
+
+            return this;
+        }
+
+        /// Set the MongoDb URI.
+        ///
+        /// @param  mongoDbUriFile  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder mongoDbUriFile(final String mongoDbUriFile) {
+            this.mongoDbUriFile = mongoDbUriFile;
 
             return this;
         }
