@@ -46,6 +46,7 @@ import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
+import net.jmp.pinecone.quickstart.load.LoadIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -389,13 +390,17 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
-        new LoadIndex(
-                pinecone,
-                this.embeddingModel,
-                this.indexName,
-                this.namespace,
-                mongoClient
-        ).operate();
+        final LoadIndex loadIndex = LoadIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .embeddingModel(this.embeddingModel)
+            .mongoClient(mongoClient)
+            .collectionName(System.getProperty("app.mongoDbCollection"))
+            .dbName(System.getProperty("app.mongoDbName"))
+            .build();
+
+        loadIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

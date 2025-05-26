@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.load;
 
 /*
  * (#)LoadIndex.java    0.2.0   05/21/2025
@@ -53,6 +53,8 @@ import java.util.*;
 
 import java.util.stream.Collectors;
 
+import net.jmp.pinecone.quickstart.IndexOperation;
+
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -72,7 +74,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-final  class LoadIndex extends IndexOperation {
+public final class LoadIndex extends IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -90,27 +92,26 @@ final  class LoadIndex extends IndexOperation {
 
     /// The constructor.
     ///
-    /// @param  pinecone        io.pinecone.clients.Pinecone
-    /// @param  embeddingModel  java.lang.String
-    /// @param  indexName       java.lang.String
-    /// @param  namespace       java.lang.String
-    /// @param  mongoClient     com.mongodb.client.MongoClient
-    LoadIndex(final Pinecone pinecone,
-              final String embeddingModel,
-              final String indexName,
-              final String namespace,
-              final MongoClient mongoClient) {
-        super(pinecone, indexName, namespace);
+    /// @param  builder         net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+    private LoadIndex(final Builder builder) {
+        super(builder.pinecone, builder.indexName, builder.namespace);
 
-        this.embeddingModel = embeddingModel;
-        this.mongoClient = mongoClient;
-        this.collectionName = System.getProperty("app.mongoDbCollection");
-        this.dbName = System.getProperty("app.mongoDbName");
+        this.embeddingModel = builder.embeddingModel;
+        this.mongoClient = builder.mongoClient;
+        this.collectionName = builder.collectionName;
+        this.dbName = builder.dbName;
+    }
+
+    /// Return the builder.
+    ///
+    /// @return  net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+    public static Builder builder() {
+        return new Builder();
     }
 
     /// The operate method.
     @Override
-    protected void operate() {
+    public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
@@ -287,5 +288,111 @@ final  class LoadIndex extends IndexOperation {
         }
 
         return metadataList;
+    }
+
+    /// The builder class.
+    public static class Builder {
+        /// The pinecone client.
+        private Pinecone pinecone;
+
+        /// The embedding model.
+        private String embeddingModel;
+
+        /// The index name.
+        private String indexName;
+
+        /// The namespace.
+        private String namespace;
+
+        /// The mongo client.
+        private MongoClient mongoClient;
+
+        /// The collection name.
+        private String collectionName;
+
+        /// The database name.
+        private String dbName;
+
+        /// The default constructor.
+        public Builder() {
+            super();
+        }
+
+        /// Set the pinecone client.
+        ///
+        /// @param  pinecone    net.jmp.pinecone.quickstart.Pinecone
+        /// @return             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder pinecone(final Pinecone pinecone) {
+            this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the embedding model.
+        ///
+        /// @param  embeddingModel  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder embeddingModel(final String embeddingModel) {
+            this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace.
+        ///
+        /// @param  namespace   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Set the mongo client.
+        ///
+        /// @param  mongoClient io.mongodb.client.MongoClient
+        /// @return             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder mongoClient(final MongoClient mongoClient) {
+            this.mongoClient = mongoClient;
+
+            return this;
+        }
+
+        /// Set the collection name.
+        ///
+        /// @param  collectionName java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder collectionName(final String collectionName) {
+            this.collectionName = collectionName;
+
+            return this;
+        }
+
+        /// Set the database name.
+        ///
+        /// @param  dbName java.lang.String
+        /// @return        net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder dbName(final String dbName) {
+            this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Build the load index.
+        ///
+        /// @return net.jmp.pinecone.quickstart.load.LoadIndex
+        public LoadIndex build() {
+            return new LoadIndex(this);
+        }
     }
 }
