@@ -28,14 +28,7 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
-import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
-
 import com.mongodb.client.*;
-
-import static com.mongodb.client.model.Filters.eq;
-
-import com.mongodb.client.model.Projections;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
@@ -45,32 +38,15 @@ import com.openai.models.ChatModel;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 
-import io.pinecone.clients.Index;
-import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
-import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
 import java.util.*;
 
 import net.jmp.pinecone.quickstart.Operation;
 
-import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
-
 import static net.jmp.util.logging.LoggerUtils.*;
-
-import org.bson.Document;
-
-import org.bson.conversions.Bson;
-
-import org.bson.types.ObjectId;
-
-import org.openapitools.inference.client.ApiException;
-import org.openapitools.inference.client.model.Embedding;
-import org.openapitools.inference.client.model.EmbeddingsList;
-import org.openapitools.inference.client.model.RankedDocument;
-import org.openapitools.inference.client.model.RerankResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,9 +92,30 @@ public final class QueryIndex extends Operation {
         }
 
         if (this.indexExists() && this.isIndexLoaded()) {
-            final List<Float> queryVector = this.queryToVector(this.queryText);
-            final List<ScoredVectorWithUnsignedIndices> matches = this.query(queryVector);
-            final List<String> reranked = this.rerank(matches);
+            final QueryVector queryVector = new QueryVector(this.pinecone, this.embeddingModel);
+            final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
+
+            final Query query = Query.builder()
+                .pinecone(this.pinecone)
+                .indexName(this.indexName)
+                .namespace(this.namespace)
+                .mongoClient(this.mongoClient)
+                .collectionName(this.collectionName)
+                .dbName(this.dbName)
+                .build();
+
+            final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList);
+
+            final Reranker reranker = Reranker.builder()
+                .pinecone(this.pinecone)
+                .rerankingModel(this.rerankingModel)
+                .queryText(this.queryText)
+                .mongoClient(this.mongoClient)
+                .collectionName(this.collectionName)
+                .dbName(this.dbName)
+                .build();
+
+            final List<String> reranked = reranker.rerank(matches);
             final String summary = this.rag(reranked);
 
             this.logger.info(summary);
@@ -129,158 +126,6 @@ public final class QueryIndex extends Operation {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
-    }
-
-    /// Query the index using the query vector.
-    ///
-    /// @param  queryVector java.util.List<java.lang.Float>
-    /// @return             java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    private List<ScoredVectorWithUnsignedIndices> query(final List<Float> queryVector) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(queryVector.toString()));
-        }
-
-        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
-
-        this.logger.info("Querying index: {}", indexName);
-
-        try (final Index index = this.pinecone.getIndexConnection(indexName)) {
-            final QueryResponseWithUnsignedIndices queryResponse =
-                    index.query(10,
-                            queryVector,
-                            null,
-                            null,
-                            null,
-                            this.namespace,
-                            null,
-                            true,
-                            true);
-
-            matches = queryResponse.getMatchesList();
-
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID: {}", match.getId());
-                    this.logger.debug("Score    : {}", match.getScore());
-                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
-                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
-                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
-
-                    final Optional<UnstructuredTextDocument> content = this.getDocument(fields.get("mongoid").getStringValue());
-
-                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
-                }
-            }
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(matches));
-        }
-
-        return matches;
-    }
-
-    /// Rerank the results.
-    ///
-    /// @param  matches     java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    /// @return             java.util.List<java.lang.String>
-    private List<String> rerank(final List<ScoredVectorWithUnsignedIndices> matches) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(matches));
-        }
-
-        this.logger.info("Reranking model: {}", this.rerankingModel);
-        this.logger.info("Reranking results for {} matches", matches.size());
-
-        /* Create a list of documents to rerank. */
-
-        final List<Map<String, Object>> documents = new ArrayList<>(matches.size());
-
-        for (final ScoredVectorWithUnsignedIndices match : matches) {
-            final Struct metadata = match.getMetadata();
-            final Map<String, Value> fields = metadata.getFieldsMap();
-            final Map<String, Object> document = new HashMap<>();
-
-            document.put("mongoid", fields.get("mongoid").getStringValue());
-            document.put("documentid", fields.get("documentid").getStringValue());
-            document.put("category", fields.get("category").getStringValue());
-
-            final Optional<UnstructuredTextDocument> content = this.getDocument(fields.get("mongoid").getStringValue());
-            final UnstructuredTextDocument doc = content.orElseThrow(() -> new RuntimeException("Could not find MongoDB document: " + fields.get("mongoid").getStringValue()));
-
-            document.put("content", doc.getContent());
-
-            documents.add(document);
-        }
-
-        /* Rerank the documents based on the content field */
-
-        final List<String> rankFields = List.of("content");
-
-        /* Create the parameters for the reranking model */
-
-        final Map<String, Object> parameters = new HashMap<>();
-
-        parameters.put("truncate", "END");
-
-        /* Perform the reranking */
-
-        final Inference inference = this.pinecone.getInferenceClient();
-
-        RerankResult result = null;
-
-        try {
-            result = inference.rerank(
-                    this.rerankingModel,
-                    this.queryText,
-                    documents,
-                    rankFields, 10,
-                    true,
-                    parameters
-            );
-        } catch (ApiException e) {
-            this.logger.error(e.getMessage());
-        }
-
-        List<String> rankedContent = new ArrayList<>(matches.size());
-
-        if (result != null) {
-            final List<RankedDocument> rankedDocuments = result.getData();
-
-            for (final RankedDocument rankedDocument : rankedDocuments) {
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Document: {}", rankedDocument.toJson());
-                }
-
-                final Map<String, Object> document = rankedDocument.getDocument();
-
-                assert document != null;
-
-                final String mongoId = (String) document.get("mongoid");
-                final String documentId = (String) document.get("documentid");
-                final String category = (String) document.get("category");
-                final String content = (String) document.get("content");
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Mongo ID: {}", mongoId);
-                    this.logger.debug("Doc ID  : {}", documentId);
-                    this.logger.debug("Category: {}", category);
-                }
-
-                this.logger.info(content);
-
-                rankedContent.add(content);
-            }
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(rankedContent));
-        }
-
-        return rankedContent;
     }
 
     /// Generate a response.
@@ -340,89 +185,6 @@ public final class QueryIndex extends Operation {
         }
 
         return response;
-    }
-
-    /// Convert the query text to a vector.
-    ///
-    /// @param  query       java.lang.String
-    /// @return             java.util.List<java.lang.Float>
-    private List<Float> queryToVector(final String query) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(query));
-        }
-
-        final Map<String, Object> parameters = new HashMap<>();
-        final Inference client = this.pinecone.getInferenceClient();
-
-        List<Float> values = new ArrayList<>();
-
-        parameters.put("input_type", "query");
-        parameters.put("truncate", "END");
-
-        EmbeddingsList embeddings = null;
-
-        try {
-            embeddings = client.embed(this.embeddingModel, parameters, List.of(query));
-        } catch (ApiException e) {
-            this.logger.error(e.getMessage());
-        }
-
-        if (embeddings != null) {
-            final List<Embedding> embeddingsList = embeddings.getData();
-
-            assert embeddingsList.size() == 1;
-
-            values = embeddingsList.getFirst().getDenseEmbedding().getValues();
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Query: {}: {}", query, embeddings.toJson());
-            }
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(values));
-        }
-
-        return values;
-    }
-
-    /// Get a document from MongoDB.
-    ///
-    /// @param  mongoId java.lang.String
-    /// @return         java.util.Optional<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
-    private Optional<UnstructuredTextDocument> getDocument(final String mongoId) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(mongoId));
-        }
-
-        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
-        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
-
-        final Bson projectionFields = Projections.fields(
-                Projections.include("id", "content", "category")
-        );
-
-        final Document mongoDocument = collection
-                .find(eq(new ObjectId(mongoId)))
-                .projection(projectionFields)
-                .first();
-
-        UnstructuredTextDocument document = null;
-
-        if (mongoDocument != null) {
-            document = new UnstructuredTextDocument(
-                    mongoId,
-                    mongoDocument.get("id").toString(),
-                    mongoDocument.get("content").toString(),
-                    mongoDocument.get("category").toString()
-            );
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(document));
-        }
-
-        return Optional.ofNullable(document);
     }
 
     /// The builder class.
