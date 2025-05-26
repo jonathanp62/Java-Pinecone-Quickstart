@@ -46,6 +46,9 @@ import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
+import net.jmp.pinecone.quickstart.list.ListIndex;
+import net.jmp.pinecone.quickstart.list.ListIndexes;
+import net.jmp.pinecone.quickstart.list.ListNamespaces;
 import net.jmp.pinecone.quickstart.load.LoadIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 
@@ -260,7 +263,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new ListIndex(pinecone, this.indexName, this.namespace).operate();
+        final ListIndex listIndex = ListIndex.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        listIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -275,7 +284,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new ListIndexes(pinecone, null, null).operate();
+        final ListIndexes listIndexes = ListIndexes.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        listIndexes.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -290,7 +305,13 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone));
         }
 
-        new ListNamespaces(pinecone, this.indexName, null).operate();
+        final ListNamespaces listNamespaces = ListNamespaces.builder()
+            .pinecone(pinecone)
+            .indexName(this.indexName)
+            .namespace(this.namespace)
+            .build();
+
+        listNamespaces.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

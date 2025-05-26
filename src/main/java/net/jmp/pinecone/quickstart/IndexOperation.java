@@ -82,7 +82,7 @@ public abstract class IndexOperation {
     }
 
     /// The operate method.
-    protected abstract void operate();
+    public abstract void operate();
 
     /// Check if the index exists.
     ///

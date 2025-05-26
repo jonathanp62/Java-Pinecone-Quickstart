@@ -133,7 +133,7 @@ final class QueryIndex extends IndexOperation {
 
     /// The operate method.
     @Override
-    protected void operate() {
+    public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
