@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.text;
 
 /*
  * (#)UnstructuredText.java 0.2.0   05/21/2025
@@ -36,12 +36,12 @@ import java.util.Map;
 ///
 /// @version    0.2.0
 /// @since      0.1.0
-final class UnstructuredText {
+public final class UnstructuredText {
     /// The text map. Use a linked hash map to preserve insertion order.
     private final Map<String, Text> textMap = LinkedHashMap.newLinkedHashMap(50);
 
     /// The default constructor.
-    UnstructuredText() {
+    public UnstructuredText() {
         super();
 
         this.loadTextMap();
@@ -103,22 +103,22 @@ final class UnstructuredText {
 
     /// Get the text map.
     ///
-    /// @return     java.util.Map<java.lang.String, net.jmp.pinecone.quickstart.UnstructuredText.Text>
-    Map<String, Text> getTextMap() {
+    /// @return     java.util.Map<java.lang.String, net.jmp.pinecone.quickstart.text.UnstructuredText.Text>
+    public Map<String, Text> getTextMap() {
         return this.textMap;
     }
 
     /// Get the text by key.
     ///
     /// @param  key     java.lang.String
-    /// @return         net.jmp.pinecone.quickstart.UnstructuredText.Text
+    /// @return         net.jmp.pinecone.quickstart.text.UnstructuredText.Text
     /// @since          0.2.0
-    Text lookup(final String key) {
+    public Text lookup(final String key) {
         return this.textMap.get(key);
     }
 
     /// The text class.
-    static class Text {
+    public static class Text {
         /// The text.
         private final String content;
 

@@ -36,6 +36,8 @@ import io.pinecone.proto.ListResponse;
 import java.util.List;
 import java.util.Map;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredText;
+
 import static net.jmp.util.logging.LoggerUtils.entry;
 import static net.jmp.util.logging.LoggerUtils.exitWith;
 

@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.text;
 
 /*
  * (#)UnstructuredTextDocument.java 0.2.0   05/24/2025
@@ -32,7 +32,7 @@ package net.jmp.pinecone.quickstart;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-final class UnstructuredTextDocument {
+public final class UnstructuredTextDocument {
     /// The MongoDB identifier.
     final String mongoId;
 
@@ -51,7 +51,7 @@ final class UnstructuredTextDocument {
     /// @param  documentId  The document identifier.
     /// @param  content     The document content.
     /// @param  category    The document category.
-    UnstructuredTextDocument(final String mongoId,
+    public UnstructuredTextDocument(final String mongoId,
                              final String documentId,
                              final String content,
                              final String category) {

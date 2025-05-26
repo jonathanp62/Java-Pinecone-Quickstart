@@ -53,6 +53,8 @@ import java.util.*;
 
 import java.util.stream.Collectors;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.bson.Document;
@@ -151,7 +153,7 @@ final  class LoadIndex extends IndexOperation {
 
     /// Create content from the database.
     ///
-    /// @return  java.util.List<net.jmp.pinecone.quickstart.UnstructuredTextDocument>
+    /// @return  java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
     private List<UnstructuredTextDocument> createContent() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
@@ -204,7 +206,7 @@ final  class LoadIndex extends IndexOperation {
 
     /// Create embeddings.
     ///
-    /// @param  documents   java.util.List<net.jmp.pinecone.quickstart.UnstructuredTextDocument>
+    /// @param  documents   java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
     /// @return             java.util.List<io.pinecone.clients.model.Embedding>
     private List<Embedding> createEmbeddings(final List<UnstructuredTextDocument> documents) {
         if (this.logger.isTraceEnabled()) {
@@ -257,7 +259,7 @@ final  class LoadIndex extends IndexOperation {
 
     /// Create metadata.
     ///
-    /// @param  documents   java.util.List<net.jmp.pinecone.quickstart.UnstructuredTextDocument>
+    /// @param  documents   java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
     /// @return             java.util.List<com.google.protobuf.Struct>
     private List<Struct> createMetadata(final List<UnstructuredTextDocument> documents) {
         if (this.logger.isTraceEnabled()) {

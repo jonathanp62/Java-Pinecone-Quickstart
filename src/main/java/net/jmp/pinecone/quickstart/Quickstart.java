@@ -46,6 +46,7 @@ import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
+import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -434,7 +435,13 @@ final class Quickstart {
             this.logger.trace(entryWith(mongoClient));
         }
 
-        new StoreUnstructuredText(mongoClient).store();
+        final StoreUnstructuredText storeUnstructuredText = StoreUnstructuredText.builder()
+            .mongoClient(mongoClient)
+            .collectionName(System.getProperty("app.mongoDbCollection"))
+            .dbName(System.getProperty("app.mongoDbName"))
+            .build();
+
+        storeUnstructuredText.store();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

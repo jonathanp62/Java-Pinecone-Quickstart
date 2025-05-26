@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.store;
 
 /*
  * (#)StoreUnstructuredText.java    0.2.0   05/24/2025
@@ -39,6 +39,8 @@ import com.mongodb.client.result.InsertManyResult;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredText;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.bson.Document;
@@ -50,7 +52,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-final class StoreUnstructuredText {
+public final class StoreUnstructuredText {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -65,17 +67,24 @@ final class StoreUnstructuredText {
 
     /// The constructor.
     ///
-    /// @param  mongoClient io.mongodb.client.MongoClient
-    StoreUnstructuredText(final MongoClient mongoClient) {
+    /// @param  builder net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
+    private StoreUnstructuredText(final Builder builder) {
         super();
 
-        this.mongoClient = mongoClient;
-        this.collectionName = System.getProperty("app.mongoDbCollection");
-        this.dbName = System.getProperty("app.mongoDbName");
+        this.mongoClient = builder.mongoClient;
+        this.collectionName = builder.collectionName;
+        this.dbName = builder.dbName;
+    }
+
+    /// Return the builder.
+    ///
+    /// @return  net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
+    public static Builder builder() {
+        return new Builder();
     }
 
     /// The store method.
-    void store() {
+    public void store() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
@@ -106,6 +115,59 @@ final class StoreUnstructuredText {
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
+        }
+    }
+
+    /// The builder class.
+    public static class Builder {
+        /// The mongo client.
+        private MongoClient mongoClient;
+
+        /// The collection name.
+        private String collectionName;
+
+        /// The database name.
+        private String dbName;
+
+        /// The default constructor.
+        public Builder() {
+            super();
+        }
+        /// Set the mongo client.
+        ///
+        /// @param  mongoClient io.mongodb.client.MongoClient
+        /// @return             net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
+        public Builder mongoClient(final MongoClient mongoClient) {
+            this.mongoClient = mongoClient;
+
+            return this;
+        }
+
+        /// Set the collection name.
+        ///
+        /// @param  collectionName java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
+        public Builder collectionName(final String collectionName) {
+            this.collectionName = collectionName;
+
+            return this;
+        }
+
+        /// Set the database name.
+        ///
+        /// @param  dbName java.lang.String
+        /// @return        net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
+        public Builder dbName(final String dbName) {
+            this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Build the object.
+        ///
+        /// @return net.jmp.pinecone.quickstart.StoreUnstructuredText
+        public StoreUnstructuredText build() {
+            return new StoreUnstructuredText(this);
         }
     }
 }

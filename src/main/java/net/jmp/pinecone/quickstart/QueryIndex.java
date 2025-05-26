@@ -54,6 +54,8 @@ import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
 import java.util.*;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.bson.Document;
@@ -410,7 +412,7 @@ final class QueryIndex extends IndexOperation {
     /// Get a document from MongoDB.
     ///
     /// @param  mongoId java.lang.String
-    /// @return         java.util.Optional<net.jmp.pinecone.quickstart.UnstructuredTextDocument>
+    /// @return         java.util.Optional<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
     private Optional<UnstructuredTextDocument> getDocument(final String mongoId) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(mongoId));
