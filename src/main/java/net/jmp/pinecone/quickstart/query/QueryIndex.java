@@ -1,4 +1,4 @@
-package net.jmp.pinecone.quickstart;
+package net.jmp.pinecone.quickstart.query;
 
 /*
  * (#)QueryIndex.java   0.2.0   05/21/2025
@@ -54,6 +54,8 @@ import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
 import java.util.*;
 
+import net.jmp.pinecone.quickstart.IndexOperation;
+
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -77,7 +79,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.2.0
 /// @since      0.2.0
-final class QueryIndex extends IndexOperation {
+public final class QueryIndex extends IndexOperation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -104,31 +106,24 @@ final class QueryIndex extends IndexOperation {
 
     /// The constructor.
     ///
-    /// @param  pinecone        io.pinecone.clients.Pinecone
-    /// @param  embeddingModel  java.lang.String
-    /// @param  indexName       java.lang.String
-    /// @param  namespace       java.lang.String
-    /// @param  rerankingModel  java.lang.String
-    /// @param  queryText       java.lang.String
-    /// @param  openAiApiKey    java.lang.String
-    /// @param  mongoClient     io.mongodb.client.MongoClient
-    QueryIndex(final Pinecone pinecone,
-               final String embeddingModel,
-               final String indexName,
-               final String namespace,
-               final String rerankingModel,
-               final String queryText,
-               final String openAiApiKey,
-               final MongoClient mongoClient) {
-        super(pinecone, indexName, namespace);
+    /// @param  builder         net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+    private QueryIndex(final Builder builder) {
+        super(builder.pinecone, builder.indexName, builder.namespace);
 
-        this.embeddingModel = embeddingModel;
-        this.rerankingModel = rerankingModel;
-        this.queryText = queryText;
-        this.openAiApiKey = openAiApiKey;
-        this.mongoClient = mongoClient;
-        this.collectionName = System.getProperty("app.mongoDbCollection");
-        this.dbName = System.getProperty("app.mongoDbName");
+        this.embeddingModel = builder.embeddingModel;
+        this.rerankingModel = builder.rerankingModel;
+        this.queryText = builder.queryText;
+        this.openAiApiKey = builder.openAiApiKey;
+        this.mongoClient = builder.mongoClient;
+        this.collectionName = builder.collectionName;
+        this.dbName = builder.dbName;
+    }
+
+    /// Return the builder.
+    ///
+    /// @return net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+    public static Builder builder() {
+        return new Builder();
     }
 
     /// The operate method.
@@ -446,5 +441,150 @@ final class QueryIndex extends IndexOperation {
         }
 
         return Optional.ofNullable(document);
+    }
+
+    /// The builder class.
+    public static class Builder {
+        /// The Pinecone cliebt.
+        private Pinecone pinecone;
+
+        /// The embedding model.
+        private String embeddingModel;
+
+        /// The index name.
+        private String indexName;
+
+        /// The namespace.
+        private String namespace;
+
+        /// The re-ranking model.
+        private String rerankingModel;
+
+        /// The query text.
+        private String queryText;
+
+        /// The OpenAI API key.
+        private String openAiApiKey;
+
+        /// The MongoDB client.
+        private MongoClient mongoClient;
+
+        /// The MongoDB collection name.
+        private String collectionName;
+
+        /// The MongoDB database name.
+        private String dbName;
+
+        /// The default constructor.
+        public Builder() {
+            super();
+        }
+
+        /// Set the Pinecone client.
+        ///
+        /// @param  pinecone net.jmp.pinecone.Pinecone
+        /// @return          net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder pinecone(final Pinecone pinecone) {
+            this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the embedding model.
+        ///
+        /// @param  embeddingModel java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder embeddingModel(final String embeddingModel) {
+            this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace.
+        ///
+        /// @param  namespace java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Set the re-ranking model.
+        ///
+        /// @param  rerankingModel java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder rerankingModel(final String rerankingModel) {
+            this.rerankingModel = rerankingModel;
+
+            return this;
+        }
+
+        /// Set the query text.
+        ///
+        /// @param  queryText java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder queryText(final String queryText) {
+            this.queryText = queryText;
+
+            return this;
+        }
+
+        /// Set the OpenAI API key.
+        ///
+        /// @param  openAiApiKey java.lang.String
+        /// @return              net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder openAiApiKey(final String openAiApiKey) {
+            this.openAiApiKey = openAiApiKey;
+
+            return this;
+        }
+
+        /// Set the MongoDB client.
+        ///
+        /// @param  mongoClient com.mongodb.client.MongoClient
+        /// @return             net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder mongoClient(final MongoClient mongoClient) {
+            this.mongoClient = mongoClient;
+
+            return this;
+        }
+
+        /// Set the MongoDB collection name.
+        ///
+        /// @param  collectionName java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder collectionName(final String collectionName) {
+            this.collectionName = collectionName;
+
+            return this;
+        }
+
+        /// Set the MongoDB database name.
+        ///
+        /// @param  dbName java.lang.String
+        /// @return        net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        public Builder dbName(final String dbName) {
+            this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Build the query index.
+        ///
+        /// @return  net.jmp.pinecone.quickstart.query.QueryIndex
+        public QueryIndex build() {
+            return new QueryIndex(this);
+        }
     }
 }
