@@ -55,16 +55,11 @@ public class ListNamespaces extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.list.ListNamespaces.Builder
     private ListNamespaces(final Builder builder) {
-        super(builder.pinecone,
-                null,
-                builder.indexName,
-                builder.namespace,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        super(Operation.operationBuilder()
+                .pinecone(builder.pinecone)
+                .indexName(builder.indexName)
+                .namespace(builder.namespace)
+        );
     }
 
     /// Return the builder.

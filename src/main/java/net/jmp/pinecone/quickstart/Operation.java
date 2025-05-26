@@ -93,38 +93,27 @@ public abstract class Operation {
 
     /// The constructor.
     ///
-    /// @param pinecone         io.pinecone.clients.Pinecone
-    /// @param embeddingModel   java.lang.String
-    /// @param indexName        java.lang.String
-    /// @param namespace        java.lang.String
-    /// @param rerankingModel   java.lang.String
-    /// @param queryText        java.lang.String
-    /// @param openAiApiKey     java.lang.String
-    /// @param mongoClient      com.mongodb.client.MongoClient
-    /// @param collectionName   java.lang.String
-    /// @param dbName           java.lang.String
-    protected Operation(final Pinecone pinecone,
-                         final String embeddingModel,
-                         final String indexName,
-                         final String namespace,
-                         final String rerankingModel,
-                         final String queryText,
-                         final String openAiApiKey,
-                         final MongoClient mongoClient,
-                         final String collectionName,
-                         final String dbName) {
+    /// @param operationBuilder net.jmp.pinecone.quickstart.Operation.OperationBuilder
+    protected Operation(final OperationBuilder operationBuilder) {
         super();
 
-        this.pinecone = pinecone;
-        this.embeddingModel = embeddingModel;
-        this.indexName = indexName;
-        this.namespace = namespace;
-        this.rerankingModel = rerankingModel;
-        this.queryText = queryText;
-        this.openAiApiKey = openAiApiKey;
-        this.mongoClient = mongoClient;
-        this.collectionName = collectionName;
-        this.dbName = dbName;
+        this.pinecone = operationBuilder.pinecone;
+        this.embeddingModel = operationBuilder.embeddingModel;
+        this.indexName = operationBuilder.indexName;
+        this.namespace = operationBuilder.namespace;
+        this.rerankingModel = operationBuilder.rerankingModel;
+        this.queryText = operationBuilder.queryText;
+        this.openAiApiKey = operationBuilder.openAiApiKey;
+        this.mongoClient = operationBuilder.mongoClient;
+        this.collectionName = operationBuilder.collectionName;
+        this.dbName = operationBuilder.dbName;
+    }
+
+    /// Return the operation builder.
+    ///
+    /// @return net.jmp.pinecone.quickstart.Operation.OperationBuilder
+    protected static OperationBuilder operationBuilder() {
+        return new OperationBuilder();
     }
 
     /// The operate method.
@@ -187,5 +176,143 @@ public abstract class Operation {
         }
 
         return result;
+    }
+
+    /// The operation builder class.
+    protected static class OperationBuilder {
+        /// The Pinecone client.
+        protected Pinecone pinecone;
+
+        /// The embedding model.
+        protected String embeddingModel;
+
+        /// The index name.
+        protected String indexName;
+
+        /// The namespace.
+        protected String namespace;
+
+        /// The reranking model.
+        protected String rerankingModel;
+
+        /// The query text.
+        protected String queryText;
+
+        /// The OpenAI API key.
+        protected String openAiApiKey;
+
+        /// The MongoDB client.
+        protected MongoClient mongoClient;
+
+        /// The MongoDB collection name.
+        protected String collectionName;
+
+        /// The MongoDB database name.
+        protected String dbName;
+
+        /// The default constructor.
+        protected OperationBuilder() {
+            super();
+        }
+
+        /// Set the Pinecone client.
+        ///
+        /// @param  pinecone net.jmp.pinecone.Pinecone
+        /// @return          net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder pinecone(final Pinecone pinecone) {
+            this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the embedding model.
+        ///
+        /// @param  embeddingModel java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder embeddingModel(final String embeddingModel) {
+            this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the index name.
+        ///
+        /// @param  indexName java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder indexName(final String indexName) {
+            this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the namespace.
+        ///
+        /// @param  namespace java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder namespace(final String namespace) {
+            this.namespace = namespace;
+
+            return this;
+        }
+
+        /// Set the reranking model.
+        ///
+        /// @param  rerankingModel java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder rerankingModel(final String rerankingModel) {
+            this.rerankingModel = rerankingModel;
+
+            return this;
+        }
+
+        /// Set the query text.
+        ///
+        /// @param  queryText java.lang.String
+        /// @return           net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder queryText(final String queryText) {
+            this.queryText = queryText;
+
+            return this;
+        }
+
+        /// Set the OpenAI API key.
+        ///
+        /// @param  openAiApiKey java.lang.String
+        /// @return              net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder openAiApiKey(final String openAiApiKey) {
+            this.openAiApiKey = openAiApiKey;
+
+            return this;
+        }
+
+        /// Set the MongoDB client.
+        ///
+        /// @param  mongoClient com.mongodb.client.MongoClient
+        /// @return             net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder mongoClient(final MongoClient mongoClient) {
+            this.mongoClient = mongoClient;
+
+            return this;
+        }
+
+        /// Set the MongoDB collection name.
+        ///
+        /// @param  collectionName java.lang.String
+        /// @return                net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder collectionName(final String collectionName) {
+            this.collectionName = collectionName;
+
+            return this;
+        }
+
+        /// Set the MongoDB database name.
+        ///
+        /// @param  dbName java.lang.String
+        /// @return        net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder dbName(final String dbName) {
+            this.dbName = dbName;
+
+            return this;
+        }
     }
 }

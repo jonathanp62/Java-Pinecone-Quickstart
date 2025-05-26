@@ -62,16 +62,11 @@ public final class StoreUnstructuredText extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.store.StoreUnstructuredText.Builder
     private StoreUnstructuredText(final Builder builder) {
-        super(null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                builder.mongoClient,
-                builder.collectionName,
-                builder.dbName);
+        super(Operation.operationBuilder()
+                .dbName(builder.dbName)
+                .collectionName(builder.collectionName)
+                .mongoClient(builder.mongoClient)
+        );
     }
 
     /// Return the builder.

@@ -55,16 +55,11 @@ public class DescribeNamespace extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
     private DescribeNamespace(final Builder builder) {
-        super(builder.pinecone,
-                null,
-                builder.indexName,
-                builder.namespace,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        super(Operation.operationBuilder()
+                .pinecone(builder.pinecone)
+                .indexName(builder.indexName)
+                .namespace(builder.namespace)
+        );
     }
 
     /// Return an instance of the builder class.

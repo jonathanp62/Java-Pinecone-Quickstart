@@ -87,16 +87,18 @@ public final class QueryIndex extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.query.QueryIndex.Builder
     private QueryIndex(final Builder builder) {
-        super(builder.pinecone,
-                builder.embeddingModel,
-                builder.indexName,
-                builder.namespace,
-                builder.rerankingModel,
-                builder.queryText,
-                builder.openAiApiKey,
-                builder.mongoClient,
-                builder.collectionName,
-                builder.dbName);
+        super(Operation.operationBuilder()
+                .pinecone(builder.pinecone)
+                .embeddingModel(builder.embeddingModel)
+                .indexName(builder.indexName)
+                .namespace(builder.namespace)
+                .rerankingModel(builder.rerankingModel)
+                .queryText(builder.queryText)
+                .openAiApiKey(builder.openAiApiKey)
+                .mongoClient(builder.mongoClient)
+                .collectionName(builder.collectionName)
+                .dbName(builder.dbName)
+        );
     }
 
     /// Return the builder.

@@ -82,16 +82,15 @@ public final class LoadIndex extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.load.LoadIndex.Builder
     private LoadIndex(final Builder builder) {
-        super(builder.pinecone,
-                builder.embeddingModel,
-                builder.indexName,
-                builder.namespace,
-                null,
-                null,
-                null,
-                builder.mongoClient,
-                builder.collectionName,
-                builder.dbName);
+        super(Operation.operationBuilder()
+                .pinecone(builder.pinecone)
+                .embeddingModel(builder.embeddingModel)
+                .indexName(builder.indexName)
+                .namespace(builder.namespace)
+                .mongoClient(builder.mongoClient)
+                .collectionName(builder.collectionName)
+                .dbName(builder.dbName)
+        );
     }
 
     /// Return the builder.

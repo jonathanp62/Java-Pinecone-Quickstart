@@ -51,16 +51,11 @@ public final class ListIndexes extends Operation {
     ///
     /// @param  builder net.jmp.pinecone.quickstart.list.ListIndexes.Builder
     private ListIndexes(final Builder builder) {
-        super(builder.pinecone,
-                null,
-                builder.indexName,
-                builder.namespace,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        super(Operation.operationBuilder()
+                .pinecone(builder.pinecone)
+                .indexName(builder.indexName)
+                .namespace(builder.namespace)
+        );
     }
 
     /// Return the builder.
