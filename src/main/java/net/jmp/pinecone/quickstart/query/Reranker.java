@@ -32,12 +32,6 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import static com.mongodb.client.model.Filters.eq;
-
-import com.mongodb.client.model.Projections;
 
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
@@ -49,12 +43,6 @@ import java.util.*;
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
 import static net.jmp.util.logging.LoggerUtils.*;
-
-import org.bson.Document;
-
-import org.bson.conversions.Bson;
-
-import org.bson.types.ObjectId;
 
 import org.openapitools.inference.client.ApiException;
 
@@ -162,7 +150,8 @@ final class Reranker {
             document.put("documentid", fields.get("documentid").getStringValue());
             document.put("category", fields.get("category").getStringValue());
 
-            final Optional<UnstructuredTextDocument> content = this.getDocument(fields.get("mongoid").getStringValue());
+            final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
+            final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
             final UnstructuredTextDocument doc = content.orElseThrow(() -> new RuntimeException("Could not find MongoDB document: " + fields.get("mongoid").getStringValue()));
 
             document.put("content", doc.getContent());
@@ -266,45 +255,6 @@ final class Reranker {
         }
 
         return rankedContent;
-    }
-
-    /// Get a document from MongoDB.
-    ///
-    /// @param  mongoId java.lang.String
-    /// @return         java.util.Optional<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
-    private Optional<UnstructuredTextDocument> getDocument(final String mongoId) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(mongoId));
-        }
-
-        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
-        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
-
-        final Bson projectionFields = Projections.fields(
-                Projections.include("id", "content", "category")
-        );
-
-        final Document mongoDocument = collection
-                .find(eq(new ObjectId(mongoId)))
-                .projection(projectionFields)
-                .first();
-
-        UnstructuredTextDocument document = null;
-
-        if (mongoDocument != null) {
-            document = new UnstructuredTextDocument(
-                    mongoId,
-                    mongoDocument.get("id").toString(),
-                    mongoDocument.get("content").toString(),
-                    mongoDocument.get("category").toString()
-            );
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(document));
-        }
-
-        return Optional.ofNullable(document);
     }
 
     /// The builder class.
