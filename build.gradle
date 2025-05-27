@@ -165,6 +165,26 @@ tasks.register('describe', JavaExec) {
 	mainClass = javaMainClass
 }
 
+tasks.register('describeModels', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
+			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
+			 'app.rerankingModel': rerankingModel,
+			 'app.queryText': queryText,
+			 'app.operation': 'describeModels']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
 tasks.register('describeNamespace', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
@@ -317,7 +337,7 @@ tasks.register('query-persons', JavaExec) {
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': 'Tell me about famous persons',
+			 'app.queryText': 'Tell me about famous persons in history and science',
 			 'app.operation': 'query']
 	)
 	classpath = sourceSets.main.runtimeClasspath

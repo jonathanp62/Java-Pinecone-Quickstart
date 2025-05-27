@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.3.0   05/27/2025
  * (#)Quickstart.java   0.2.0   05/21/2025
  * (#)Quickstart.java   0.1.0   05/17/2025
  *
@@ -44,6 +45,7 @@ import java.util.*;
 import net.jmp.pinecone.quickstart.create.CreateIndex;
 import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
+import net.jmp.pinecone.quickstart.describe.DescribeModels;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
 import net.jmp.pinecone.quickstart.list.ListIndex;
@@ -60,7 +62,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.2.0
+/// @version    0.3.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -135,6 +137,7 @@ final class Quickstart {
                 case "create" -> this.createIndex(pinecone);
                 case "delete" -> this.deleteIndex(pinecone);
                 case "describe" -> this.describeIndex(pinecone);
+                case "describeModels" -> this.describeModels(pinecone);
                 case "describeNamespace" -> this.describeNamespace(pinecone);
                 case "fetch" -> this.fetchIndex(pinecone);
                 case "list" -> this.listIndex(pinecone);
@@ -367,6 +370,25 @@ final class Quickstart {
             .build();
 
         describeIndex.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Describe the models.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void describeModels(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        final DescribeModels describeModels = DescribeModels.builder()
+                .pinecone(pinecone)
+                .build();
+
+        describeModels.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

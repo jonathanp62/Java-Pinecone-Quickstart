@@ -40,6 +40,8 @@ import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
+import org.bson.Document;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +98,13 @@ public final class QueryIndex extends Operation {
                 .dbName(this.dbName)
                 .build();
 
-            final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList);
+            final Set<String> categories = this.getCategories();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Categories: {}", categories);
+            }
+
+            final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList, categories);
 
             final Reranker reranker = Reranker.builder()
                 .pinecone(this.pinecone)
@@ -119,6 +127,64 @@ public final class QueryIndex extends Operation {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Get any categories found in the query text.
+    ///
+    /// @return java.util.Set<java.lang.String>
+    /// @since  0.3.0
+    private Set<String> getCategories() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final Set<String> categories = new HashSet<>();
+
+        String textToSplit;
+
+        if (this.queryText.endsWith(".")) {
+            textToSplit = this.queryText.substring(0, this.queryText.length() - 1);
+        } else {
+            textToSplit = this.queryText;
+        }
+
+        final String[] splits = textToSplit.split(" ");
+
+        for (final String split : splits) {
+            if (this.isWordACategory(split)) {
+                categories.add(split);
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(categories));
+        }
+
+        return categories;
+    }
+
+    /// Check if the word is a category.
+    ///
+    /// @param  word    java.lang.String
+    /// @return         boolean
+    /// @since          0.3.0
+    private boolean isWordACategory(final String word) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(word));
+        }
+
+        boolean result = false;
+
+        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
+        final MongoCollection<Document> categoriesCollection = database.getCollection("categories");
+
+        result = categoriesCollection.find(new Document("category", word)).first() != null;
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
     }
 
     /// The builder class.

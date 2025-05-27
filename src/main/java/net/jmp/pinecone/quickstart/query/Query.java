@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Query.java    0.3.0   05/27/2025
  * (#)Query.java    0.2.0   05/26/2025
  *
  * @author   Jonathan Parker
@@ -28,6 +29,7 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
+import com.google.protobuf.ListValue;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 
@@ -39,10 +41,7 @@ import io.pinecone.clients.Pinecone;
 import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
 
@@ -53,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query class.
 ///
-/// @version    0.2.0
+/// @version    0.3.0
 /// @since      0.2.0
 final class Query {
     /// The logger.
@@ -101,15 +100,50 @@ final class Query {
     /// Query the index.
     ///
     /// @param  queryVector java.util.List<java.lang.Float>
+    /// @param  categories  java.util.Set<java.lang.String>
     /// @return             java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    List<ScoredVectorWithUnsignedIndices> query(final List<Float> queryVector) {
+    List<ScoredVectorWithUnsignedIndices> query(final List<Float> queryVector,
+                                                final Set<String> categories) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(queryVector.toString()));
+            this.logger.trace(entryWith(queryVector.toString(), categories));
         }
 
         List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
 
         this.logger.info("Querying index: {}", this.indexName);
+
+        Struct filter = null;
+
+        if (!categories.isEmpty()) {
+            // @todo Extract this into a new method
+            // @todo If these is one category, construct this: "category": "history"
+
+            /* Constructing this: "category": { "$in": ["history", "science"] } */
+
+            // Start with ["history", "science"]
+
+            final ListValue.Builder listValueBuilder = ListValue.newBuilder();
+
+            for (final String category : categories) {
+                listValueBuilder.addValues(Value.newBuilder().setStringValue(category).build());
+            }
+
+            final ListValue categoriesList = listValueBuilder.build();
+
+            // Create the $in struct with the "$in" key
+
+            final Struct inStruct = Struct.newBuilder()
+                    .putFields("$in", Value.newBuilder().setListValue(categoriesList).build())
+                    .build();
+
+            // Creating the final category struct with the "category" key
+
+            filter = Struct.newBuilder()
+                    .putFields("category", Value.newBuilder().setStructValue(inStruct).build())
+                    .build();
+
+            this.logger.info("Filter: {}", filter);
+        }
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
@@ -119,7 +153,7 @@ final class Query {
                             null,
                             null,
                             this.namespace,
-                            null,
+                            filter,
                             true,
                             true);
 

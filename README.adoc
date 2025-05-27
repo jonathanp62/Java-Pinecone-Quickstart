@@ -12,7 +12,8 @@ Gradle JavaExec Tasks
 |create            |No arguments
 |delete            |No arguments
 |describe          |No arguments
-|describeNamespaces|No arguments
+|describeNamespace |No arguments
+|describeModels    |No arguments
 |fetch             |No arguments
 |list              |No arguments
 |listIndexes       |No arguments
