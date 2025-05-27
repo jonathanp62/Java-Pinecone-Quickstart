@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Reranker.java 0.3.0   05/27/2025
  * (#)Reranker.java 0.2.0   05/26/2025
  *
  * @author   Jonathan Parker
@@ -54,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 /// The re-ranker class.
 ///
-/// @version    0.2.0
+/// @version    0.3.0
 /// @since      0.2.0
 final class Reranker {
     /// The logger.
@@ -242,9 +243,8 @@ final class Reranker {
                     this.logger.debug("Mongo ID: {}", mongoId);
                     this.logger.debug("Doc ID  : {}", documentId);
                     this.logger.debug("Category: {}", category);
+                    this.logger.debug("Content : {}", content);
                 }
-
-                this.logger.info(content);
 
                 rankedContent.add(content);
             }

@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.store;
 
 /*
+ * (#)StoreUnstructuredText.java    0.3.0   05/26/2025
  * (#)StoreUnstructuredText.java    0.2.0   05/24/2025
  *
  * @author   Jonathan Parker
@@ -30,10 +31,13 @@ package net.jmp.pinecone.quickstart.store;
 
 import com.mongodb.MongoBulkWriteException;
 
+import com.mongodb.MongoException;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertManyResult;
 
 import java.util.ArrayList;
@@ -52,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 /// The store unstructured text class.
 ///
-/// @version    0.2.0
+/// @version    0.3.0
 /// @since      0.2.0
 public final class StoreUnstructuredText extends Operation {
     /// The logger.
@@ -84,7 +88,52 @@ public final class StoreUnstructuredText extends Operation {
         }
 
         final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
-        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
+        final MongoCollection<Document> quickstartCollection = database.getCollection(this.collectionName);
+        final MongoCollection<Document> categoriesCollection = database.getCollection("categories");
+
+        this.deleteDocuments(database, quickstartCollection);
+        this.deleteDocuments(database, categoriesCollection);
+
+        this.loadQuickstart(database, quickstartCollection);
+        this.loadCategories(database, categoriesCollection);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Delete documents.
+    ///
+    /// @param  database io.mongodb.client.MongoDatabase
+    /// @param  collection io.mongodb.client.MongoCollection<org.bson.Document>
+    private void deleteDocuments(final MongoDatabase database, final MongoCollection<Document> collection) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(database, collection));
+        }
+
+        /* An empty document as a filter will delete all documents */
+
+        try {
+            final DeleteResult result = collection.deleteMany(new Document());
+
+            this.logger.info("{} document(s) were deleted from {}", result.getDeletedCount(), collection.getNamespace().getCollectionName());
+        } catch (final MongoException me) {
+            this.logger.error(catching(me));
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load the Quickstart documents.
+    ///
+    /// @param  database io.mongodb.client.MongoDatabase
+    /// @param  collection io.mongodb.client.MongoCollection<org.bson.Document>
+    private void loadQuickstart(final MongoDatabase database, final MongoCollection<Document> collection) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(database, collection));
+        }
 
         final List<Document> documents = new ArrayList<>();
         final UnstructuredText unstructuredText = new UnstructuredText();
@@ -100,11 +149,48 @@ public final class StoreUnstructuredText extends Operation {
 
             result.getInsertedIds().values()
                     .forEach(id -> this.logger.debug("Inserted document: {}", id.asObjectId().getValue()));
+
+            this.logger.info("{} document(s) were inserted into {}", result.getInsertedIds().size(), collection.getNamespace().getCollectionName());
         } catch (final MongoBulkWriteException mbwe) {
             this.logger.error(catching(mbwe));
 
             mbwe.getWriteResult().getInserts()
                     .forEach(doc -> this.logger.info("Inserted document: {}", doc.getId().asObjectId().getValue()));
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load categories.
+    ///
+    /// @param  database io.mongodb.client.MongoDatabase
+    /// @param  collection io.mongodb.client.MongoCollection<org.bson.Document>
+    private void loadCategories(final MongoDatabase database, final MongoCollection<Document> collection) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(database, collection));
+        }
+
+        final List<Document> documents = new ArrayList<>();
+        final UnstructuredText unstructuredText = new UnstructuredText();
+
+        unstructuredText.getCategories().forEach((value) -> {
+            documents.add(new Document("category", value));
+        });
+
+        try {
+            final InsertManyResult result = collection.insertMany(documents);
+
+            result.getInsertedIds().values()
+                    .forEach(id -> this.logger.debug("Inserted category: {}", id.asObjectId().getValue()));
+
+            this.logger.info("{} categories were inserted into {}", result.getInsertedIds().size(), collection.getNamespace().getCollectionName());
+        } catch (final MongoBulkWriteException mbwe) {
+            this.logger.error(catching(mbwe));
+
+            mbwe.getWriteResult().getInserts()
+                    .forEach(doc -> this.logger.info("Inserted category: {}", doc.getId().asObjectId().getValue()));
         }
 
         if (this.logger.isTraceEnabled()) {

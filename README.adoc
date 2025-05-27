@@ -8,10 +8,18 @@ Gradle JavaExec Tasks
 
 [options="header"]
 |=======================
-|Task Name              |Application Invocation
-|bootRun                |No arguments
-|bootRunDev             |No arguments
-|bootRunTest            |No arguments
+|Task Name         |Application Invocation
+|create            |No arguments
+|delete            |No arguments
+|describe          |No arguments
+|describeNamespaces|No arguments
+|fetch             |No arguments
+|list              |No arguments
+|listIndexes       |No arguments
+|listNamespaces    |No arguments
+|load              |No arguments
+|query             |No arguments
+|store             |No arguments
 |=======================
 
 Current version: 0.3.0.
