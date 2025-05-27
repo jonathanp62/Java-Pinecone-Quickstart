@@ -58,7 +58,7 @@ ext {
 	project.version = '0.3.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	rerankingModel = 'bge-reranker-v2-m3'
-	queryText = 'Famous historical structures and monuments'
+	queryText = ''
 	useAssertions = '--enable-assertions'
 }
 
@@ -285,7 +285,7 @@ tasks.register('load', JavaExec) {
 	mainClass = javaMainClass
 }
 
-tasks.register('query', JavaExec) {
+tasks.register('query-monuments', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
@@ -297,7 +297,27 @@ tasks.register('query', JavaExec) {
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
+			 'app.queryText': 'Famous historical structures and monuments',
+			 'app.operation': 'query']
+	)
+	classpath = sourceSets.main.runtimeClasspath
+	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+	mainClass = javaMainClass
+}
+
+tasks.register('query-persons', JavaExec) {
+	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	systemProperties(
+			['app.embeddingModel': embeddingModel,
+			 'app.indexName': indexName,
+			 'app.mongoDbCollection': mongoDbCollection,
+			 'app.mongoDbName': mongoDbName,
+			 'app.mongoDbUri': mongoDbUri,
+			 'app.namespace': namespace,
+			 'app.openaiApiKey': openaiApiKey,
+			 'app.pineconeApiKey': pineconeApiKey,
+			 'app.rerankingModel': rerankingModel,
+			 'app.queryText': 'Tell me about famous persons',
 			 'app.operation': 'query']
 	)
 	classpath = sourceSets.main.runtimeClasspath

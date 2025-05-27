@@ -18,7 +18,8 @@ Gradle JavaExec Tasks
 |listIndexes       |No arguments
 |listNamespaces    |No arguments
 |load              |No arguments
-|query             |No arguments
+|query-monuments   |No arguments
+|query-persons     |No arguments
 |store             |No arguments
 |=======================
 
