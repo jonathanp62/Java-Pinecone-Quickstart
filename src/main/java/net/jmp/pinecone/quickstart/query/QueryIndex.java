@@ -104,14 +104,7 @@ public final class QueryIndex extends Operation {
                 .build();
 
             final List<String> reranked = reranker.rerank(matches);
-
-            String question;
-
-            if (this.queryText.startsWith("rec")) {
-                question = this.getContent(this.queryText).orElse(reranked.getFirst());
-            } else {
-                question = this.queryText;
-            }
+            final String question = this.getQuestion(reranked.getFirst());
 
             final Summarizer summarizer = new Summarizer(this.openAiApiKey, question);
             final String summary = summarizer.summarize(reranked);
@@ -269,6 +262,30 @@ public final class QueryIndex extends Operation {
         }
 
         return Optional.ofNullable(content);
+    }
+
+    /// Get the question.
+    ///
+    /// @param  topRanked   java.lang.String
+    /// @return             java.lang.String
+    private String getQuestion(final String topRanked) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(topRanked));
+        }
+
+        String question;
+
+        if (this.queryText.startsWith("rec")) {
+            question = this.getContent(this.queryText).orElse(topRanked);
+        } else {
+            question = this.queryText;
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(question));
+        }
+
+        return question;
     }
 
     /// The builder class.
