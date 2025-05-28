@@ -112,38 +112,7 @@ final class Query {
 
         this.logger.info("Querying index: {}", this.indexName);
 
-        Struct filter = null;
-
-        if (!categories.isEmpty()) {
-            // @todo Extract this into a new method
-            // @todo If these is one category, construct this: "category": "history"
-
-            /* Constructing this: "category": { "$in": ["history", "science"] } */
-
-            // Start with ["history", "science"]
-
-            final ListValue.Builder listValueBuilder = ListValue.newBuilder();
-
-            for (final String category : categories) {
-                listValueBuilder.addValues(Value.newBuilder().setStringValue(category).build());
-            }
-
-            final ListValue categoriesList = listValueBuilder.build();
-
-            // Create the $in struct with the "$in" key
-
-            final Struct inStruct = Struct.newBuilder()
-                    .putFields("$in", Value.newBuilder().setListValue(categoriesList).build())
-                    .build();
-
-            // Creating the final category struct with the "category" key
-
-            filter = Struct.newBuilder()
-                    .putFields("category", Value.newBuilder().setStructValue(inStruct).build())
-                    .build();
-
-            this.logger.info("Filter: {}", filter);
-        }
+        final Struct filter = this.createFilter(categories);
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
@@ -183,6 +152,58 @@ final class Query {
         }
 
         return matches;
+    }
+
+    /// Create the filter. For multiple categories, the filter will be equivalent to:
+    ///
+    /// "category": { "$in": ["category1", "category2"] }
+    ///
+    /// @param  categories java.util.Set<java.lang.String>
+    /// @return            io.pinecone.unsigned_indices_model.Struct
+    private Struct createFilter(final Set<String> categories) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(categories));
+        }
+
+        Struct filter = null;
+
+        if (!categories.isEmpty()) {
+            if (categories.size() == 1) {
+                filter = Struct.newBuilder()
+                        .putFields("category", Value.newBuilder().setStringValue(categories.iterator().next()).build())
+                        .build();
+            } else {
+                // Start with the list: ["category1", "category2"]
+
+                final ListValue.Builder listValueBuilder = ListValue.newBuilder();
+
+                for (final String category : categories) {
+                    listValueBuilder.addValues(Value.newBuilder().setStringValue(category).build());
+                }
+
+                final ListValue categoriesList = listValueBuilder.build();
+
+                // Create the $in struct with the "$in" key
+
+                final Struct inStruct = Struct.newBuilder()
+                        .putFields("$in", Value.newBuilder().setListValue(categoriesList).build())
+                        .build();
+
+                // Creating the final category struct with the "category" key
+
+                filter = Struct.newBuilder()
+                        .putFields("category", Value.newBuilder().setStructValue(inStruct).build())
+                        .build();
+            }
+
+            this.logger.debug("Filter: {}", filter);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(filter));
+        }
+
+        return filter;
     }
 
     /// The builder class.
