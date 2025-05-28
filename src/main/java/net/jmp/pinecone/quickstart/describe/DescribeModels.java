@@ -28,11 +28,20 @@ package net.jmp.pinecone.quickstart.describe;
  * SOFTWARE.
  */
 
+import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+
+import io.pinecone.proto.DescribeIndexStatsResponse;
+import io.pinecone.proto.NamespaceSummary;
+
+import java.util.List;
+import java.util.Map;
 
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
+
+import org.openapitools.db_control.client.model.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,13 +68,76 @@ public class DescribeModels extends Operation {
         return new Builder();
     }
 
+    /// The operate method.
     @Override
     public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        this.logger.warn("Nothing to work on yet.  Use IndexModel.");
+        final IndexList indexList = this.pinecone.listIndexes();
+        final List<IndexModel> indexModels = indexList.getIndexes();
+
+        if (indexModels != null) {
+            for (final IndexModel indexModel : indexModels) {
+                this.describeIndex(indexModel);
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Describe the index.
+    ///
+    /// @param  indexModel  org.openapitools.db_control.client.model.IndexModel
+    private void describeIndex(final IndexModel indexModel) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        try (final Index index = this.pinecone.getIndexConnection(indexModel.getName())) {
+            final DescribeIndexStatsResponse response = index.describeIndexStats();
+
+            this.logger.info("Index name         : {}", indexModel.getName());
+            this.logger.info("Index fullness     : {}", response.getIndexFullness());
+            this.logger.info("Total vector count : {}", response.getTotalVectorCount());
+            this.logger.info("Is initialized     : {}", response.isInitialized());
+            this.logger.info("Host               : {}", indexModel.getHost());
+            this.logger.info("Deletion protection: {}", indexModel.getDeletionProtection());
+            this.logger.info("Dimensions         : {}", indexModel.getDimension());
+            this.logger.info("Metric             : {}", indexModel.getMetric());
+            this.logger.info("Vector type        : {}", indexModel.getVectorType());
+
+            final Map<String, NamespaceSummary> namespaces = response.getNamespacesMap();
+
+            if (namespaces != null) {
+                for (final String namespace : namespaces.keySet()) {
+                    this.logger.info("Namespace          : {}", namespace);
+                }
+            }
+
+            final Map<String, String> tags = indexModel.getTags();
+
+            if (tags != null) {
+                for (final Map.Entry<String, String> tag : tags.entrySet()) {
+                    this.logger.info("Tag:               : {}:{}", tag.getKey(), tag.getValue());
+                }
+            }
+
+            final IndexModelSpec spec = indexModel.getSpec();
+
+            if (spec.getServerless() != null) {
+                this.logger.info("Serverless cloud   : {}", spec.getServerless().getCloud());
+                this.logger.info("Serverless region  : {}", spec.getServerless().getRegion());
+            }
+
+            final IndexModelStatus status = indexModel.getStatus();
+
+            this.logger.info("Status Ready       : {}", status.getReady());
+            this.logger.info("Status State       : {}", status.getState());
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
