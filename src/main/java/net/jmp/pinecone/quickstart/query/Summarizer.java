@@ -55,18 +55,18 @@ final class Summarizer {
     /// The OpenAI API key.
     private final String openAiApiKey;
 
-    /// The query text.
-    private final String queryText;
+    /// The question.
+    private final String question;
 
     /// The constructor.
     ///
     /// @param  openAiApiKey    java.lang.String
-    /// @param  queryText       java.lang.String
-    Summarizer(final String openAiApiKey, final String queryText) {
+    /// @param  question        java.lang.String
+    Summarizer(final String openAiApiKey, final String question) {
         super();
 
         this.openAiApiKey = openAiApiKey;
-        this.queryText = queryText;
+        this.question = question;
     }
 
     /// Generate a summary.
@@ -95,7 +95,7 @@ final class Summarizer {
                 sb.append("\n");
             }
 
-            sb.append("\nQuestion: ").append(this.queryText).append("\n");
+            sb.append("\nQuestion: ").append(this.question).append("\n");
             final String prompt = sb.toString();
 
             this.logger.info("Prompt: {}", prompt);

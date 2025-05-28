@@ -86,25 +86,13 @@ public final class QueryIndex extends Operation {
         }
 
         if (this.indexExists() && this.isIndexLoaded()) {
-            final QueryVector queryVector = new QueryVector(this.pinecone, this.embeddingModel);
-            final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
+            List<ScoredVectorWithUnsignedIndices> matches = null;
 
-            final Query query = Query.builder()
-                .pinecone(this.pinecone)
-                .indexName(this.indexName)
-                .namespace(this.namespace)
-                .mongoClient(this.mongoClient)
-                .collectionName(this.collectionName)
-                .dbName(this.dbName)
-                .build();
-
-            final Set<String> categories = this.getCategories();
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Categories: {}", categories);
+            if (this.queryText.startsWith("rec")) {
+                matches = this.queryById();
+            } else {
+                matches = this.queryByVector();
             }
-
-            final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList, categories);
 
             final Reranker reranker = Reranker.builder()
                 .pinecone(this.pinecone)
@@ -116,7 +104,16 @@ public final class QueryIndex extends Operation {
                 .build();
 
             final List<String> reranked = reranker.rerank(matches);
-            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText);
+
+            String question;
+
+            if (this.queryText.startsWith("rec")) {
+                question = this.getContent(this.queryText).orElse(reranked.getFirst());
+            } else {
+                question = this.queryText;
+            }
+
+            final Summarizer summarizer = new Summarizer(this.openAiApiKey, question);
             final String summary = summarizer.summarize(reranked);
 
             this.logger.info(summary);
@@ -127,6 +124,67 @@ public final class QueryIndex extends Operation {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Query the index by vector ID.
+    ///
+    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> queryById() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final Query query = Query.builder()
+                .pinecone(this.pinecone)
+                .indexName(this.indexName)
+                .namespace(this.namespace)
+                .mongoClient(this.mongoClient)
+                .collectionName(this.collectionName)
+                .dbName(this.dbName)
+                .build();
+
+        final List<ScoredVectorWithUnsignedIndices> matches = query.queryById(this.queryText);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Query the index by vector.
+    ///
+    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> queryByVector() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.embeddingModel);
+        final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
+
+        final Query query = Query.builder()
+                .pinecone(this.pinecone)
+                .indexName(this.indexName)
+                .namespace(this.namespace)
+                .mongoClient(this.mongoClient)
+                .collectionName(this.collectionName)
+                .dbName(this.dbName)
+                .build();
+
+        final Set<String> categories = this.getCategories();
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Categories: {}", categories);
+        }
+
+        final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList, categories);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
     }
 
     /// Get any categories found in the query text.
@@ -185,6 +243,32 @@ public final class QueryIndex extends Operation {
         }
 
         return result;
+    }
+
+    /// Get the content by vector ID.
+    ///
+    /// @param  vectorId java.lang.String
+    /// @return          java.util.Optional<java.lang.String>
+    private Optional<String> getContent(final String vectorId) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(vectorId));
+        }
+
+        String content = null;
+
+        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
+        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
+        final Document document = collection.find(new Document("id", vectorId)).first();
+
+        if (document != null && document.containsKey("content")) {
+            content = document.get("content").toString();
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(content));
+        }
+
+        return Optional.ofNullable(content);
     }
 
     /// The builder class.

@@ -97,7 +97,58 @@ final class Query {
         return new Builder();
     }
 
-    /// Query the index.
+    /// Query the index by vector ID.
+    ///
+    /// @param  vectorId java.lang.String
+    /// @return          java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    List<ScoredVectorWithUnsignedIndices> queryById(final String vectorId) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(vectorId));
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches;
+
+        this.logger.info("Querying index: {}", this.indexName);
+        this.logger.info("Querying ID   : {}", vectorId);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            final QueryResponseWithUnsignedIndices queryResponse =
+                    index.queryByVectorId(10,
+                            vectorId,
+                            this.namespace,
+                            null,
+                            true,
+                            true);
+
+            matches = queryResponse.getMatchesList();
+
+            for (final ScoredVectorWithUnsignedIndices match : matches) {
+                final Struct metadata = match.getMetadata();
+                final Map<String, Value> fields = metadata.getFieldsMap();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Vector ID: {}", match.getId());
+                    this.logger.debug("Score    : {}", match.getScore());
+                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
+                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
+                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
+
+                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
+                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
+
+                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
+                }
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Query the index by query vector.
     ///
     /// @param  queryVector java.util.List<java.lang.Float>
     /// @param  categories  java.util.Set<java.lang.String>
@@ -108,7 +159,7 @@ final class Query {
             this.logger.trace(entryWith(queryVector.toString(), categories));
         }
 
-        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
+        List<ScoredVectorWithUnsignedIndices> matches;
 
         this.logger.info("Querying index: {}", this.indexName);
 
