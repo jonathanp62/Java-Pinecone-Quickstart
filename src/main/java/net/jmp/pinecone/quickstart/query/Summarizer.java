@@ -99,7 +99,10 @@ final class Summarizer {
             final String prompt = sb.toString();
 
             this.logger.info("Prompt: {}", prompt);
-            this.logger.info("Size  : {}", prompt.length());
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.info("Size  : {}", prompt.length());
+            }
 
             final ChatCompletionCreateParams chatCompletionCreateParams = ChatCompletionCreateParams.builder()
                     .model(ChatModel.GPT_4_1)
