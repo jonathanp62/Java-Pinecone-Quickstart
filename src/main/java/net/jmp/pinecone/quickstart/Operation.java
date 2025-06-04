@@ -209,7 +209,7 @@ public abstract class Operation {
         return result;
     }
 
-    /// Check if the index is loaded.
+    /// Check if the dense index is loaded.
     ///
     /// @return boolean
     protected boolean isIndexLoaded() {
@@ -217,15 +217,70 @@ public abstract class Operation {
             this.logger.trace(entry());
         }
 
+        final boolean result = this.isDenseIndexLoaded();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Check if the dense index is loaded.
+    ///
+    /// @return boolean
+    protected boolean isDenseIndexLoaded() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.isNamedIndexLoaded(this.indexName, this.namespace);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Check if the sparse index is loaded.
+    ///
+    /// @return boolean
+    protected boolean isSparseIndexLoaded() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.isNamedIndexLoaded(this.indexSparseName, this.namespace);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Check if the dense index is loaded.
+    ///
+    /// @param  indexName   java.lang.String
+    /// @param  namespace   java.lang.String
+    /// @return             boolean
+    private boolean isNamedIndexLoaded(final String indexName, final String namespace) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(indexName, namespace));
+        }
+
         int vectorsCount = 0;
 
-        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
-            final ListResponse response = index.list(this.namespace);
+        try (final Index index = this.pinecone.getIndexConnection(indexName)) {
+            final ListResponse response = index.list(namespace);
 
             vectorsCount = response.getVectorsCount();
         }
 
         if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Index name   : {}", indexName);
+            this.logger.debug("Namespace    : {}", namespace);
             this.logger.debug("Vectors count: {}", vectorsCount);
         }
 

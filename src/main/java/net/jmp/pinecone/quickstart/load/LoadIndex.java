@@ -110,9 +110,25 @@ public final class LoadIndex extends Operation {
             this.logger.trace(entry());
         }
 
+        // TODO It is unlikely that the two methods will be alike enough to reduce code duplication
+
+        this.loadDenseIndex();
+        this.loadSparseIndex();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load the dense index.
+    private void loadDenseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
         if (this.indexExists() && !this.isIndexLoaded()) {
             final List<UnstructuredTextDocument> documents = this.createContent();
-            final List<Embedding> embeddings = this.createEmbeddings(documents);
+            final List<Embedding> embeddings = this.createEmbeddings(documents, this.embeddingModel);
             final List<Struct> metadata = this.createMetadata(documents);
 
             assert embeddings.size() == metadata.size();
@@ -127,7 +143,7 @@ public final class LoadIndex extends Operation {
                 vectors.add(buildUpsertVectorWithUnsignedIndices(vectorId, embedding.getDenseEmbedding().getValues(), null, null, metadataStruct));
             }
 
-            this.logger.info("Loading index: {}", this.indexName);
+            this.logger.info("Loading dense index: {}", this.indexName);
 
             try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
                 final UpsertResponse result = index.upsert(vectors, this.namespace);
@@ -138,7 +154,35 @@ public final class LoadIndex extends Operation {
                 this.logger.info("Serialized size: {}", serializedSize);
             }
         } else {
-            this.logger.info("Index either does not exist or is already loaded: {}", this.indexName);
+            this.logger.info("Dense index either does not exist or is already loaded: {}", this.indexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load the sparse index.
+    private void loadSparseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (this.sparseIndexExists() && !this.isSparseIndexLoaded()) {
+            final List<UnstructuredTextDocument> documents = this.createContent();
+            final List<Embedding> embeddings = this.createEmbeddings(documents, this.embeddingModelSparse);
+            final List<Struct> metadata = this.createMetadata(documents);
+
+            assert embeddings.size() == metadata.size();
+
+            // TODO See https://github.com/pinecone-io/pinecone-java-client
+            // TODO See https://docs.pinecone.io/guides/index-data/upsert-data
+
+            final List<VectorWithUnsignedIndices> vectors = new ArrayList<>(embeddings.size());
+
+            this.logger.info("Loading sparse index: {}", this.indexSparseName);
+        } else {
+            this.logger.info("Sparse index either does not exist or is already loaded: {}", this.indexSparseName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -201,11 +245,13 @@ public final class LoadIndex extends Operation {
 
     /// Create embeddings.
     ///
-    /// @param  documents   java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
-    /// @return             java.util.List<io.pinecone.clients.model.Embedding>
-    private List<Embedding> createEmbeddings(final List<UnstructuredTextDocument> documents) {
+    /// @param  documents       java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
+    /// @param  embeddingModel  java.lang.String
+    /// @return                 java.util.List<io.pinecone.clients.model.Embedding>
+    private List<Embedding> createEmbeddings(final List<UnstructuredTextDocument> documents,
+                                             final String embeddingModel) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(documents));
+            this.logger.trace(entryWith(documents, embeddingModel));
         }
 
         List<Embedding> embeddingList = new ArrayList<>();
@@ -224,7 +270,7 @@ public final class LoadIndex extends Operation {
         parameters.put("truncate", "END");
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Embedding model: {}", this.embeddingModel);
+            this.logger.debug("Embedding model: {}", embeddingModel);
             this.logger.debug("Parameters: {}", parameters);
             this.logger.debug("Embedding text: {}", inputs);
         }
@@ -232,7 +278,7 @@ public final class LoadIndex extends Operation {
         EmbeddingsList embeddings = null;
 
         try {
-            embeddings = client.embed(this.embeddingModel, parameters, inputs);
+            embeddings = client.embed(embeddingModel, parameters, inputs);
         } catch (ApiException e) {
             this.logger.error(e.getMessage());
         }
