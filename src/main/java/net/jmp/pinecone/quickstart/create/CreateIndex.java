@@ -86,7 +86,7 @@ public final class CreateIndex extends Operation {
         }
     }
 
-    /// The dense index  method.
+    /// The dense index method.
     private void denseIndex() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
@@ -125,7 +125,7 @@ public final class CreateIndex extends Operation {
         }
     }
 
-    /// The sparse index  method.
+    /// The sparse index method.
     private void sparseIndex() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
