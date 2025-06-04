@@ -54,5 +54,5 @@ Gradle JavaExec Tasks
 |store             |No arguments
 |=======================
 
-Current version: 0.3.0.
+Current version: 0.4.0.
 ~~~~~~~~~~~~~~~~~~~~~~~
