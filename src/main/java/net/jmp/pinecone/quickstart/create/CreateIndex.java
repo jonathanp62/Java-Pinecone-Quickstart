@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.create;
 
 /*
+ * (#)CreateIndex.java  0.4.0   06/04/2025
  * (#)CreateIndex.java  0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /// The create index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class CreateIndex extends Operation {
     /// The logger.
@@ -58,6 +59,7 @@ public final class CreateIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .indexName(builder.indexName)
+                .indexSparseName(builder.indexSparseName)
                 .namespace(builder.namespace)
         );
     }
@@ -76,8 +78,22 @@ public final class CreateIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (!this.indexExists()) {
-            this.logger.info("Creating index: {}", this.indexName);
+        this.denseIndex();
+        this.sparseIndex();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// The dense index  method.
+    private void denseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (!this.denseIndexExists()) {
+            this.logger.info("Creating dense index: {}", this.indexName);
 
             /* Embedding model llama-text-embed-v2 */
 
@@ -100,7 +116,24 @@ public final class CreateIndex extends Operation {
 
             this.indexStatus(indexModel);
         } else {
-            this.logger.info("Index already exists: {}", this.indexName);
+            this.logger.info("Dense index already exists: {}", this.indexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// The sparse index  method.
+    private void sparseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (!this.sparseIndexExists()) {
+            this.logger.info("Creating sparse index: {}", this.indexSparseName);
+        } else {
+            this.logger.info("Sparse index already exists: {}", this.indexSparseName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -128,8 +161,11 @@ public final class CreateIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
+        /// The dense index name.
         private String indexName;
+
+        /// The sparse index name.
+        private String indexSparseName;
 
         /// The namespace.
         private String namespace;
@@ -149,12 +185,22 @@ public final class CreateIndex extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
         /// @param  indexName   java.lang.String
         /// @return             net.jmp.pinecone.quickstart.create.CreateIndex.Builder
         public Builder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  indexSparseName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.create.CreateIndex.Builder
+        public Builder indexSparseName(final String indexSparseName) {
+            this.indexSparseName = indexSparseName;
 
             return this;
         }

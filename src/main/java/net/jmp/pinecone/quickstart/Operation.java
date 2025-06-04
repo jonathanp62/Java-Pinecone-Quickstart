@@ -41,8 +41,7 @@ import java.util.Map;
 
 import net.jmp.pinecone.quickstart.text.UnstructuredText;
 
-import static net.jmp.util.logging.LoggerUtils.entry;
-import static net.jmp.util.logging.LoggerUtils.exitWith;
+import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.openapitools.db_control.client.model.IndexList;
 import org.openapitools.db_control.client.model.IndexModel;
@@ -124,12 +123,64 @@ public abstract class Operation {
     /// The operate method.
     public abstract void operate();
 
-    /// Check if the index exists.
+    /// Return true if the dense index exists.
     ///
     /// @return boolean
     protected boolean indexExists() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
+        }
+
+        final boolean result = this.denseIndexExists();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Return true if the dense index exists.
+    ///
+    /// @return boolean
+    protected boolean denseIndexExists() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.doesIndexExist(this.indexName);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Return true if the sparse index exists.
+    ///
+    /// @return boolean
+    protected boolean sparseIndexExists() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.doesIndexExist(this.indexSparseName);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
+    /// Check if the named index exists.
+    ///
+    /// @param  indexName   java.lang.String
+    /// @return             boolean
+    private boolean doesIndexExist(final String indexName) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(indexName));
         }
 
         boolean result = false;
@@ -139,7 +190,7 @@ public abstract class Operation {
 
         if (indexes != null) {
             for (final IndexModel indexModel : indexes) {
-                if (indexModel.getName().equals(this.indexName)) {
+                if (indexModel.getName().equals(indexName)) {
                     result = true;
 
                     break;
