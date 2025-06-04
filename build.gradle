@@ -46,6 +46,7 @@ apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
 	embeddingModel = 'llama-text-embed-v2'
+	embeddingModelSparse = 'pinecone-sparse-english-v0'
 	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
 	indexName = 'quickstart'
 	indexSparseName = 'quickstart-sparse'
@@ -111,6 +112,7 @@ tasks.register('create', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -132,6 +134,7 @@ tasks.register('delete', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -153,6 +156,7 @@ tasks.register('describe', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -174,6 +178,7 @@ tasks.register('describeModels', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -195,6 +200,7 @@ tasks.register('describeNamespace', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -216,6 +222,7 @@ tasks.register('fetch', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -237,6 +244,7 @@ tasks.register('list', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -258,6 +266,7 @@ tasks.register('listIndexes', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -279,6 +288,7 @@ tasks.register('listNamespaces', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -300,6 +310,7 @@ tasks.register('load', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -321,6 +332,7 @@ tasks.register('query-by-id', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -342,6 +354,7 @@ tasks.register('query-monuments', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -363,6 +376,7 @@ tasks.register('query-persons', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
@@ -384,6 +398,7 @@ tasks.register('store', JavaExec) {
 	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
+			 'app.embeddingModelSparse': embeddingModelSparse,
 			 'app.indexName': indexName,
 			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbUri': mongoDbUri,

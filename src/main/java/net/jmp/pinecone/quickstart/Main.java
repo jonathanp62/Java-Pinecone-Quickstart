@@ -57,6 +57,7 @@ public final class Main implements Runnable {
 
         final String operation = System.getProperty("app.operation");
         final String embeddingModel = System.getProperty("app.embeddingModel");
+        final String embeddingModelSparse = System.getProperty("app.embeddingModelSparse");
         final String indexName = System.getProperty("app.indexName");
         final String indexSparseName = System.getProperty("app.indexSparseName");
         final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
@@ -68,19 +69,21 @@ public final class Main implements Runnable {
 
         this.logger.info("Pinecone Quickstart");
 
-        this.logger.info("Operation         : {}", operation);
-        this.logger.info("Embedding Model   : {}", embeddingModel);
-        this.logger.info("Index Name        : {}", indexName);
-        this.logger.info("Index Sparse Name : {}", indexSparseName);
-        this.logger.info("MongoDB Collection: {}", mongoDbCollection);
-        this.logger.info("MongoDB Name      : {}", mongoDbName);
-        this.logger.info("MongoDB URI File  : {}", mongoDbUriFile);
-        this.logger.info("Namespace         : {}", namespace);
-        this.logger.info("Reranking Model   : {}", rerankingModel);
-        this.logger.info("Query Text        : {}", queryText);
+        this.logger.info("Operation             : {}", operation);
+        this.logger.info("Embedding Model       : {}", embeddingModel);
+        this.logger.info("Embedding Model Sparse: {}", embeddingModelSparse);
+        this.logger.info("Index Name            : {}", indexName);
+        this.logger.info("Index Sparse Name     : {}", indexSparseName);
+        this.logger.info("MongoDB Collection    : {}", mongoDbCollection);
+        this.logger.info("MongoDB Name          : {}", mongoDbName);
+        this.logger.info("MongoDB URI File      : {}", mongoDbUriFile);
+        this.logger.info("Namespace             : {}", namespace);
+        this.logger.info("Reranking Model       : {}", rerankingModel);
+        this.logger.info("Query Text            : {}", queryText);
 
         final Quickstart quickstart = Quickstart.builder()
             .embeddingModel(embeddingModel)
+            .embeddingModelSparse(embeddingModelSparse)
             .indexName(indexName)
             .indexSparseName(indexSparseName)
             .mongoDbCollection(mongoDbCollection)

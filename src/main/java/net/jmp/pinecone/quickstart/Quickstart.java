@@ -69,8 +69,11 @@ final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The embedding model.
+    /// The dense embedding model.
     private final String embeddingModel;
+
+    /// The sparse embedding model.
+    private final String embeddingModelSparse;
 
     /// The dense index name.
     private final String indexName;
@@ -106,6 +109,7 @@ final class Quickstart {
         super();
 
         this.embeddingModel = builder.embeddingModel;
+        this.embeddingModelSparse = builder.embeddingModelSparse;
         this.indexName = builder.indexName;
         this.indexSparseName = builder.indexSparseName;
         this.mongoDbCollection = builder.mongoDbCollection;
@@ -455,8 +459,10 @@ final class Quickstart {
         final LoadIndex loadIndex = LoadIndex.builder()
             .pinecone(pinecone)
             .indexName(this.indexName)
+            .indexSparseName(this.indexSparseName)
             .namespace(this.namespace)
             .embeddingModel(this.embeddingModel)
+            .embeddingModelSparse(this.embeddingModelSparse)
             .mongoClient(mongoClient)
             .collectionName(this.mongoDbCollection)
             .dbName(this.mongoDbName)
@@ -521,8 +527,11 @@ final class Quickstart {
 
     /// The builder class.
     static class Builder {
-        /// The embedding model.
+        /// The dense embedding model.
         private String embeddingModel;
+
+        /// The sparse embedding model.
+        private String embeddingModelSparse;
 
         /// The dense index name.
         private String indexName;
@@ -553,12 +562,22 @@ final class Quickstart {
             super();
         }
 
-        /// Set the embedding model.
+        /// Set the dense embedding model.
         ///
         /// @param  embeddingModel  java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder embeddingModel(final String embeddingModel) {
             this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the sparse embedding model.
+        ///
+        /// @param  embeddingModelSparse    java.lang.String
+        /// @return                         net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder embeddingModelSparse(final String embeddingModelSparse) {
+            this.embeddingModelSparse = embeddingModelSparse;
 
             return this;
         }

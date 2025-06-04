@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.load;
 
 /*
+ * (#)LoadIndex.java    0.4.0   06/04/2025
  * (#)LoadIndex.java    0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 /// The load index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class LoadIndex extends Operation {
     /// The logger.
@@ -85,7 +86,9 @@ public final class LoadIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .embeddingModel(builder.embeddingModel)
+                .embeddingModelSparse(builder.embeddingModelSparse)
                 .indexName(builder.indexName)
+                .indexSparseName(builder.indexSparseName)
                 .namespace(builder.namespace)
                 .mongoClient(builder.mongoClient)
                 .collectionName(builder.collectionName)
@@ -286,11 +289,17 @@ public final class LoadIndex extends Operation {
         /// The pinecone client.
         private Pinecone pinecone;
 
-        /// The embedding model.
+        /// The dense embedding model.
         private String embeddingModel;
 
-        /// The index name.
+        /// The sparse embedding model.
+        private String embeddingModelSparse;
+
+        /// The dense index name.
         private String indexName;
+
+        /// The sparse index name.
+        private String indexSparseName;
 
         /// The namespace.
         private String namespace;
@@ -319,7 +328,7 @@ public final class LoadIndex extends Operation {
             return this;
         }
 
-        /// Set the embedding model.
+        /// Set the dense embedding model.
         ///
         /// @param  embeddingModel  java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.load.LoadIndex.Builder
@@ -329,12 +338,32 @@ public final class LoadIndex extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the sparse embedding model.
+        ///
+        /// @param  embeddingModelSparse    java.lang.String
+        /// @return                         net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder embeddingModelSparse(final String embeddingModelSparse) {
+            this.embeddingModelSparse = embeddingModelSparse;
+
+            return this;
+        }
+
+        /// Set the dense index name.
         ///
         /// @param  indexName   java.lang.String
         /// @return             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
         public Builder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  indexSparseName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder indexSparseName(final String indexSparseName) {
+            this.indexSparseName = indexSparseName;
 
             return this;
         }

@@ -61,8 +61,11 @@ public abstract class Operation {
     /// The Pinecone client.
     protected final Pinecone pinecone;
 
-    /// The embedding model.
+    /// The dense embedding model.
     protected final String embeddingModel;
+
+    /// The sparse embedding model.
+    protected final String embeddingModelSparse;
 
     /// The dense index name.
     protected final String indexName;
@@ -102,6 +105,7 @@ public abstract class Operation {
 
         this.pinecone = operationBuilder.pinecone;
         this.embeddingModel = operationBuilder.embeddingModel;
+        this.embeddingModelSparse = operationBuilder.embeddingModelSparse;
         this.indexName = operationBuilder.indexName;
         this.indexSparseName = operationBuilder.indexSparseName;
         this.namespace = operationBuilder.namespace;
@@ -239,8 +243,11 @@ public abstract class Operation {
         /// The Pinecone client.
         protected Pinecone pinecone;
 
-        /// The embedding model.
+        /// The dense embedding model.
         protected String embeddingModel;
+
+        /// The sparse embedding model.
+        protected String embeddingModelSparse;
 
         /// The dense index name.
         protected String indexName;
@@ -284,12 +291,22 @@ public abstract class Operation {
             return this;
         }
 
-        /// Set the embedding model.
+        /// Set the dense embedding model.
         ///
         /// @param  embeddingModel java.lang.String
         /// @return                net.jmp.pinecone.quickstart.Operation.OperationBuilder
         public OperationBuilder embeddingModel(final String embeddingModel) {
             this.embeddingModel = embeddingModel;
+
+            return this;
+        }
+
+        /// Set the sparse embedding model.
+        ///
+        /// @param  embeddingModelSparse    java.lang.String
+        /// @return                         net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder embeddingModelSparse(final String embeddingModelSparse) {
+            this.embeddingModelSparse = embeddingModelSparse;
 
             return this;
         }
