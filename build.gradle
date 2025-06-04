@@ -48,6 +48,7 @@ ext {
 	embeddingModel = 'llama-text-embed-v2'
 	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
 	indexName = 'quickstart'
+	indexSparseName = 'quickstart-sparse'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	mongoDbCollection = 'quickstart'
 	mongoDbName = 'pinecone_quickstart'
@@ -111,6 +112,7 @@ tasks.register('create', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -131,6 +133,7 @@ tasks.register('delete', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -151,6 +154,7 @@ tasks.register('describe', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -171,6 +175,7 @@ tasks.register('describeModels', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -191,6 +196,7 @@ tasks.register('describeNamespace', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -211,6 +217,7 @@ tasks.register('fetch', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -231,6 +238,7 @@ tasks.register('list', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -251,6 +259,7 @@ tasks.register('listIndexes', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -271,6 +280,7 @@ tasks.register('listNamespaces', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -291,6 +301,7 @@ tasks.register('load', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -311,6 +322,7 @@ tasks.register('query-by-id', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -331,6 +343,7 @@ tasks.register('query-monuments', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -351,6 +364,7 @@ tasks.register('query-persons', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -371,6 +385,7 @@ tasks.register('store', JavaExec) {
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.indexName': indexName,
+			 'app.indexSparseName': indexSparseName,
 			 'app.mongoDbUri': mongoDbUri,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,

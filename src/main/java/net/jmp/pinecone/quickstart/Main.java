@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Main.java 0.4.0   06/04/2025
  * (#)Main.java 0.2.0   05/22/2025
  * (#)Main.java 0.1.0   05/17/2025
  *
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /// The main application class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.1.0
 public final class Main implements Runnable {
     /// The logger.
@@ -57,6 +58,7 @@ public final class Main implements Runnable {
         final String operation = System.getProperty("app.operation");
         final String embeddingModel = System.getProperty("app.embeddingModel");
         final String indexName = System.getProperty("app.indexName");
+        final String indexSparseName = System.getProperty("app.indexSparseName");
         final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
         final String mongoDbName = System.getProperty("app.mongoDbName");
         final String mongoDbUriFile = System.getProperty("app.mongoDbUri");
@@ -69,6 +71,7 @@ public final class Main implements Runnable {
         this.logger.info("Operation         : {}", operation);
         this.logger.info("Embedding Model   : {}", embeddingModel);
         this.logger.info("Index Name        : {}", indexName);
+        this.logger.info("Index Sparse Name : {}", indexSparseName);
         this.logger.info("MongoDB Collection: {}", mongoDbCollection);
         this.logger.info("MongoDB Name      : {}", mongoDbName);
         this.logger.info("MongoDB URI File  : {}", mongoDbUriFile);
@@ -79,6 +82,7 @@ public final class Main implements Runnable {
         final Quickstart quickstart = Quickstart.builder()
             .embeddingModel(embeddingModel)
             .indexName(indexName)
+            .indexSparseName(indexSparseName)
             .mongoDbCollection(mongoDbCollection)
             .mongoDbName(mongoDbName)
             .mongoDbUriFile(mongoDbUriFile)

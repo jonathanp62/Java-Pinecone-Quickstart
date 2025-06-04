@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.4.0   06/04/2025
  * (#)Quickstart.java   0.3.0   05/27/2025
  * (#)Quickstart.java   0.2.0   05/21/2025
  * (#)Quickstart.java   0.1.0   05/17/2025
@@ -62,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.3.0
+/// @version    0.4.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -71,8 +72,11 @@ final class Quickstart {
     /// The embedding model.
     private final String embeddingModel;
 
-    /// The index name.
+    /// The dense index name.
     private final String indexName;
+
+    /// The sparse index name.
+    private final String indexSparseName;
 
     /// The MongoDB collection.
     private final String mongoDbCollection;
@@ -103,6 +107,7 @@ final class Quickstart {
 
         this.embeddingModel = builder.embeddingModel;
         this.indexName = builder.indexName;
+        this.indexSparseName = builder.indexSparseName;
         this.mongoDbCollection = builder.mongoDbCollection;
         this.mongoDbName = builder.mongoDbName;
         this.mongoDbUriFile = builder.mongoDbUriFile;
@@ -345,6 +350,7 @@ final class Quickstart {
         final CreateIndex createIndex = CreateIndex.builder()
             .pinecone(pinecone)
             .indexName(this.indexName)
+            .indexSparseName(this.indexSparseName)
             .namespace(this.namespace)
             .build();
 
@@ -518,8 +524,11 @@ final class Quickstart {
         /// The embedding model.
         private String embeddingModel;
 
-        /// The index name.
+        /// The dense index name.
         private String indexName;
+
+        /// The sparse index name.
+        private String indexSparseName;
 
         /// The MongoDb collection.
         private String mongoDbCollection;
@@ -554,12 +563,22 @@ final class Quickstart {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
         /// @param  indexName   java.lang.String
         /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  indexSparseName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder indexSparseName(final String indexSparseName) {
+            this.indexSparseName = indexSparseName;
 
             return this;
         }

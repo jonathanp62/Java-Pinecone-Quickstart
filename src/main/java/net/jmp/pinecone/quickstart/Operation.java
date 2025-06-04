@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Operation.java    0.4.0   06/04/2025
  * (#)Operation.java    0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// The index operation class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public abstract class Operation {
     /// The logger.
@@ -64,8 +65,11 @@ public abstract class Operation {
     /// The embedding model.
     protected final String embeddingModel;
 
-    /// The index name.
+    /// The dense index name.
     protected final String indexName;
+
+    /// The sparse index name.
+    protected final String indexSparseName;
 
     /// The namespace.
     protected final String namespace;
@@ -100,6 +104,7 @@ public abstract class Operation {
         this.pinecone = operationBuilder.pinecone;
         this.embeddingModel = operationBuilder.embeddingModel;
         this.indexName = operationBuilder.indexName;
+        this.indexSparseName = operationBuilder.indexSparseName;
         this.namespace = operationBuilder.namespace;
         this.rerankingModel = operationBuilder.rerankingModel;
         this.queryText = operationBuilder.queryText;
@@ -186,8 +191,11 @@ public abstract class Operation {
         /// The embedding model.
         protected String embeddingModel;
 
-        /// The index name.
+        /// The dense index name.
         protected String indexName;
+
+        /// The sparse index name.
+        protected String indexSparseName;
 
         /// The namespace.
         protected String namespace;
@@ -235,12 +243,22 @@ public abstract class Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
         /// @param  indexName java.lang.String
         /// @return           net.jmp.pinecone.quickstart.Operation.OperationBuilder
         public OperationBuilder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  indexSparseName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder indexSparseName(final String indexSparseName) {
+            this.indexSparseName = indexSparseName;
 
             return this;
         }
