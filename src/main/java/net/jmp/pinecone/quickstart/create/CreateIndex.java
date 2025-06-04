@@ -104,7 +104,8 @@ public final class CreateIndex extends Operation {
                     "aws",
                     "us-east-1",
                     DeletionProtection.DISABLED,
-                    new HashMap<>());   // Tags are key-value pairs that you can use to categorize and identify the index
+                    new HashMap<>()    // Tags are key-value pairs that you can use to categorize and identify the index
+            );
 
             /* The tags could have just as easily been included during create */
 
@@ -132,6 +133,25 @@ public final class CreateIndex extends Operation {
 
         if (!this.sparseIndexExists()) {
             this.logger.info("Creating sparse index: {}", this.indexSparseName);
+
+            /* Embedding model pinecone-sparse-english-v0 */
+
+            this.pinecone.createSparseServelessIndex(
+                    this.indexSparseName,
+                    "aws",
+                    "us-east-1",
+                    DeletionProtection.DISABLED,
+                    Map.of("env", "development"),
+                    "sparse"
+            );
+
+            final IndexModel indexModel = this.pinecone.configureServerlessIndex(
+                    this.indexSparseName,
+                    DeletionProtection.DISABLED,
+                    Map.of("env", "development")
+            );
+
+            this.indexStatus(indexModel);
         } else {
             this.logger.info("Sparse index already exists: {}", this.indexSparseName);
         }
