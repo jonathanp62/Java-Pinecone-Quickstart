@@ -78,8 +78,8 @@ final class Quickstart {
     /// The dense index name.
     private final String indexName;
 
-    /// The sparse index name.
-    private final String indexSparseName;
+    /// The hybrid index name.
+    private final String indexNameHybrid;
 
     /// The MongoDB collection.
     private final String mongoDbCollection;
@@ -111,7 +111,7 @@ final class Quickstart {
         this.embeddingModel = builder.embeddingModel;
         this.embeddingModelSparse = builder.embeddingModelSparse;
         this.indexName = builder.indexName;
-        this.indexSparseName = builder.indexSparseName;
+        this.indexNameHybrid = builder.indexNameHybrid;
         this.mongoDbCollection = builder.mongoDbCollection;
         this.mongoDbName = builder.mongoDbName;
         this.mongoDbUriFile = builder.mongoDbUriFile;
@@ -354,7 +354,7 @@ final class Quickstart {
         final CreateIndex createIndex = CreateIndex.builder()
             .pinecone(pinecone)
             .indexName(this.indexName)
-            .indexSparseName(this.indexSparseName)
+            .indexNameHybrid(this.indexNameHybrid)
             .namespace(this.namespace)
             .build();
 
@@ -459,7 +459,7 @@ final class Quickstart {
         final LoadIndex loadIndex = LoadIndex.builder()
             .pinecone(pinecone)
             .indexName(this.indexName)
-            .indexSparseName(this.indexSparseName)
+            .indexNameHybrid(this.indexNameHybrid)
             .namespace(this.namespace)
             .embeddingModel(this.embeddingModel)
             .embeddingModelSparse(this.embeddingModelSparse)
@@ -536,8 +536,8 @@ final class Quickstart {
         /// The dense index name.
         private String indexName;
 
-        /// The sparse index name.
-        private String indexSparseName;
+        /// The hybrid index name.
+        private String indexNameHybrid;
 
         /// The MongoDb collection.
         private String mongoDbCollection;
@@ -592,12 +592,12 @@ final class Quickstart {
             return this;
         }
 
-        /// Set the sparse index name.
+        /// Set the hybrid index name.
         ///
-        /// @param  indexSparseName java.lang.String
+        /// @param  indexNameHybrid java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
-        public Builder indexSparseName(final String indexSparseName) {
-            this.indexSparseName = indexSparseName;
+        public Builder indexNameHybrid(final String indexNameHybrid) {
+            this.indexNameHybrid = indexNameHybrid;
 
             return this;
         }

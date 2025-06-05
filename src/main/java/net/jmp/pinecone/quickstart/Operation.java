@@ -70,8 +70,8 @@ public abstract class Operation {
     /// The dense index name.
     protected final String indexName;
 
-    /// The sparse index name.
-    protected final String indexSparseName;
+    /// The hybrid index name.
+    protected final String indexNameHybrid;
 
     /// The namespace.
     protected final String namespace;
@@ -107,7 +107,7 @@ public abstract class Operation {
         this.embeddingModel = operationBuilder.embeddingModel;
         this.embeddingModelSparse = operationBuilder.embeddingModelSparse;
         this.indexName = operationBuilder.indexName;
-        this.indexSparseName = operationBuilder.indexSparseName;
+        this.indexNameHybrid = operationBuilder.indexNameHybrid;
         this.namespace = operationBuilder.namespace;
         this.rerankingModel = operationBuilder.rerankingModel;
         this.queryText = operationBuilder.queryText;
@@ -161,15 +161,15 @@ public abstract class Operation {
         return result;
     }
 
-    /// Return true if the sparse index exists.
+    /// Return true if the hybrid index exists.
     ///
     /// @return boolean
-    protected boolean sparseIndexExists() {
+    protected boolean hybridIndexExists() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.doesIndexExist(this.indexSparseName);
+        final boolean result = this.doesIndexExist(this.indexNameHybrid);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -243,15 +243,15 @@ public abstract class Operation {
         return result;
     }
 
-    /// Check if the sparse index is loaded.
+    /// Check if the hybrid index is loaded.
     ///
     /// @return boolean
-    protected boolean isSparseIndexLoaded() {
+    protected boolean isHybridIndexLoaded() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.isNamedIndexLoaded(this.indexSparseName, this.namespace);
+        final boolean result = this.isNamedIndexLoaded(this.indexNameHybrid, this.namespace);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -307,8 +307,8 @@ public abstract class Operation {
         /// The dense index name.
         protected String indexName;
 
-        /// The sparse index name.
-        protected String indexSparseName;
+        /// The hybrid index name.
+        protected String indexNameHybrid;
 
         /// The namespace.
         protected String namespace;
@@ -376,12 +376,12 @@ public abstract class Operation {
             return this;
         }
 
-        /// Set the sparse index name.
+        /// Set the hybrid index name.
         ///
-        /// @param  indexSparseName java.lang.String
+        /// @param  indexNameHybrid java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.Operation.OperationBuilder
-        public OperationBuilder indexSparseName(final String indexSparseName) {
-            this.indexSparseName = indexSparseName;
+        public OperationBuilder indexNameHybrid(final String indexNameHybrid) {
+            this.indexNameHybrid = indexNameHybrid;
 
             return this;
         }

@@ -59,7 +59,7 @@ public final class Main implements Runnable {
         final String embeddingModel = System.getProperty("app.embeddingModel");
         final String embeddingModelSparse = System.getProperty("app.embeddingModelSparse");
         final String indexName = System.getProperty("app.indexName");
-        final String indexSparseName = System.getProperty("app.indexSparseName");
+        final String indexNameHybrid = System.getProperty("app.indexNameHybrid");
         final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
         final String mongoDbName = System.getProperty("app.mongoDbName");
         final String mongoDbUriFile = System.getProperty("app.mongoDbUri");
@@ -73,7 +73,7 @@ public final class Main implements Runnable {
         this.logger.info("Embedding Model       : {}", embeddingModel);
         this.logger.info("Embedding Model Sparse: {}", embeddingModelSparse);
         this.logger.info("Index Name            : {}", indexName);
-        this.logger.info("Index Sparse Name     : {}", indexSparseName);
+        this.logger.info("Index Name Hybrid     : {}", indexNameHybrid);
         this.logger.info("MongoDB Collection    : {}", mongoDbCollection);
         this.logger.info("MongoDB Name          : {}", mongoDbName);
         this.logger.info("MongoDB URI File      : {}", mongoDbUriFile);
@@ -85,7 +85,7 @@ public final class Main implements Runnable {
             .embeddingModel(embeddingModel)
             .embeddingModelSparse(embeddingModelSparse)
             .indexName(indexName)
-            .indexSparseName(indexSparseName)
+            .indexNameHybrid(indexNameHybrid)
             .mongoDbCollection(mongoDbCollection)
             .mongoDbName(mongoDbName)
             .mongoDbUriFile(mongoDbUriFile)

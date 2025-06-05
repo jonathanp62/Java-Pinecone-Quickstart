@@ -50,6 +50,8 @@ import io.pinecone.proto.UpsertResponse;
 
 import io.pinecone.unsigned_indices_model.VectorWithUnsignedIndices;
 
+import static java.lang.Integer.toUnsignedLong;
+
 import java.util.*;
 
 import java.util.stream.Collectors;
@@ -88,7 +90,7 @@ public final class LoadIndex extends Operation {
                 .embeddingModel(builder.embeddingModel)
                 .embeddingModelSparse(builder.embeddingModelSparse)
                 .indexName(builder.indexName)
-                .indexSparseName(builder.indexSparseName)
+                .indexNameHybrid(builder.indexNameHybrid)
                 .namespace(builder.namespace)
                 .mongoClient(builder.mongoClient)
                 .collectionName(builder.collectionName)
@@ -110,10 +112,8 @@ public final class LoadIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        // TODO It is unlikely that the two methods will be alike enough to reduce code duplication
-
         this.loadDenseIndex();
-        this.loadSparseIndex();
+        this.loadHybridIndex();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -140,7 +140,15 @@ public final class LoadIndex extends Operation {
                 final Struct metadataStruct = metadata.get(i);
                 final String vectorId = metadataStruct.getFieldsMap().get("documentid").getStringValue();
 
-                vectors.add(buildUpsertVectorWithUnsignedIndices(vectorId, embedding.getDenseEmbedding().getValues(), null, null, metadataStruct));
+                vectors.add(
+                        buildUpsertVectorWithUnsignedIndices(
+                                vectorId,
+                                embedding.getDenseEmbedding().getValues(),
+                                null,
+                                null,
+                                metadataStruct
+                        )
+                );
             }
 
             this.logger.info("Loading dense index: {}", this.indexName);
@@ -162,27 +170,60 @@ public final class LoadIndex extends Operation {
         }
     }
 
-    /// Load the sparse index.
-    private void loadSparseIndex() {
+    /// Load the hybrid index.
+    private void loadHybridIndex() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        if (this.sparseIndexExists() && !this.isSparseIndexLoaded()) {
+        if (this.hybridIndexExists() && !this.isHybridIndexLoaded()) {
             final List<UnstructuredTextDocument> documents = this.createContent();
-            final List<Embedding> embeddings = this.createEmbeddings(documents, this.embeddingModelSparse);
+            final List<Embedding> denseEmbeddings = this.createEmbeddings(documents, this.embeddingModel);
+            final List<Embedding> sparseEmbeddings = this.createEmbeddings(documents, this.embeddingModelSparse);
             final List<Struct> metadata = this.createMetadata(documents);
 
-            assert embeddings.size() == metadata.size();
+            assert denseEmbeddings.size() == metadata.size();
+            assert sparseEmbeddings.size() == metadata.size();
 
-            // TODO See https://github.com/pinecone-io/pinecone-java-client
-            // TODO See https://docs.pinecone.io/guides/index-data/upsert-data
+            final List<VectorWithUnsignedIndices> vectors = new ArrayList<>(sparseEmbeddings.size());
 
-            final List<VectorWithUnsignedIndices> vectors = new ArrayList<>(embeddings.size());
+            for (int i = 0; i < sparseEmbeddings.size(); i++) {
+                final Embedding sparseEmbedding = sparseEmbeddings.get(i);
+                final Embedding denseEmbedding = denseEmbeddings.get(i);
+                final Struct metadataStruct = metadata.get(i);
+                final String vectorId = metadataStruct.getFieldsMap().get("documentid").getStringValue();
 
-            this.logger.info("Loading sparse index: {}", this.indexSparseName);
+                final List<Long> sparseIndices = new ArrayList<>(sparseEmbedding.getSparseEmbedding().getSparseIndices().size());
+
+                for (int j = 0; j < sparseEmbedding.getSparseEmbedding().getSparseIndices().size(); j++) {
+                    sparseIndices.add(toUnsignedLong(sparseEmbedding.getSparseEmbedding().getSparseIndices().get(j)));
+                }
+
+                final List<Float> sparseValues = sparseEmbedding.getSparseEmbedding().getSparseValues();
+
+                vectors.add(
+                        buildUpsertVectorWithUnsignedIndices(
+                                vectorId,
+                                denseEmbedding.getDenseEmbedding().getValues(),
+                                sparseIndices,
+                                sparseValues,
+                                metadataStruct
+                        )
+                );
+            }
+
+            this.logger.info("Loading hybrid index: {}", this.indexNameHybrid);
+
+            try (final Index index = this.pinecone.getIndexConnection(this.indexNameHybrid)) {
+                final UpsertResponse result = index.upsert(vectors, this.namespace);
+                final int upsertedCount = result.getUpsertedCount();
+                final int serializedSize = result.getSerializedSize();
+
+                this.logger.info("Upserted {} vectors", upsertedCount);
+                this.logger.info("Serialized size: {}", serializedSize);
+            }
         } else {
-            this.logger.info("Sparse index either does not exist or is already loaded: {}", this.indexSparseName);
+            this.logger.info("Hybrid index either does not exist or is already loaded: {}", this.indexNameHybrid);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -344,8 +385,8 @@ public final class LoadIndex extends Operation {
         /// The dense index name.
         private String indexName;
 
-        /// The sparse index name.
-        private String indexSparseName;
+        /// The hybrid index name.
+        private String indexNameHybrid;
 
         /// The namespace.
         private String namespace;
@@ -404,12 +445,12 @@ public final class LoadIndex extends Operation {
             return this;
         }
 
-        /// Set the sparse index name.
+        /// Set the hybrid index name.
         ///
-        /// @param  indexSparseName java.lang.String
+        /// @param  indexNameHybrid java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.load.LoadIndex.Builder
-        public Builder indexSparseName(final String indexSparseName) {
-            this.indexSparseName = indexSparseName;
+        public Builder indexNameHybrid(final String indexNameHybrid) {
+            this.indexNameHybrid = indexNameHybrid;
 
             return this;
         }

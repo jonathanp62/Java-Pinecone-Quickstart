@@ -59,7 +59,7 @@ public final class CreateIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .indexName(builder.indexName)
-                .indexSparseName(builder.indexSparseName)
+                .indexNameHybrid(builder.indexNameHybrid)
                 .namespace(builder.namespace)
         );
     }
@@ -79,7 +79,7 @@ public final class CreateIndex extends Operation {
         }
 
         this.denseIndex();
-        this.sparseIndex();
+        this.hybridIndex();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -125,35 +125,36 @@ public final class CreateIndex extends Operation {
         }
     }
 
-    /// The sparse index method.
-    private void sparseIndex() {
+    /// The hybrid index method.
+    private void hybridIndex() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        if (!this.sparseIndexExists()) {
-            this.logger.info("Creating sparse index: {}", this.indexSparseName);
+        if (!this.hybridIndexExists()) {
+            this.logger.info("Creating hybrid index: {}", this.indexNameHybrid);
 
-            /* Embedding model pinecone-sparse-english-v0 */
+            /* Embedding model llama-text-embed-v2 */
 
-            this.pinecone.createSparseServelessIndex(
-                    this.indexSparseName,
+            this.pinecone.createServerlessIndex(
+                    this.indexNameHybrid,
+                    "cosine",
+                    1024,
                     "aws",
                     "us-east-1",
                     DeletionProtection.DISABLED,
-                    Map.of("env", "development"),
-                    "sparse"
+                    Map.of("env", "development")
             );
 
             final IndexModel indexModel = this.pinecone.configureServerlessIndex(
-                    this.indexSparseName,
+                    this.indexNameHybrid,
                     DeletionProtection.DISABLED,
                     Map.of("env", "development")
             );
 
             this.indexStatus(indexModel);
         } else {
-            this.logger.info("Sparse index already exists: {}", this.indexSparseName);
+            this.logger.info("Hybrid index already exists: {}", this.indexNameHybrid);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -184,8 +185,8 @@ public final class CreateIndex extends Operation {
         /// The dense index name.
         private String indexName;
 
-        /// The sparse index name.
-        private String indexSparseName;
+        /// The hybrid index name.
+        private String indexNameHybrid;
 
         /// The namespace.
         private String namespace;
@@ -215,12 +216,12 @@ public final class CreateIndex extends Operation {
             return this;
         }
 
-        /// Set the sparse index name.
+        /// Set the hybrid index name.
         ///
-        /// @param  indexSparseName java.lang.String
+        /// @param  indexNameHybrid java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.create.CreateIndex.Builder
-        public Builder indexSparseName(final String indexSparseName) {
-            this.indexSparseName = indexSparseName;
+        public Builder indexNameHybrid(final String indexNameHybrid) {
+            this.indexNameHybrid = indexNameHybrid;
 
             return this;
         }
