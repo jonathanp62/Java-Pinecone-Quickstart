@@ -33,7 +33,6 @@
 
 /*
  * The following system property must be set in HOME/.gradle/gradle.properties:
- *   systemProp.macosArchitecture=intel -or-
  *   systemProp.macosArchitecture=silicon
  */
 
@@ -102,7 +101,10 @@ tasks.withType(Javadoc).configureEach {
 }
 
 tasks.withType(JavaExec).configureEach {
-	jvmArgs = ["-Xmx8192m", "--enable-native-access=ALL-UNNAMED", "-ea"]
+	jvmArgs = ["-Xmx8192m",
+			   "--enable-native-access=ALL-UNNAMED",
+			   "--sun-misc-unsafe-memory-access=allow",	// Stop the JVM from complaining about Netty
+			   "-ea"]
 
 	println()
 	println("JVM Arguments: " + jvmArgs)
