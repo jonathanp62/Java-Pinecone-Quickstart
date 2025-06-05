@@ -47,7 +47,6 @@ apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 ext {
 	embeddingModel = 'llama-text-embed-v2'
 	embeddingModelSparse = 'pinecone-sparse-english-v0'
-	enableNativeAccess = '--enable-native-access=ALL-UNNAMED'
 	indexName = 'quickstart'
 	indexNameHybrid = 'quickstart-hybrid'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
@@ -61,8 +60,6 @@ ext {
 	project.version = '0.4.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	rerankingModel = 'bge-reranker-v2-m3'
-	queryText = ''
-	useAssertions = '--enable-assertions'
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_24
@@ -104,12 +101,12 @@ tasks.withType(Javadoc).configureEach {
     sjdo.version(true)
 }
 
-/*
- * Execute with - gradle execute instead of gradle run
- */
+tasks.withType(JavaExec).configureEach {
+	jvmArgs = ["-Xmx8192m", "--enable-native-access=ALL-UNNAMED", "-ea"]
 
-tasks.register('create', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
+	println()
+	println("JVM Arguments: " + jvmArgs)
+
 	systemProperties(
 			['app.embeddingModel': embeddingModel,
 			 'app.embeddingModelSparse': embeddingModelSparse,
@@ -122,296 +119,75 @@ tasks.register('create', JavaExec) {
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'create']
+			 'app.queryText': '']
 	)
+
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 	mainClass = javaMainClass
+}
+
+tasks.register('create', JavaExec) {
+	getSystemProperties().put('app.operation', 'create')
 }
 
 tasks.register('delete', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'delete']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'delete')
 }
 
 tasks.register('describe', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'describe']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'describe')
 }
 
 tasks.register('describeModels', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'describeModels']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'describeModels')
 }
 
 tasks.register('describeNamespace', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'describeNamespace']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'describeNamespace')
 }
 
 tasks.register('fetch', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'fetch']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'fetch')
 }
 
 tasks.register('list', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'list']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'list')
 }
 
 tasks.register('listIndexes', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'listIndexes']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'listIndexes')
 }
 
 tasks.register('listNamespaces', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'listNamespaces']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'listNamespaces')
 }
 
 tasks.register('load', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'load']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'load')
 }
 
 tasks.register('query-by-id', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': 'rec20',
-			 'app.operation': 'query']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-by-id')
+	sysProps.put('app.queryText', 'rec20')
 }
 
 tasks.register('query-monuments', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': 'Famous historical structures and monuments',
-			 'app.operation': 'query']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-monuments')
+	sysProps.put('app.queryText', 'Famous historical structures and monuments')
 }
 
 tasks.register('query-persons', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': 'Tell me about famous persons in history and science',
-			 'app.operation': 'query']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-persons')
+	sysProps.put('app.queryText', 'Tell me about famous persons in history and science')
 }
 
 tasks.register('store', JavaExec) {
-	allJvmArgs = [useAssertions, enableNativeAccess] as List<String>
-	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
-			 'app.mongoDbUri': mongoDbUri,
-			 'app.mongoDbCollection': mongoDbCollection,
-			 'app.mongoDbName': mongoDbName,
-			 'app.namespace': namespace,
-			 'app.openaiApiKey': openaiApiKey,
-			 'app.pineconeApiKey': pineconeApiKey,
-			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': queryText,
-			 'app.operation': 'store']
-	)
-	classpath = sourceSets.main.runtimeClasspath
-	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-	mainClass = javaMainClass
+	getSystemProperties().put('app.operation', 'store')
 }
