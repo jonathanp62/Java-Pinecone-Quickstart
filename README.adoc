@@ -44,6 +44,7 @@ Gradle JavaExec Tasks
 |describeNamespace |No arguments
 |describeModels    |No arguments
 |fetch             |No arguments
+|hybridquery       |No arguments
 |list              |No arguments
 |listIndexes       |No arguments
 |listNamespaces    |No arguments
