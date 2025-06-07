@@ -26,11 +26,11 @@ The unstructured text is initially placed in the UnstructeredText class in the t
 
 The store task deletes all the content from the collections in MongoDB and reloads them with the unstructured text in the above-mentioned class.
 
-The delete task deletes the index from Pinecone.
+The delete task deletes the indexes from Pinecone.
 
-The create task creates the index in Pinecone.
+The create task creates the indexes in Pinecone.
 
-The load task loads the Pinecone index from the MongoDB collections.
+The load task loads the Pinecone indexes from the MongoDB collections.
 
 Gradle JavaExec Tasks
 ~~~~~~~~~~~~~~~~~~~~~
