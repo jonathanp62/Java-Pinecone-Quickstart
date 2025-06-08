@@ -149,6 +149,7 @@ final class Quickstart {
                 case "describeModels" -> this.describeModels(pinecone);
                 case "describeNamespace" -> this.describeNamespace(pinecone);
                 case "fetch" -> this.fetchIndex(pinecone);
+                case "hybridquery" -> this.queryHybridIndex(pinecone, mongoClient);
                 case "list" -> this.listIndex(pinecone);
                 case "listIndexes" -> this.listIndexes(pinecone);
                 case "listNamespaces" -> this.listNamespaces(pinecone);
@@ -470,6 +471,22 @@ final class Quickstart {
             .build();
 
         loadIndex.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Query the hybrid index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  mongoClient com.mongodb.client.MongoClient
+    private void queryHybridIndex(final Pinecone pinecone, final MongoClient mongoClient) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, mongoClient));
+        }
+
+        this.logger.info("Pinecone hybrid query - Temporary");
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

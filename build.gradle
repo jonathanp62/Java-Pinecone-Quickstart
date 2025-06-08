@@ -153,6 +153,13 @@ tasks.register('fetch', JavaExec) {
 	getSystemProperties().put('app.operation', 'fetch')
 }
 
+tasks.register('hybridquery', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'hybridquery')
+	sysProps.put('app.queryText', 'Tell me about the physics of light')
+}
+
 tasks.register('list', JavaExec) {
 	getSystemProperties().put('app.operation', 'list')
 }
