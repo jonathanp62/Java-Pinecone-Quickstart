@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.delete;
 
 /*
+ * (#)DeleteIndex.java  0.4.0   06/08/2025
  * (#)DeleteIndex.java  0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /// The delete index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class DeleteIndex extends Operation {
     /// The logger.
@@ -52,6 +53,7 @@ public final class DeleteIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .indexName(builder.indexName)
+                .indexNameHybrid(builder.indexNameHybrid)
                 .namespace(builder.namespace)
         );
     }
@@ -71,11 +73,19 @@ public final class DeleteIndex extends Operation {
         }
 
         if (this.indexExists()) {
-            this.logger.info("Deleting index: {}", this.indexName);
+            this.logger.info("Deleting dense index: {}", this.indexName);
 
             this.pinecone.deleteIndex(this.indexName);
         } else {
-            this.logger.info("Index does not exist: {}", this.indexName);
+            this.logger.info("Dense index does not exist: {}", this.indexName);
+        }
+
+        if (this.hybridIndexExists()) {
+            this.logger.info("Deleting hybrid index: {}", this.indexNameHybrid);
+
+            this.pinecone.deleteIndex(this.indexNameHybrid);
+        } else {
+            this.logger.info("Hybrid index does not exist: {}", this.indexNameHybrid);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -88,8 +98,11 @@ public final class DeleteIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
+        /// The dense index name.
         private String indexName;
+
+        /// The hybrid index name.
+        private String indexNameHybrid;
 
         /// The namespace.
         private String namespace;
@@ -109,12 +122,22 @@ public final class DeleteIndex extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
         /// @param  indexName   java.lang.String
         /// @return             net.jmp.pinecone.quickstart.delete.DeleteIndex.Builder
         public Builder indexName(final String indexName) {
             this.indexName = indexName;
+
+            return this;
+        }
+
+        /// Set the hybrid index name.
+        ///
+        /// @param  indexNameHybrid java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.delete.DeleteIndex.Builder
+        public Builder indexNameHybrid(final String indexNameHybrid) {
+            this.indexNameHybrid = indexNameHybrid;
 
             return this;
         }

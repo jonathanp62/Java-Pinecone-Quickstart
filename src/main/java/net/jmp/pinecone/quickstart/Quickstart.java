@@ -437,6 +437,7 @@ final class Quickstart {
         final DeleteIndex deleteIndex = DeleteIndex.builder()
             .pinecone(pinecone)
             .indexName(this.indexName)
+            .indexNameHybrid(this.indexNameHybrid)
             .namespace(this.namespace)
             .build();
 
