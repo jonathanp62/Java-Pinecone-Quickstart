@@ -108,8 +108,8 @@ final class Query {
 
         List<ScoredVectorWithUnsignedIndices> matches;
 
-        this.logger.info("Querying index: {}", this.indexName);
-        this.logger.info("Querying ID   : {}", vectorId);
+        this.logger.info("Querying dense index: {}", this.indexName);
+        this.logger.info("Querying ID         : {}", vectorId);
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
@@ -161,7 +161,7 @@ final class Query {
 
         List<ScoredVectorWithUnsignedIndices> matches;
 
-        this.logger.info("Querying index: {}", this.indexName);
+        this.logger.info("Querying dense index: {}", this.indexName);
 
         final Struct filter = this.createFilter(categories);
 

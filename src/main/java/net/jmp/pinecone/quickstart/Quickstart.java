@@ -49,6 +49,7 @@ import net.jmp.pinecone.quickstart.describe.DescribeIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeModels;
 import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
+import net.jmp.pinecone.quickstart.hybridquery.HybridQuery;
 import net.jmp.pinecone.quickstart.list.ListIndex;
 import net.jmp.pinecone.quickstart.list.ListIndexes;
 import net.jmp.pinecone.quickstart.list.ListNamespaces;
@@ -486,7 +487,18 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
-        this.logger.info("Pinecone hybrid query - Temporary");
+        final HybridQuery hybridQuery = HybridQuery.builder()
+                .pinecone(pinecone)
+                .indexNameHybrid(this.indexNameHybrid)
+                .namespace(this.namespace)
+                .queryText(this.queryText)
+                .mongoClient(mongoClient)
+                .collectionName(this.mongoDbCollection)
+                .dbName(this.mongoDbName)
+                .queryText(this.queryText)
+                .build();
+
+        hybridQuery.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
