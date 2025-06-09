@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.list;
 
 /*
+ * (#)ListIndexes.java  0.4.0   06/09/2025
  * (#)ListIndexes.java  0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /// The list indexes class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class ListIndexes extends Operation {
     /// The logger.
@@ -53,8 +54,6 @@ public final class ListIndexes extends Operation {
     private ListIndexes(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
-                .namespace(builder.namespace)
         );
     }
 
@@ -88,12 +87,6 @@ public final class ListIndexes extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
-        private String indexName;
-
-        /// The namespace.
-        private String namespace;
-
         /// The default constructor.
         public Builder() {
             super();
@@ -105,26 +98,6 @@ public final class ListIndexes extends Operation {
         /// @return             net.jmp.pinecone.quickstart.list.ListIndexes.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
-
-            return this;
-        }
-
-        /// Set the index name.
-        ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.list.ListIndexes.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
-
-            return this;
-        }
-
-        /// Set the namespace.
-        ///
-        /// @param  namespace   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.list.ListIndexes.Builder
-        public Builder namespace(final String namespace) {
-            this.namespace = namespace;
 
             return this;
         }

@@ -70,16 +70,16 @@ final class Quickstart {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The dense embedding model.
-    private final String embeddingModel;
+    private final String denseEmbeddingModel;
 
     /// The sparse embedding model.
-    private final String embeddingModelSparse;
+    private final String sparseEmbeddingModel;
 
     /// The dense index name.
-    private final String indexName;
+    private final String denseIndexName;
 
-    /// The hybrid index name.
-    private final String indexNameHybrid;
+    /// The sparse index name.
+    private final String sparseIndexName;
 
     /// The MongoDB collection.
     private final String mongoDbCollection;
@@ -108,10 +108,10 @@ final class Quickstart {
     private Quickstart(final Builder builder) {
         super();
 
-        this.embeddingModel = builder.embeddingModel;
-        this.embeddingModelSparse = builder.embeddingModelSparse;
-        this.indexName = builder.indexName;
-        this.indexNameHybrid = builder.indexNameHybrid;
+        this.denseEmbeddingModel = builder.denseEmbeddingModel;
+        this.sparseEmbeddingModel = builder.sparseEmbeddingModel;
+        this.denseIndexName = builder.denseIndexName;
+        this.sparseIndexName = builder.sparseIndexName;
         this.mongoDbCollection = builder.mongoDbCollection;
         this.mongoDbName = builder.mongoDbName;
         this.mongoDbUriFile = builder.mongoDbUriFile;
@@ -149,12 +149,12 @@ final class Quickstart {
                 case "describeModels" -> this.describeModels(pinecone);
                 case "describeNamespace" -> this.describeNamespace(pinecone);
                 case "fetch" -> this.fetchIndex(pinecone);
-                case "hybridquery" -> this.queryHybridIndex(pinecone, mongoClient);
                 case "list" -> this.listIndex(pinecone);
                 case "listIndexes" -> this.listIndexes(pinecone);
                 case "listNamespaces" -> this.listNamespaces(pinecone);
                 case "load" -> this.loadIndex(pinecone, mongoClient);
                 case "query" -> this.queryIndex(pinecone, mongoClient);
+                case "query-sparse" -> this.querySparseIndex(pinecone, mongoClient);
                 case "store" -> this.storeUnstructuredText(mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
             }
@@ -260,7 +260,7 @@ final class Quickstart {
         return Optional.ofNullable(mongoDbUri);
     }
 
-    /// Fetch from the index.
+    /// Fetch from the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void fetchIndex(final Pinecone pinecone) {
@@ -270,7 +270,8 @@ final class Quickstart {
 
         final FetchIndex fetchIndex = FetchIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -281,7 +282,7 @@ final class Quickstart {
         }
     }
 
-    /// List the index.
+    /// List the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void listIndex(final Pinecone pinecone) {
@@ -291,7 +292,8 @@ final class Quickstart {
 
         final ListIndex listIndex = ListIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -312,8 +314,6 @@ final class Quickstart {
 
         final ListIndexes listIndexes = ListIndexes.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
-            .namespace(this.namespace)
             .build();
 
         listIndexes.operate();
@@ -333,7 +333,8 @@ final class Quickstart {
 
         final ListNamespaces listNamespaces = ListNamespaces.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -344,7 +345,7 @@ final class Quickstart {
         }
     }
 
-    /// Create the index.
+    /// Create the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void createIndex(final Pinecone pinecone) {
@@ -354,8 +355,8 @@ final class Quickstart {
 
         final CreateIndex createIndex = CreateIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
-            .indexNameHybrid(this.indexNameHybrid)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -366,7 +367,7 @@ final class Quickstart {
         }
     }
 
-    /// Describe the index.
+    /// Describe the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void describeIndex(final Pinecone pinecone) {
@@ -376,7 +377,8 @@ final class Quickstart {
 
         final DescribeIndex describeIndex = DescribeIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -406,7 +408,7 @@ final class Quickstart {
         }
     }
 
-    /// Describe the namespace.
+    /// Describe the namespaces.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void describeNamespace(final Pinecone pinecone) {
@@ -416,7 +418,8 @@ final class Quickstart {
 
         final DescribeNamespace describeNamespace = DescribeNamespace.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -427,7 +430,7 @@ final class Quickstart {
         }
     }
 
-    /// Delete the index.
+    /// Delete the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     private void deleteIndex(final Pinecone pinecone) {
@@ -437,8 +440,8 @@ final class Quickstart {
 
         final DeleteIndex deleteIndex = DeleteIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
-            .indexNameHybrid(this.indexNameHybrid)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
             .build();
 
@@ -449,7 +452,7 @@ final class Quickstart {
         }
     }
 
-    /// Load the index.
+    /// Load the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     /// @param  mongoClient com.mongodb.client.MongoClient
@@ -460,11 +463,11 @@ final class Quickstart {
 
         final LoadIndex loadIndex = LoadIndex.builder()
             .pinecone(pinecone)
-            .indexName(this.indexName)
-            .indexNameHybrid(this.indexNameHybrid)
+            .denseIndexName(this.denseIndexName)
+            .sparseIndexName(this.sparseIndexName)
             .namespace(this.namespace)
-            .embeddingModel(this.embeddingModel)
-            .embeddingModelSparse(this.embeddingModelSparse)
+            .denseEmbeddingModel(this.denseEmbeddingModel)
+            .sparseEmbeddingModel(this.sparseEmbeddingModel)
             .mongoClient(mongoClient)
             .collectionName(this.mongoDbCollection)
             .dbName(this.mongoDbName)
@@ -477,16 +480,16 @@ final class Quickstart {
         }
     }
 
-    /// Query the hybrid index.
+    /// Query the sparse index.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
     /// @param  mongoClient com.mongodb.client.MongoClient
-    private void queryHybridIndex(final Pinecone pinecone, final MongoClient mongoClient) {
+    private void querySparseIndex(final Pinecone pinecone, final MongoClient mongoClient) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
-        this.logger.info("Pinecone hybrid query - Temporary");
+        this.logger.info("Pinecone sparse query - Temporary");
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -504,8 +507,8 @@ final class Quickstart {
 
         final QueryIndex queryIndex = QueryIndex.builder()
             .pinecone(pinecone)
-            .embeddingModel(this.embeddingModel)
-            .indexName(this.indexName)
+            .denseEmbeddingModel(this.denseEmbeddingModel)
+            .denseIndexName(this.denseIndexName)
             .namespace(this.namespace)
             .rerankingModel(this.rerankingModel)
             .queryText(this.queryText)
@@ -546,16 +549,16 @@ final class Quickstart {
     /// The builder class.
     static class Builder {
         /// The dense embedding model.
-        private String embeddingModel;
+        private String denseEmbeddingModel;
 
         /// The sparse embedding model.
-        private String embeddingModelSparse;
+        private String sparseEmbeddingModel;
 
         /// The dense index name.
-        private String indexName;
+        private String denseIndexName;
 
-        /// The hybrid index name.
-        private String indexNameHybrid;
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The MongoDb collection.
         private String mongoDbCollection;
@@ -582,40 +585,40 @@ final class Quickstart {
 
         /// Set the dense embedding model.
         ///
-        /// @param  embeddingModel  java.lang.String
-        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
-        public Builder embeddingModel(final String embeddingModel) {
-            this.embeddingModel = embeddingModel;
+        /// @param  denseEmbeddingModel java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
+            this.denseEmbeddingModel = denseEmbeddingModel;
 
             return this;
         }
 
         /// Set the sparse embedding model.
         ///
-        /// @param  embeddingModelSparse    java.lang.String
+        /// @param  sparseEmbeddingModel    java.lang.String
         /// @return                         net.jmp.pinecone.quickstart.Quickstart.Builder
-        public Builder embeddingModelSparse(final String embeddingModelSparse) {
-            this.embeddingModelSparse = embeddingModelSparse;
+        public Builder sparseEmbeddingModel(final String sparseEmbeddingModel) {
+            this.sparseEmbeddingModel = sparseEmbeddingModel;
 
             return this;
         }
 
         /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }
 
-        /// Set the hybrid index name.
+        /// Set the sparse index name.
         ///
-        /// @param  indexNameHybrid java.lang.String
-        /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
-        public Builder indexNameHybrid(final String indexNameHybrid) {
-            this.indexNameHybrid = indexNameHybrid;
+        /// @param  sparseIndexName    java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

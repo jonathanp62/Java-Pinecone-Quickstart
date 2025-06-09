@@ -44,10 +44,8 @@ plugins {
 apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
-	embeddingModel = 'llama-text-embed-v2'
-	embeddingModelSparse = 'pinecone-sparse-english-v0'
-	indexName = 'quickstart'
-	indexNameHybrid = 'quickstart-hybrid'
+	denseEmbeddingModel = 'llama-text-embed-v2'
+	denseIndexName = 'quickstart-dense'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	mongoDbCollection = 'quickstart'
 	mongoDbName = 'pinecone_quickstart'
@@ -59,6 +57,8 @@ ext {
 	project.version = '0.4.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	rerankingModel = 'bge-reranker-v2-m3'
+	sparseEmbeddingModel = 'pinecone-sparse-english-v0'
+	sparseIndexName = 'quickstart-sparse'
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_24
@@ -110,10 +110,8 @@ tasks.withType(JavaExec).configureEach {
 	println("JVM Arguments: " + jvmArgs)
 
 	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
+			['app.denseEmbeddingModel': denseEmbeddingModel,
+			 'app.denseIndexName': denseIndexName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -121,7 +119,10 @@ tasks.withType(JavaExec).configureEach {
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': '']
+			 'app.queryText': '',
+			 'app.sparseEmbeddingModel': sparseEmbeddingModel,
+			 'app.sparseIndexName': sparseIndexName
+			]
 	)
 
 	classpath = sourceSets.main.runtimeClasspath
@@ -151,13 +152,6 @@ tasks.register('describeNamespace', JavaExec) {
 
 tasks.register('fetch', JavaExec) {
 	getSystemProperties().put('app.operation', 'fetch')
-}
-
-tasks.register('hybridquery', JavaExec) {
-	var sysProps = getSystemProperties()
-
-	sysProps.put('app.operation', 'hybridquery')
-	sysProps.put('app.queryText', 'Tell me about the physics of light')
 }
 
 tasks.register('list', JavaExec) {
@@ -195,6 +189,13 @@ tasks.register('query-persons', JavaExec) {
 
 	sysProps.put('app.operation', 'query-persons')
 	sysProps.put('app.queryText', 'Tell me about famous persons in history and science')
+}
+
+tasks.register('query-sparse', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-sparse')
+	sysProps.put('app.queryText', 'Tell me about the physics of light')
 }
 
 tasks.register('store', JavaExec) {

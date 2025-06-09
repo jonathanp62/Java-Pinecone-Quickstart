@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)QueryIndex.java   0.4.0   06/09/2025
  * (#)QueryIndex.java   0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -45,9 +46,9 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/// The query index class.
+/// The query dense index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class QueryIndex extends Operation {
     /// The logger.
@@ -59,8 +60,8 @@ public final class QueryIndex extends Operation {
     private QueryIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .embeddingModel(builder.embeddingModel)
-                .indexName(builder.indexName)
+                .denseEmbeddingModel(builder.denseEmbeddingModel)
+                .denseIndexName(builder.denseIndexName)
                 .namespace(builder.namespace)
                 .rerankingModel(builder.rerankingModel)
                 .queryText(builder.queryText)
@@ -85,7 +86,7 @@ public final class QueryIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.indexExists() && this.isIndexLoaded()) {
+        if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
             List<ScoredVectorWithUnsignedIndices> matches = null;
 
             if (this.queryText.startsWith("rec")) {
@@ -111,7 +112,7 @@ public final class QueryIndex extends Operation {
 
             this.logger.info(summary);
         } else {
-            this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
+            this.logger.info("Dense index does not exist or is not loaded: {}", this.denseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -119,7 +120,7 @@ public final class QueryIndex extends Operation {
         }
     }
 
-    /// Query the index by vector ID.
+    /// Query the dense index by vector ID.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
     private List<ScoredVectorWithUnsignedIndices> queryById() {
@@ -129,7 +130,7 @@ public final class QueryIndex extends Operation {
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)
-                .indexName(this.indexName)
+                .indexName(this.denseIndexName)
                 .namespace(this.namespace)
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
@@ -145,7 +146,7 @@ public final class QueryIndex extends Operation {
         return matches;
     }
 
-    /// Query the index by vector.
+    /// Query the dense index by vector.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
     private List<ScoredVectorWithUnsignedIndices> queryByVector() {
@@ -153,12 +154,12 @@ public final class QueryIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        final QueryVector queryVector = new QueryVector(this.pinecone, this.embeddingModel);
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
         final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)
-                .indexName(this.indexName)
+                .indexName(this.denseIndexName)
                 .namespace(this.namespace)
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
@@ -293,11 +294,11 @@ public final class QueryIndex extends Operation {
         /// The Pinecone cliebt.
         private Pinecone pinecone;
 
-        /// The embedding model.
-        private String embeddingModel;
+        /// The dense embedding model.
+        private String denseEmbeddingModel;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -335,22 +336,22 @@ public final class QueryIndex extends Operation {
             return this;
         }
 
-        /// Set the embedding model.
+        /// Set the dense embedding model.
         ///
-        /// @param  embeddingModel java.lang.String
+        /// @param  denseEmbeddingModel java.lang.String
         /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-        public Builder embeddingModel(final String embeddingModel) {
-            this.embeddingModel = embeddingModel;
+        public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
+            this.denseEmbeddingModel = denseEmbeddingModel;
 
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName java.lang.String
+        /// @param  denseIndexName java.lang.String
         /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }

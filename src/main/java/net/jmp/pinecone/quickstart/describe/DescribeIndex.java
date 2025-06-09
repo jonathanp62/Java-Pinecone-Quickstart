@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.describe;
 
 /*
+ * (#)DescribeIndex.java    0.4.0   06/09/2025
  * (#)DescribeIndex.java    0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public class DescribeIndex extends Operation {
     /// The logger.
@@ -56,7 +57,8 @@ public class DescribeIndex extends Operation {
     private DescribeIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
+                .denseIndexName(builder.denseIndexName)
+                .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
     }
@@ -75,14 +77,14 @@ public class DescribeIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.indexExists()) {
-            final IndexModel indexModel = this.pinecone.describeIndex(this.indexName);
+        if (this.doesDenseIndexExist()) {
+            final IndexModel indexModel = this.pinecone.describeIndex(this.denseIndexName);
 
             if (this.logger.isInfoEnabled()) {
-                this.logger.info("Index: {}", indexModel.toJson());
+                this.logger.info("Dense Index: {}", indexModel.toJson());
             }
 
-            try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
                 final ListResponse response = index.list(this.namespace);
 
                 if (this.logger.isInfoEnabled()) {
@@ -90,7 +92,25 @@ public class DescribeIndex extends Operation {
                 }
             }
         } else {
-            this.logger.info("Index does not exist: {}", this.indexName);
+            this.logger.info("Dense index does not exist: {}", this.denseIndexName);
+        }
+
+        if (this.doesSparseIndexExist()) {
+            final IndexModel indexModel = this.pinecone.describeIndex(this.sparseIndexName);
+
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Sparse Index: {}", indexModel.toJson());
+            }
+
+            try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
+                final ListResponse response = index.list(this.namespace);
+
+                if (this.logger.isInfoEnabled()) {
+                    this.logger.info("Vectors count: {}", response.getVectorsCount());
+                }
+            }
+        } else {
+            this.logger.info("Sparse index does not exist: {}", this.sparseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -103,8 +123,11 @@ public class DescribeIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
+
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -124,12 +147,22 @@ public class DescribeIndex extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.describe.DescribeIndex.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.describe.DescribeIndex.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  sparseIndexName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.describe.DescribeIndex.Builder
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

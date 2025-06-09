@@ -44,7 +44,6 @@ Gradle JavaExec Tasks
 |describeNamespace |No arguments
 |describeModels    |No arguments
 |fetch             |No arguments
-|hybridquery       |No arguments
 |list              |No arguments
 |listIndexes       |No arguments
 |listNamespaces    |No arguments
@@ -52,6 +51,7 @@ Gradle JavaExec Tasks
 |query-by-id       |No arguments
 |query-monuments   |No arguments
 |query-persons     |No arguments
+|query-sparse      |No arguments
 |store             |No arguments
 |=======================
 

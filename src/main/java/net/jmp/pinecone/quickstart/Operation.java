@@ -62,16 +62,16 @@ public abstract class Operation {
     protected final Pinecone pinecone;
 
     /// The dense embedding model.
-    protected final String embeddingModel;
+    protected final String denseEmbeddingModel;
 
     /// The sparse embedding model.
-    protected final String embeddingModelSparse;
+    protected final String sparseEmbeddingModel;
 
     /// The dense index name.
-    protected final String indexName;
+    protected final String denseIndexName;
 
-    /// The hybrid index name.
-    protected final String indexNameHybrid;
+    /// The sparse index name.
+    protected final String sparseIndexName;
 
     /// The namespace.
     protected final String namespace;
@@ -104,10 +104,10 @@ public abstract class Operation {
         super();
 
         this.pinecone = operationBuilder.pinecone;
-        this.embeddingModel = operationBuilder.embeddingModel;
-        this.embeddingModelSparse = operationBuilder.embeddingModelSparse;
-        this.indexName = operationBuilder.indexName;
-        this.indexNameHybrid = operationBuilder.indexNameHybrid;
+        this.denseEmbeddingModel = operationBuilder.denseEmbeddingModel;
+        this.sparseEmbeddingModel = operationBuilder.sparseEmbeddingModel;
+        this.denseIndexName = operationBuilder.denseIndexName;
+        this.sparseIndexName = operationBuilder.sparseIndexName;
         this.namespace = operationBuilder.namespace;
         this.rerankingModel = operationBuilder.rerankingModel;
         this.queryText = operationBuilder.queryText;
@@ -130,12 +130,12 @@ public abstract class Operation {
     /// Return true if the dense index exists.
     ///
     /// @return boolean
-    protected boolean indexExists() {
+    protected boolean doesDenseIndexExist() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.denseIndexExists();
+        final boolean result = this.doesIndexExist(this.denseIndexName);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -144,32 +144,15 @@ public abstract class Operation {
         return result;
     }
 
-    /// Return true if the dense index exists.
+    /// Return true if the sparse index exists.
     ///
     /// @return boolean
-    protected boolean denseIndexExists() {
+    protected boolean doesSparseIndexExist() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.doesIndexExist(this.indexName);
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(result));
-        }
-
-        return result;
-    }
-
-    /// Return true if the hybrid index exists.
-    ///
-    /// @return boolean
-    protected boolean hybridIndexExists() {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
-        }
-
-        final boolean result = this.doesIndexExist(this.indexNameHybrid);
+        final boolean result = this.doesIndexExist(this.sparseIndexName);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -212,29 +195,12 @@ public abstract class Operation {
     /// Check if the dense index is loaded.
     ///
     /// @return boolean
-    protected boolean isIndexLoaded() {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
-        }
-
-        final boolean result = this.isDenseIndexLoaded();
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(result));
-        }
-
-        return result;
-    }
-
-    /// Check if the dense index is loaded.
-    ///
-    /// @return boolean
     protected boolean isDenseIndexLoaded() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.isNamedIndexLoaded(this.indexName, this.namespace);
+        final boolean result = this.isNamedIndexLoaded(this.denseIndexName, this.namespace);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -243,15 +209,15 @@ public abstract class Operation {
         return result;
     }
 
-    /// Check if the hybrid index is loaded.
+    /// Check if the sparse index is loaded.
     ///
     /// @return boolean
-    protected boolean isHybridIndexLoaded() {
+    protected boolean isSparseIndexLoaded() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final boolean result = this.isNamedIndexLoaded(this.indexNameHybrid, this.namespace);
+        final boolean result = this.isNamedIndexLoaded(this.sparseIndexName, this.namespace);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(result));
@@ -299,16 +265,16 @@ public abstract class Operation {
         protected Pinecone pinecone;
 
         /// The dense embedding model.
-        protected String embeddingModel;
+        protected String denseEmbeddingModel;
 
         /// The sparse embedding model.
-        protected String embeddingModelSparse;
+        protected String sparseEmbeddingModel;
 
         /// The dense index name.
-        protected String indexName;
+        protected String denseIndexName;
 
-        /// The hybrid index name.
-        protected String indexNameHybrid;
+        /// The sparse index name.
+        protected String sparseIndexName;
 
         /// The namespace.
         protected String namespace;
@@ -348,40 +314,40 @@ public abstract class Operation {
 
         /// Set the dense embedding model.
         ///
-        /// @param  embeddingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.Operation.OperationBuilder
-        public OperationBuilder embeddingModel(final String embeddingModel) {
-            this.embeddingModel = embeddingModel;
+        /// @param  denseEmbeddingModel java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder denseEmbeddingModel(final String denseEmbeddingModel) {
+            this.denseEmbeddingModel = denseEmbeddingModel;
 
             return this;
         }
 
         /// Set the sparse embedding model.
         ///
-        /// @param  embeddingModelSparse    java.lang.String
+        /// @param  sparseEmbeddingModel    java.lang.String
         /// @return                         net.jmp.pinecone.quickstart.Operation.OperationBuilder
-        public OperationBuilder embeddingModelSparse(final String embeddingModelSparse) {
-            this.embeddingModelSparse = embeddingModelSparse;
+        public OperationBuilder sparseEmbeddingModel(final String sparseEmbeddingModel) {
+            this.sparseEmbeddingModel = sparseEmbeddingModel;
 
             return this;
         }
 
         /// Set the dense index name.
         ///
-        /// @param  indexName java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.Operation.OperationBuilder
-        public OperationBuilder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }
 
-        /// Set the hybrid index name.
+        /// Set the sparse index name.
         ///
-        /// @param  indexNameHybrid java.lang.String
+        /// @param  sparseIndexName java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.Operation.OperationBuilder
-        public OperationBuilder indexNameHybrid(final String indexNameHybrid) {
-            this.indexNameHybrid = indexNameHybrid;
+        public OperationBuilder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }
