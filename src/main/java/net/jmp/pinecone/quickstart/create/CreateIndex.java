@@ -136,14 +136,13 @@ public final class CreateIndex extends Operation {
 
             /* Embedding model pinecone-sparse-english-v0 */
 
-            this.pinecone.createServerlessIndex(
+            this.pinecone.createSparseServelessIndex(
                     this.sparseIndexName,
-                    "cosine",
-                    1024,
                     "aws",
                     "us-east-1",
                     DeletionProtection.DISABLED,
-                    Map.of("env", "development")
+                    Map.of("env", "development"),
+                    "sparse"
             );
 
             final IndexModel indexModel = this.pinecone.configureServerlessIndex(
