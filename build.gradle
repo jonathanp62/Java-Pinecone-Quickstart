@@ -171,21 +171,21 @@ tasks.register('load', JavaExec) {
 	getSystemProperties().put('app.operation', 'load')
 }
 
-tasks.register('query-by-id', JavaExec) {
+tasks.register('query-dense-by-id', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'query-dense')
 	sysProps.put('app.queryText', 'rec20')
 }
 
-tasks.register('query-monuments', JavaExec) {
+tasks.register('query-dense-monuments', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'query-dense')
 	sysProps.put('app.queryText', 'Famous historical structures and monuments')
 }
 
-tasks.register('query-persons', JavaExec) {
+tasks.register('query-dense-persons', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'query-dense')
