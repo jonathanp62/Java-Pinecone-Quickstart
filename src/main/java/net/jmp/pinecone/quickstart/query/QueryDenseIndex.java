@@ -1,8 +1,8 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
- * (#)QueryIndex.java   0.4.0   06/09/2025
- * (#)QueryIndex.java   0.2.0   05/21/2025
+ * (#)QueryDenseIndex.java  0.4.0   06/09/2025
+ * (#)QueryDenseIndex.java  0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
  *
@@ -50,14 +50,14 @@ import org.slf4j.LoggerFactory;
 ///
 /// @version    0.4.0
 /// @since      0.2.0
-public final class QueryIndex extends Operation {
+public final class QueryDenseIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The constructor.
     ///
-    /// @param  builder net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-    private QueryIndex(final Builder builder) {
+    /// @param  builder net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+    private QueryDenseIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .denseEmbeddingModel(builder.denseEmbeddingModel)
@@ -74,7 +74,7 @@ public final class QueryIndex extends Operation {
 
     /// Return the builder.
     ///
-    /// @return net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+    /// @return net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
     public static Builder builder() {
         return new Builder();
     }
@@ -329,7 +329,7 @@ public final class QueryIndex extends Operation {
         /// Set the Pinecone client.
         ///
         /// @param  pinecone net.jmp.pinecone.Pinecone
-        /// @return          net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return          net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
 
@@ -339,7 +339,7 @@ public final class QueryIndex extends Operation {
         /// Set the dense embedding model.
         ///
         /// @param  denseEmbeddingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return                     net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
             this.denseEmbeddingModel = denseEmbeddingModel;
 
@@ -348,8 +348,8 @@ public final class QueryIndex extends Operation {
 
         /// Set the dense index name.
         ///
-        /// @param  denseIndexName java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
 
@@ -359,7 +359,7 @@ public final class QueryIndex extends Operation {
         /// Set the namespace.
         ///
         /// @param  namespace java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder namespace(final String namespace) {
             this.namespace = namespace;
 
@@ -369,7 +369,7 @@ public final class QueryIndex extends Operation {
         /// Set the re-ranking model.
         ///
         /// @param  rerankingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder rerankingModel(final String rerankingModel) {
             this.rerankingModel = rerankingModel;
 
@@ -379,7 +379,7 @@ public final class QueryIndex extends Operation {
         /// Set the query text.
         ///
         /// @param  queryText java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder queryText(final String queryText) {
             this.queryText = queryText;
 
@@ -389,7 +389,7 @@ public final class QueryIndex extends Operation {
         /// Set the OpenAI API key.
         ///
         /// @param  openAiApiKey java.lang.String
-        /// @return              net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return              net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder openAiApiKey(final String openAiApiKey) {
             this.openAiApiKey = openAiApiKey;
 
@@ -399,7 +399,7 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB client.
         ///
         /// @param  mongoClient com.mongodb.client.MongoClient
-        /// @return             net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return             net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder mongoClient(final MongoClient mongoClient) {
             this.mongoClient = mongoClient;
 
@@ -409,7 +409,7 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB collection name.
         ///
         /// @param  collectionName java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder collectionName(final String collectionName) {
             this.collectionName = collectionName;
 
@@ -419,18 +419,18 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB database name.
         ///
         /// @param  dbName java.lang.String
-        /// @return        net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return        net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
 
             return this;
         }
 
-        /// Build the query index.
+        /// Build the dense query index.
         ///
-        /// @return  net.jmp.pinecone.quickstart.query.QueryIndex
-        public QueryIndex build() {
-            return new QueryIndex(this);
+        /// @return  net.jmp.pinecone.quickstart.query.QueryDenseIndex
+        public QueryDenseIndex build() {
+            return new QueryDenseIndex(this);
         }
     }
 }

@@ -53,7 +53,8 @@ import net.jmp.pinecone.quickstart.list.ListIndex;
 import net.jmp.pinecone.quickstart.list.ListIndexes;
 import net.jmp.pinecone.quickstart.list.ListNamespaces;
 import net.jmp.pinecone.quickstart.load.LoadIndex;
-import net.jmp.pinecone.quickstart.query.QueryIndex;
+import net.jmp.pinecone.quickstart.query.QueryDenseIndex;
+import net.jmp.pinecone.quickstart.query.QuerySparseIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 
 import static net.jmp.util.logging.LoggerUtils.*;
@@ -153,7 +154,7 @@ final class Quickstart {
                 case "listIndexes" -> this.listIndexes(pinecone);
                 case "listNamespaces" -> this.listNamespaces(pinecone);
                 case "load" -> this.loadIndex(pinecone, mongoClient);
-                case "query" -> this.queryDenseIndex(pinecone, mongoClient); // @todo Rename to query-dense
+                case "query-dense" -> this.queryDenseIndex(pinecone, mongoClient);
                 case "query-sparse" -> this.querySparseIndex(pinecone, mongoClient);
                 case "store" -> this.storeUnstructuredText(mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
@@ -489,7 +490,20 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
-        this.logger.info("Pinecone sparse query - Temporary");
+        final QuerySparseIndex querySparseIndex = QuerySparseIndex.builder()
+                .pinecone(pinecone)
+                .sparseEmbeddingModel(this.sparseEmbeddingModel)
+                .sparseIndexName(this.sparseIndexName)
+                .namespace(this.namespace)
+                .rerankingModel(this.rerankingModel)
+                .queryText(this.queryText)
+                .openAiApiKey(this.openAiApiKey)
+                .mongoClient(mongoClient)
+                .collectionName(this.mongoDbCollection)
+                .dbName(this.mongoDbName)
+                .build();
+
+        querySparseIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -505,7 +519,7 @@ final class Quickstart {
             this.logger.trace(entryWith(pinecone, mongoClient));
         }
 
-        final QueryIndex queryIndex = QueryIndex.builder()
+        final QueryDenseIndex queryDenseIndex = QueryDenseIndex.builder()
             .pinecone(pinecone)
             .denseEmbeddingModel(this.denseEmbeddingModel)
             .denseIndexName(this.denseIndexName)
@@ -518,7 +532,7 @@ final class Quickstart {
             .dbName(this.mongoDbName)
             .build();
 
-        queryIndex.operate();
+        queryDenseIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
