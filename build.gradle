@@ -110,7 +110,8 @@ tasks.withType(JavaExec).configureEach {
 	println("JVM Arguments: " + jvmArgs)
 
 	systemProperties(
-			['app.denseEmbeddingModel': denseEmbeddingModel,
+			[
+ 			 'app.denseEmbeddingModel': denseEmbeddingModel,
 			 'app.denseIndexName': denseIndexName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
