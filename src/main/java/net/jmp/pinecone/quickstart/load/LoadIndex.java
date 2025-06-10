@@ -178,49 +178,51 @@ public final class LoadIndex extends Operation {
 
         if (this.doesSparseIndexExist() && !this.isSparseIndexLoaded()) {
             final List<UnstructuredTextDocument> documents = this.createContent();
-            final List<Embedding> denseEmbeddings = this.createEmbeddings(documents, this.sparseEmbeddingModel);
             final List<Embedding> sparseEmbeddings = this.createEmbeddings(documents, this.sparseEmbeddingModel);
             final List<Struct> metadata = this.createMetadata(documents);
 
-            assert denseEmbeddings.size() == metadata.size();
             assert sparseEmbeddings.size() == metadata.size();
-
-            final List<VectorWithUnsignedIndices> vectors = new ArrayList<>(sparseEmbeddings.size());
-
-            for (int i = 0; i < sparseEmbeddings.size(); i++) {
-                final Embedding sparseEmbedding = sparseEmbeddings.get(i);
-                final Embedding denseEmbedding = denseEmbeddings.get(i);
-                final Struct metadataStruct = metadata.get(i);
-                final String vectorId = metadataStruct.getFieldsMap().get("documentid").getStringValue();
-
-                final List<Long> sparseIndices = new ArrayList<>(sparseEmbedding.getSparseEmbedding().getSparseIndices().size());
-
-                for (int j = 0; j < sparseEmbedding.getSparseEmbedding().getSparseIndices().size(); j++) {
-                    sparseIndices.add(toUnsignedLong(sparseEmbedding.getSparseEmbedding().getSparseIndices().get(j)));
-                }
-
-                final List<Float> sparseValues = sparseEmbedding.getSparseEmbedding().getSparseValues();
-
-                vectors.add(
-                        buildUpsertVectorWithUnsignedIndices(
-                                vectorId,
-                                denseEmbedding.getDenseEmbedding().getValues(),
-                                sparseIndices,
-                                sparseValues,
-                                metadataStruct
-                        )
-                );
-            }
 
             this.logger.info("Loading sparse index: {}", this.sparseIndexName);
 
             try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
-                final UpsertResponse result = index.upsert(vectors, this.namespace);
-                final int upsertedCount = result.getUpsertedCount();
-                final int serializedSize = result.getSerializedSize();
+                int totalUpsertedCount = 0;
 
-                this.logger.info("Upserted {} vectors", upsertedCount);
-                this.logger.info("Serialized size: {}", serializedSize);
+                for (int i = 0; i < sparseEmbeddings.size(); i++) {
+                    final Embedding sparseEmbedding = sparseEmbeddings.get(i);
+                    final Struct metadataStruct = metadata.get(i);
+                    final String vectorId = metadataStruct.getFieldsMap().get("documentid").getStringValue();
+
+                    final List<Long> sparseIndices = new ArrayList<>(sparseEmbedding.getSparseEmbedding().getSparseIndices().size());
+
+                    for (int j = 0; j < sparseEmbedding.getSparseEmbedding().getSparseIndices().size(); j++) {
+                        sparseIndices.add(toUnsignedLong(sparseEmbedding.getSparseEmbedding().getSparseIndices().get(j)));
+                    }
+
+                    final List<Float> sparseValues = sparseEmbedding.getSparseEmbedding().getSparseValues();
+
+                    final UpsertResponse result = index.upsert(
+                            vectorId,
+                            Collections.emptyList(),
+                            sparseIndices,
+                            sparseValues,
+                            metadataStruct,
+                            this.namespace
+                    );
+
+                    final int upsertedCount = result.getUpsertedCount();
+
+                    totalUpsertedCount += upsertedCount;
+
+                    if (this.logger.isDebugEnabled()) {
+                        final int serializedSize = result.getSerializedSize();
+
+                        this.logger.debug("Upserted {} vectors", upsertedCount);
+                        this.logger.debug("Serialized size: {}", serializedSize);
+                    }
+                }
+
+                this.logger.info("Upserted {} total vectors", totalUpsertedCount);
             }
         } else {
             this.logger.info("Sparse index either does not exist or is already loaded: {}", this.sparseIndexName);
