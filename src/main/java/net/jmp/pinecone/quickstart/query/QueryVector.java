@@ -149,7 +149,7 @@ final class QueryVector {
             final List<Integer> sparseIndices = embeddingsList.getFirst().getSparseEmbedding().getSparseIndices();
 
             sparseVector.setSparseValues(sparseValues);
-            sparseVector.setSparseIndices(sparseIndices);
+            sparseVector.setIntSparseIndices(sparseIndices);
 
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Query sparse embeddings: {}: {}", queryText, sparseEmbeddings.toJson());

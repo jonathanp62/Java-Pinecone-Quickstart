@@ -28,6 +28,8 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
+import static java.lang.Integer.toUnsignedLong;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +42,7 @@ final class SparseVector {
     private List<Float> sparseValues = new ArrayList<>();
 
     /// The sparse indices.
-    private List<Integer> sparseIndices = new ArrayList<>();
+    private List<Long> sparseIndices = new ArrayList<>();
 
     /// The default constructor.
     SparseVector() {
@@ -63,15 +65,28 @@ final class SparseVector {
 
     /// Return the sparse indices.
     ///
-    /// @return  java.util.List<java.lang.Integer>
-    List<Integer> getSparseIndices() {
+    /// @return  java.util.List<java.lang.Long>
+    List<Long> getSparseIndices() {
         return this.sparseIndices;
     }
 
     /// Set the sparse indices.
     ///
-    /// @param  sparseIndices  java.util.List<java.lang.Integer>
-    void setSparseIndices(final List<Integer> sparseIndices) {
+    /// @param  sparseIndices  java.util.List<java.lang.Long>
+    void setLongSparseIndices(final List<Long> sparseIndices) {
         this.sparseIndices = sparseIndices;
+    }
+
+    /// Set the sparse indices from a list of integers.
+    ///
+    /// @param  sparseIndices  java.util.List<java.lang.Integer>
+    void setIntSparseIndices(final List<Integer> sparseIndices) {
+        final List<Long> sparseIndicesAsLongs = new ArrayList<>(sparseIndices.size());
+
+        for (Integer sparseIndex : sparseIndices) {
+            sparseIndicesAsLongs.add(toUnsignedLong(sparseIndex));
+        }
+
+        this.sparseIndices = sparseIndicesAsLongs;
     }
 }
