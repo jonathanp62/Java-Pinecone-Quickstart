@@ -67,6 +67,7 @@ public final class Main implements Runnable {
         final String queryText = System.getProperty("app.queryText");
         final String sparseEmbeddingModel = System.getProperty("app.sparseEmbeddingModel");
         final String sparseIndexName = System.getProperty("app.sparseIndexName");
+        final String topK = System.getProperty("app.topK");
 
         this.logger.info("Pinecone Quickstart");
 
@@ -81,6 +82,7 @@ public final class Main implements Runnable {
         this.logger.info("Query Text            : {}", queryText);
         this.logger.info("Sparse Embedding Model: {}", sparseEmbeddingModel);
         this.logger.info("Sparse Index Name     : {}", sparseIndexName);
+        this.logger.info("TopK                  : {}", topK);
 
         final Quickstart quickstart = Quickstart.builder()
             .denseEmbeddingModel(denseEmbeddingModel)
@@ -93,6 +95,7 @@ public final class Main implements Runnable {
             .namespace(namespace)
             .rerankingModel(rerankingModel)
             .queryText(queryText)
+            .topK(Integer.parseInt(topK))
             .build();
 
         quickstart.start(operation);

@@ -103,6 +103,9 @@ final class Quickstart {
     /// The Open AI API key.
     private String openAiApiKey;
 
+    /// The number of top results to return when querying.
+    private int topk;
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.Quickstart.Builder
@@ -119,6 +122,7 @@ final class Quickstart {
         this.namespace = builder.namespace;
         this.rerankingModel = builder.rerankingModel;
         this.queryText = builder.queryText;
+        this.topk = builder.topK;
     }
 
     /// The builder method.
@@ -592,6 +596,9 @@ final class Quickstart {
         /// The query text.
         private String queryText;
 
+        /// The number of top results to return when querying.
+        private int topK;
+
         /// The default constructor.
         Builder() {
             super();
@@ -693,6 +700,16 @@ final class Quickstart {
         /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder queryText(final String queryText) {
             this.queryText = queryText;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }
