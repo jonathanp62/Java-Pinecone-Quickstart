@@ -59,6 +59,7 @@ ext {
 	rerankingModel = 'bge-reranker-v2-m3'
 	sparseEmbeddingModel = 'pinecone-sparse-english-v0'
 	sparseIndexName = 'quickstart-sparse'
+	topK = 10
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_24
@@ -122,7 +123,8 @@ tasks.withType(JavaExec).configureEach {
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': '',
 			 'app.sparseEmbeddingModel': sparseEmbeddingModel,
-			 'app.sparseIndexName': sparseIndexName
+			 'app.sparseIndexName': sparseIndexName,
+			 'app.topK': topK
 			]
 	)
 
