@@ -136,6 +136,7 @@ public final class QueryDenseIndex extends Operation {
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
                 .dbName(this.dbName)
+                .topK(this.topK)
                 .build();
 
         final List<ScoredVectorWithUnsignedIndices> matches = query.queryById(this.queryText);
@@ -165,6 +166,7 @@ public final class QueryDenseIndex extends Operation {
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
                 .dbName(this.dbName)
+                .topK(this.topK)
                 .build();
 
         final Set<String> categories = this.getCategories();

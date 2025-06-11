@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Query.java    0.4.0   06/11/2025
  * (#)Query.java    0.3.0   05/27/2025
  * (#)Query.java    0.2.0   05/26/2025
  *
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query class.
 ///
-/// @version    0.3.0
+/// @version    0.4.0
 /// @since      0.2.0
 final class Query {
     /// The logger.
@@ -76,6 +77,9 @@ final class Query {
     /// The MongoDB database name.
     private final String dbName;
 
+    /// The number of top results to return when querying.
+    private final int topK;
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.query.Query.Builder
@@ -88,6 +92,7 @@ final class Query {
         this.mongoClient = builder.mongoClient;
         this.collectionName = builder.collectionName;
         this.dbName = builder.dbName;
+        this.topK = builder.topK;
     }
 
     /// Return the builder.
@@ -113,7 +118,7 @@ final class Query {
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
-                    index.queryByVectorId(10,
+                    index.queryByVectorId(this.topK,
                             vectorId,
                             this.namespace,
                             null,
@@ -167,7 +172,7 @@ final class Query {
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
-                    index.query(10,
+                    index.query(this.topK,
                             queryVector,
                             null,
                             null,
@@ -277,9 +282,12 @@ final class Query {
         /// The MongoDB database name.
         private String dbName;
 
+        /// The number of top results to return when querying.
+        private int topK;
+
         /// The default constructor.
         Builder() {
-
+            super();
         }
 
         /// Set the Pinecone client.
@@ -338,6 +346,16 @@ final class Query {
         /// @return        net.jmp.pinecone.quickstart.query.Query.Builder
         Builder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.query.Query.Builder
+        Builder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }
