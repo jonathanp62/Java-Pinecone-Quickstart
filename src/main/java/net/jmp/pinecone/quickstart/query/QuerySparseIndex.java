@@ -36,8 +36,6 @@ import io.pinecone.clients.Pinecone;
 import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
-import static java.lang.Integer.toUnsignedLong;
-
 import java.util.*;
 
 import net.jmp.pinecone.quickstart.Operation;
@@ -70,6 +68,7 @@ public final class QuerySparseIndex extends Operation {
                 .mongoClient(builder.mongoClient)
                 .collectionName(builder.collectionName)
                 .dbName(builder.dbName)
+                .topK(builder.topK)
         );
     }
 
@@ -94,7 +93,7 @@ public final class QuerySparseIndex extends Operation {
             if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
                 try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
                     final QueryResponseWithUnsignedIndices response = index.query(
-                            10,
+                            this.topK,
                             Collections.emptyList(),
                             sparseVector.getSparseIndices(),
                             sparseVector.getSparseValues(),
@@ -154,6 +153,9 @@ public final class QuerySparseIndex extends Operation {
 
         /// The MongoDB database name.
         private String dbName;
+
+        /// The number of top results to return when querying.
+        private int topK;
 
         /// The default constructor.
         public Builder() {
@@ -256,6 +258,16 @@ public final class QuerySparseIndex extends Operation {
         /// @return        net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        public Builder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }

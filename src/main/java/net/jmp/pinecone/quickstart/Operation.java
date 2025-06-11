@@ -94,6 +94,9 @@ public abstract class Operation {
     /// The MongoDB database name.
     protected final String dbName;
 
+    /// The number of top results to return when querying.
+    protected final int topK;
+
     /// The text map.
     protected final Map<String, UnstructuredText.Text> textMap = new UnstructuredText().getTextMap();
 
@@ -115,6 +118,7 @@ public abstract class Operation {
         this.mongoClient = operationBuilder.mongoClient;
         this.collectionName = operationBuilder.collectionName;
         this.dbName = operationBuilder.dbName;
+        this.topK = operationBuilder.topK;
     }
 
     /// Return the operation builder.
@@ -297,6 +301,9 @@ public abstract class Operation {
         /// The MongoDB database name.
         protected String dbName;
 
+        /// The number of top results to return when querying.
+        protected int topK;
+
         /// The default constructor.
         protected OperationBuilder() {
             super();
@@ -418,6 +425,16 @@ public abstract class Operation {
         /// @return        net.jmp.pinecone.quickstart.Operation.OperationBuilder
         public OperationBuilder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }

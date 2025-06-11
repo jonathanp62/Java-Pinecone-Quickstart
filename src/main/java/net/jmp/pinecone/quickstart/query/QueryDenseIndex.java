@@ -69,6 +69,7 @@ public final class QueryDenseIndex extends Operation {
                 .mongoClient(builder.mongoClient)
                 .collectionName(builder.collectionName)
                 .dbName(builder.dbName)
+                .topK(builder.topK)
         );
     }
 
@@ -321,6 +322,9 @@ public final class QueryDenseIndex extends Operation {
         /// The MongoDB database name.
         private String dbName;
 
+        /// The number of top results to return when querying.
+        private int topK;
+
         /// The default constructor.
         public Builder() {
             super();
@@ -422,6 +426,16 @@ public final class QueryDenseIndex extends Operation {
         /// @return        net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+        public Builder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }

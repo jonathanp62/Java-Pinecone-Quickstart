@@ -104,7 +104,7 @@ final class Quickstart {
     private String openAiApiKey;
 
     /// The number of top results to return when querying.
-    private int topk;
+    private final int topK;
 
     /// The constructor.
     ///
@@ -122,7 +122,7 @@ final class Quickstart {
         this.namespace = builder.namespace;
         this.rerankingModel = builder.rerankingModel;
         this.queryText = builder.queryText;
-        this.topk = builder.topK;
+        this.topK = builder.topK;
     }
 
     /// The builder method.
@@ -505,6 +505,7 @@ final class Quickstart {
                 .mongoClient(mongoClient)
                 .collectionName(this.mongoDbCollection)
                 .dbName(this.mongoDbName)
+                .topK(this.topK)
                 .build();
 
         querySparseIndex.operate();
@@ -534,6 +535,7 @@ final class Quickstart {
             .mongoClient(mongoClient)
             .collectionName(this.mongoDbCollection)
             .dbName(this.mongoDbName)
+            .topK(this.topK)
             .build();
 
         queryDenseIndex.operate();
