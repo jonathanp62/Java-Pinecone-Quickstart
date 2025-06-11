@@ -155,7 +155,7 @@ public final class QueryDenseIndex extends Operation {
         }
 
         final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
-        final List<Float> queryVectorList = queryVector.queryTextToDenseVector(this.queryText);
+        final DenseVector denseVector = queryVector.queryTextToDenseVector(this.queryText);
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)
@@ -172,7 +172,7 @@ public final class QueryDenseIndex extends Operation {
             this.logger.debug("Categories: {}", categories);
         }
 
-        final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList, categories);
+        final List<ScoredVectorWithUnsignedIndices> matches = query.query(denseVector.getDenseValues(), categories);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(matches));

@@ -75,16 +75,15 @@ final class QueryVector {
     /// Convert the query text to a dense vector.
     ///
     /// @param  queryText  java.lang.String
-    /// @return            java.util.List<java.lang.Float>
-    List<Float> queryTextToDenseVector(final String queryText) {
+    /// @return            net.jmp.pinecone.quickstart.query.DenseVector
+    DenseVector queryTextToDenseVector(final String queryText) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(queryText));
         }
 
+        final DenseVector denseVector = new DenseVector();
         final Map<String, Object> parameters = new HashMap<>();
         final Inference client = this.pinecone.getInferenceClient();
-
-        List<Float> values = new ArrayList<>();
 
         parameters.put("input_type", "query");
         parameters.put("truncate", "END");
@@ -102,7 +101,9 @@ final class QueryVector {
 
             assert embeddingsList.size() == 1;
 
-            values = embeddingsList.getFirst().getDenseEmbedding().getValues();
+            final List<Float> values = embeddingsList.getFirst().getDenseEmbedding().getValues();
+
+            denseVector.setDenseValues(values);
 
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Query: {}: {}", queryText, embeddings.toJson());
@@ -110,10 +111,10 @@ final class QueryVector {
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(values));
+            this.logger.trace(exitWith(denseVector));
         }
 
-        return values;
+        return denseVector;
     }
 
     /// Convert the query text to a sparse vector.
