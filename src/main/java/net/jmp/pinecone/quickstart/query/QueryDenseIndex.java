@@ -155,7 +155,7 @@ public final class QueryDenseIndex extends Operation {
         }
 
         final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
-        final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
+        final List<Float> queryVectorList = queryVector.queryTextToDenseVector(this.queryText);
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)

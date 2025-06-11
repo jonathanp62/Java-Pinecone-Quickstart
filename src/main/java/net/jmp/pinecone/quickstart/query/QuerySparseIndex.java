@@ -31,7 +31,6 @@ package net.jmp.pinecone.quickstart.query;
 import com.mongodb.client.MongoClient;
 
 import io.pinecone.clients.Index;
-import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
 import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
@@ -44,11 +43,6 @@ import java.util.*;
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
-
-import org.openapitools.inference.client.ApiException;
-
-import org.openapitools.inference.client.model.Embedding;
-import org.openapitools.inference.client.model.EmbeddingsList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,49 +88,16 @@ public final class QuerySparseIndex extends Operation {
         }
 
         if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
-            final Map<String, Object> parameters = new HashMap<>();
-            final Inference client = this.pinecone.getInferenceClient();
+            final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
+            final SparseVector sparseVector = queryVector.queryTextToSparseVector(this.queryText);
 
-            List<Float> sparseValues = new ArrayList<>();
-            List<Integer> sparseIndices = new ArrayList<>();
-
-            parameters.put("input_type", "query");
-            parameters.put("truncate", "END");
-
-            EmbeddingsList sparseEmbeddings = null;
-
-            try {
-                sparseEmbeddings = client.embed(this.sparseEmbeddingModel, parameters, List.of(this.queryText));
-            } catch (ApiException e) {
-                this.logger.error(e.getMessage());
-            }
-
-            if (sparseEmbeddings != null) {
-                final List<Embedding> embeddingsList = sparseEmbeddings.getData();
-
-                assert embeddingsList.size() == 1;
-
-                sparseValues = embeddingsList.getFirst().getSparseEmbedding().getSparseValues();
-                sparseIndices = embeddingsList.getFirst().getSparseEmbedding().getSparseIndices();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Query sparse embeddings: {}: {}", this.queryText, sparseEmbeddings.toJson());
-                }
-            }
-
-            if (!sparseValues.isEmpty() && !sparseIndices.isEmpty()) {
-                final List<Long> sparseIndicesAsLongs = new ArrayList<>(sparseIndices.size());
-
-                for (Integer sparseIndex : sparseIndices) {
-                    sparseIndicesAsLongs.add(toUnsignedLong(sparseIndex));
-                }
-
+            if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
                 try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
                     final QueryResponseWithUnsignedIndices response = index.query(
                             10,
                             Collections.emptyList(),
-                            sparseIndicesAsLongs,
-                            sparseValues,
+                            sparseVector.getSparseIndices(),
+                            sparseVector.getSparseValues(),
                             null,
                             this.namespace,
                             null,
