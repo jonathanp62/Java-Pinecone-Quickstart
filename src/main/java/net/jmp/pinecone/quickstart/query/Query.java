@@ -153,7 +153,7 @@ final class Query {
         return matches;
     }
 
-    /// Query the index by query vector.
+    /// Query the index by dense query vector.
     ///
     /// @param  queryVector java.util.List<java.lang.Float>
     /// @param  categories  java.util.Set<java.lang.String>
@@ -166,7 +166,7 @@ final class Query {
 
         List<ScoredVectorWithUnsignedIndices> matches;
 
-        this.logger.info("Querying index: {}", this.indexName);
+        this.logger.info("Querying dense index: {}", this.indexName);
 
         final Struct filter = this.createFilter(categories);
 
@@ -202,6 +202,30 @@ final class Query {
                 }
             }
         }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Query the index by sparse query vector.
+    ///
+    /// @param  sparseIndices   java.util.List<java.lang.Long>
+    /// @param  sparseValues    java.util.List<java.lang.Float>
+    /// @param  categories      java.util.Set<java.lang.String>
+    /// @return                 java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    List<ScoredVectorWithUnsignedIndices> query(final List<Long> sparseIndices,
+                                                final List<Float> sparseValues,
+                                                final Set<String> categories) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sparseIndices.toString(), sparseValues.toString(), categories));
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches = null;
+
+        this.logger.info("Querying sparse index: {}", this.indexName);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(matches));
