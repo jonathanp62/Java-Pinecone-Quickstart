@@ -1,7 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
- * (#)SparseVector.java 0.4.0   06/11/2025
+ * (#)Vector.java   0.4.0   06/12/2025
  *
  * @author   Jonathan Parker
  *
@@ -28,62 +28,33 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
-import static java.lang.Integer.toUnsignedLong;
-
 import java.util.ArrayList;
 import java.util.List;
 
-/// The sparse vector class.
+/// The vector class.
 ///
 /// @version    0.4.0
 /// @since      0.4.0
-final class SparseVector extends Vector {
-    /// The sparse indices.
-    private List<Long> sparseIndices = new ArrayList<>();
+class Vector {
+    /// The dense or sparse values.
+    private List<Float> values = new ArrayList<>();
 
     /// The default constructor.
-    SparseVector() {
+    protected Vector() {
         super();
     }
 
-    /// Return the sparse values.
+    /// Return the values.
     ///
     /// @return  java.util.List<java.lang.Float>
-    List<Float> getSparseValues() {
-        return this.getValues();
+    protected List<Float> getValues() {
+        return this.values;
     }
 
-    /// Set the sparse values.
+    /// Set the values.
     ///
-    /// @param  sparseValues  java.util.List<java.lang.Float>
-    void setSparseValues(final List<Float> sparseValues) {
-        this.setValues(sparseValues);
-    }
-
-    /// Return the sparse indices.
-    ///
-    /// @return  java.util.List<java.lang.Long>
-    List<Long> getSparseIndices() {
-        return this.sparseIndices;
-    }
-
-    /// Set the sparse indices.
-    ///
-    /// @param  sparseIndices  java.util.List<java.lang.Long>
-    void setLongSparseIndices(final List<Long> sparseIndices) {
-        this.sparseIndices = sparseIndices;
-    }
-
-    /// Set the sparse indices from a list of integers.
-    ///
-    /// @param  sparseIndices  java.util.List<java.lang.Integer>
-    void setIntSparseIndices(final List<Integer> sparseIndices) {
-        final List<Long> sparseIndicesAsLongs = new ArrayList<>(sparseIndices.size());
-
-        for (Integer sparseIndex : sparseIndices) {
-            sparseIndicesAsLongs.add(toUnsignedLong(sparseIndex));
-        }
-
-        this.sparseIndices = sparseIndicesAsLongs;
+    /// @param  values  java.util.List<java.lang.Float>
+    protected void setValues(final List<Float> values) {
+        this.values = values;
     }
 }

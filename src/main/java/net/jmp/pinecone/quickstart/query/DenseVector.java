@@ -28,17 +28,13 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
-import java.util.ArrayList;
 import java.util.List;
 
 /// The dense vector class.
 ///
 /// @version    0.4.0
 /// @since      0.4.0
-final class DenseVector {
-    /// The dense values.
-    private List<Float> denseValues = new ArrayList<>();
-
+final class DenseVector extends Vector {
     /// The default constructor.
     DenseVector() {
         super();
@@ -48,13 +44,13 @@ final class DenseVector {
     ///
     /// @return  java.util.List<java.lang.Float>
     List<Float> getDenseValues() {
-        return this.denseValues;
+        return this.getValues();
     }
 
     /// Set the dense values.
     ///
     /// @param  denseValues  java.util.List<java.lang.Float>
     void setDenseValues(final List<Float> denseValues) {
-        this.denseValues = denseValues;
+        this.setValues(denseValues);
     }
 }
