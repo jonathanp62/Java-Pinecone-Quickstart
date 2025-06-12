@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.describe;
 
 /*
+ * (#)DescribeNamespace.java    0.4.0   06/09/2025
  * (#)DescribeNamespace.java    0.2.0   05/22/2025
  *
  * @author   Jonathan Parker
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /// The describe namespace class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public class DescribeNamespace extends Operation {
     /// The logger.
@@ -57,7 +58,8 @@ public class DescribeNamespace extends Operation {
     private DescribeNamespace(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
+                .denseIndexName(builder.denseIndexName)
+                .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
     }
@@ -76,9 +78,24 @@ public class DescribeNamespace extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.info("Describing namespace {} for index: {}", this.namespace, this.indexName);
+        this.logger.info("Describing namespace {} for index: {}", this.namespace, this.denseIndexName);
 
-        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            final DescribeIndexStatsResponse response = index.describeIndexStats();
+
+            if (response.containsNamespaces(this.namespace)) {
+                final Map<String, NamespaceSummary> namespaces = response.getNamespacesMap();
+                final NamespaceSummary namespaceSummary = namespaces.get(this.namespace);
+
+                this.logger.info("Vector count: {}", namespaceSummary.getVectorCount());
+            } else {
+                this.logger.info("Namespace does not exist: {}", this.namespace);
+            }
+        }
+
+        this.logger.info("Describing namespace {} for index: {}", this.namespace, this.sparseIndexName);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
             final DescribeIndexStatsResponse response = index.describeIndexStats();
 
             if (response.containsNamespaces(this.namespace)) {
@@ -101,8 +118,11 @@ public class DescribeNamespace extends Operation {
         /// The Pinecone instance.
         private Pinecone pinecone;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
+
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The namespace name.
         private String namespace;
@@ -122,12 +142,22 @@ public class DescribeNamespace extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  sparseIndexName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.describe.DescribeNamespace.Builder
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

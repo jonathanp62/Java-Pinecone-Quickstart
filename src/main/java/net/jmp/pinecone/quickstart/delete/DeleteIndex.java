@@ -52,8 +52,8 @@ public final class DeleteIndex extends Operation {
     private DeleteIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
-                .indexNameHybrid(builder.indexNameHybrid)
+                .denseIndexName(builder.denseIndexName)
+                .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
     }
@@ -72,20 +72,20 @@ public final class DeleteIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.indexExists()) {
-            this.logger.info("Deleting dense index: {}", this.indexName);
+        if (this.doesDenseIndexExist()) {
+            this.logger.info("Deleting dense index: {}", this.denseIndexName);
 
-            this.pinecone.deleteIndex(this.indexName);
+            this.pinecone.deleteIndex(this.denseIndexName);
         } else {
-            this.logger.info("Dense index does not exist: {}", this.indexName);
+            this.logger.info("Dense index does not exist: {}", this.doesDenseIndexExist());
         }
 
-        if (this.hybridIndexExists()) {
-            this.logger.info("Deleting hybrid index: {}", this.indexNameHybrid);
+        if (this.doesSparseIndexExist()) {
+            this.logger.info("Deleting sparse index: {}", this.sparseIndexName);
 
-            this.pinecone.deleteIndex(this.indexNameHybrid);
+            this.pinecone.deleteIndex(this.sparseIndexName);
         } else {
-            this.logger.info("Hybrid index does not exist: {}", this.indexNameHybrid);
+            this.logger.info("Sparse index does not exist: {}", this.sparseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -99,10 +99,10 @@ public final class DeleteIndex extends Operation {
         private Pinecone pinecone;
 
         /// The dense index name.
-        private String indexName;
+        private String denseIndexName;
 
-        /// The hybrid index name.
-        private String indexNameHybrid;
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -124,20 +124,20 @@ public final class DeleteIndex extends Operation {
 
         /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.delete.DeleteIndex.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.delete.DeleteIndex.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }
 
-        /// Set the hybrid index name.
+        /// Set the sparse index name.
         ///
-        /// @param  indexNameHybrid java.lang.String
+        /// @param  sparseIndexName java.lang.String
         /// @return             net.jmp.pinecone.quickstart.delete.DeleteIndex.Builder
-        public Builder indexNameHybrid(final String indexNameHybrid) {
-            this.indexNameHybrid = indexNameHybrid;
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

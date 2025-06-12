@@ -56,42 +56,46 @@ public final class Main implements Runnable {
         }
 
         final String operation = System.getProperty("app.operation");
-        final String embeddingModel = System.getProperty("app.embeddingModel");
-        final String embeddingModelSparse = System.getProperty("app.embeddingModelSparse");
-        final String indexName = System.getProperty("app.indexName");
-        final String indexNameHybrid = System.getProperty("app.indexNameHybrid");
+
+        final String denseEmbeddingModel = System.getProperty("app.denseEmbeddingModel");
+        final String denseIndexName = System.getProperty("app.denseIndexName");
         final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
         final String mongoDbName = System.getProperty("app.mongoDbName");
         final String mongoDbUriFile = System.getProperty("app.mongoDbUri");
         final String namespace = System.getProperty("app.namespace");
         final String rerankingModel = System.getProperty("app.rerankingModel");
         final String queryText = System.getProperty("app.queryText");
+        final String sparseEmbeddingModel = System.getProperty("app.sparseEmbeddingModel");
+        final String sparseIndexName = System.getProperty("app.sparseIndexName");
+        final String topK = System.getProperty("app.topK");
 
         this.logger.info("Pinecone Quickstart");
 
         this.logger.info("Operation             : {}", operation);
-        this.logger.info("Embedding Model       : {}", embeddingModel);
-        this.logger.info("Embedding Model Sparse: {}", embeddingModelSparse);
-        this.logger.info("Index Name            : {}", indexName);
-        this.logger.info("Index Name Hybrid     : {}", indexNameHybrid);
+        this.logger.info("Dense Embedding Model : {}", denseEmbeddingModel);
+        this.logger.info("Dense Index Name      : {}", denseIndexName);
         this.logger.info("MongoDB Collection    : {}", mongoDbCollection);
         this.logger.info("MongoDB Name          : {}", mongoDbName);
         this.logger.info("MongoDB URI File      : {}", mongoDbUriFile);
         this.logger.info("Namespace             : {}", namespace);
         this.logger.info("Reranking Model       : {}", rerankingModel);
         this.logger.info("Query Text            : {}", queryText);
+        this.logger.info("Sparse Embedding Model: {}", sparseEmbeddingModel);
+        this.logger.info("Sparse Index Name     : {}", sparseIndexName);
+        this.logger.info("TopK                  : {}", topK);
 
         final Quickstart quickstart = Quickstart.builder()
-            .embeddingModel(embeddingModel)
-            .embeddingModelSparse(embeddingModelSparse)
-            .indexName(indexName)
-            .indexNameHybrid(indexNameHybrid)
+            .denseEmbeddingModel(denseEmbeddingModel)
+            .sparseEmbeddingModel(sparseEmbeddingModel)
+            .denseIndexName(denseIndexName)
+            .sparseIndexName(sparseIndexName)
             .mongoDbCollection(mongoDbCollection)
             .mongoDbName(mongoDbName)
             .mongoDbUriFile(mongoDbUriFile)
             .namespace(namespace)
             .rerankingModel(rerankingModel)
             .queryText(queryText)
+            .topK(Integer.parseInt(topK))
             .build();
 
         quickstart.start(operation);

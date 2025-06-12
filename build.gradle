@@ -1,11 +1,12 @@
 /*
+ * (#)build.gradle  0.5.0   06/12/2025
  * (#)build.gradle  0.4.0   06/04/2025
  * (#)build.gradle  0.3.0   05/26/2025
  * (#)build.gradle  0.2.0   05/19/2025
  * (#)build.gradle  0.1.0   05/17/2025
  *
  * @author   Jonathan Parker
- * @version  0.4.0
+ * @version  0.5.0
  * @since    0.1.0
  *
  * MIT License
@@ -44,10 +45,8 @@ plugins {
 apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
-	embeddingModel = 'llama-text-embed-v2'
-	embeddingModelSparse = 'pinecone-sparse-english-v0'
-	indexName = 'quickstart'
-	indexNameHybrid = 'quickstart-hybrid'
+	denseEmbeddingModel = 'llama-text-embed-v2'
+	denseIndexName = 'quickstart-dense'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
 	mongoDbCollection = 'quickstart'
 	mongoDbName = 'pinecone_quickstart'
@@ -56,9 +55,12 @@ ext {
 	openaiApiKey = 'etc/open-ai-api-key.txt'
 	pineconeApiKey = 'etc/pinecone-api-key.txt'
 	project.group = 'net.jmp.pinecone.quickstart'
-	project.version = '0.4.0'
+	project.version = '0.5.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	rerankingModel = 'bge-reranker-v2-m3'
+	sparseEmbeddingModel = 'pinecone-sparse-english-v0'
+	sparseIndexName = 'quickstart-sparse'
+	topK = 10
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_24
@@ -110,10 +112,9 @@ tasks.withType(JavaExec).configureEach {
 	println("JVM Arguments: " + jvmArgs)
 
 	systemProperties(
-			['app.embeddingModel': embeddingModel,
-			 'app.embeddingModelSparse': embeddingModelSparse,
-			 'app.indexName': indexName,
-			 'app.indexNameHybrid': indexNameHybrid,
+			[
+ 			 'app.denseEmbeddingModel': denseEmbeddingModel,
+			 'app.denseIndexName': denseIndexName,
 			 'app.mongoDbCollection': mongoDbCollection,
 			 'app.mongoDbName': mongoDbName,
 			 'app.mongoDbUri': mongoDbUri,
@@ -121,7 +122,11 @@ tasks.withType(JavaExec).configureEach {
 			 'app.openaiApiKey': openaiApiKey,
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
-			 'app.queryText': '']
+			 'app.queryText': '',
+			 'app.sparseEmbeddingModel': sparseEmbeddingModel,
+			 'app.sparseIndexName': sparseIndexName,
+			 'app.topK': topK
+			]
 	)
 
 	classpath = sourceSets.main.runtimeClasspath
@@ -153,13 +158,6 @@ tasks.register('fetch', JavaExec) {
 	getSystemProperties().put('app.operation', 'fetch')
 }
 
-tasks.register('hybridquery', JavaExec) {
-	var sysProps = getSystemProperties()
-
-	sysProps.put('app.operation', 'hybridquery')
-	sysProps.put('app.queryText', 'Tell me about the physics of light')
-}
-
 tasks.register('list', JavaExec) {
 	getSystemProperties().put('app.operation', 'list')
 }
@@ -176,25 +174,39 @@ tasks.register('load', JavaExec) {
 	getSystemProperties().put('app.operation', 'load')
 }
 
-tasks.register('query-by-id', JavaExec) {
+tasks.register('query-dense-by-id', JavaExec) {
 	var sysProps = getSystemProperties()
 
-	sysProps.put('app.operation', 'query-by-id')
+	sysProps.put('app.operation', 'query-dense')
 	sysProps.put('app.queryText', 'rec20')
 }
 
-tasks.register('query-monuments', JavaExec) {
+tasks.register('query-dense-monuments', JavaExec) {
 	var sysProps = getSystemProperties()
 
-	sysProps.put('app.operation', 'query-monuments')
+	sysProps.put('app.operation', 'query-dense')
 	sysProps.put('app.queryText', 'Famous historical structures and monuments')
 }
 
-tasks.register('query-persons', JavaExec) {
+tasks.register('query-dense-persons', JavaExec) {
 	var sysProps = getSystemProperties()
 
-	sysProps.put('app.operation', 'query-persons')
+	sysProps.put('app.operation', 'query-dense')
 	sysProps.put('app.queryText', 'Tell me about famous persons in history and science')
+}
+
+tasks.register('query-sparse', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-sparse')
+	sysProps.put('app.queryText', 'light')
+}
+
+tasks.register('query-sparse-category', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-sparse')
+	sysProps.put('app.queryText', 'light physics')
 }
 
 tasks.register('store', JavaExec) {

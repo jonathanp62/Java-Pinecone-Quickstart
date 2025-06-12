@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.list;
 
 /*
+ * (#)ListNamespaces.java   0.4.0   06/09/2025
  * (#)ListNamespaces.java   0.2.0   05/22/2025
  *
  * @author   Jonathan Parker
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /// The list namespaces class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public class ListNamespaces extends Operation {
     /// The logger.
@@ -57,7 +58,8 @@ public class ListNamespaces extends Operation {
     private ListNamespaces(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
+                .denseIndexName(builder.denseIndexName)
+                .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
     }
@@ -76,9 +78,20 @@ public class ListNamespaces extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.info("Listing namespaces for index: {}", this.indexName);
+        this.logger.info("Listing namespaces for dense index: {}", this.denseIndexName);
 
-        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            final DescribeIndexStatsResponse response = index.describeIndexStats();
+            final Map<String, NamespaceSummary> namespaces = response.getNamespacesMap();
+
+            for (final Map.Entry<String, NamespaceSummary> namespace : namespaces.entrySet()) {
+                this.logger.info("Namespace: {}", namespace.getKey());
+            }
+        }
+
+        this.logger.info("Listing namespaces for sparse index: {}", this.sparseIndexName);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
             final DescribeIndexStatsResponse response = index.describeIndexStats();
             final Map<String, NamespaceSummary> namespaces = response.getNamespacesMap();
 
@@ -97,8 +110,11 @@ public class ListNamespaces extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
+
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -118,12 +134,22 @@ public class ListNamespaces extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.list.ListNamespaces.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.list.ListNamespaces.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  sparseIndexName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.list.ListNamespaces.Builder
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

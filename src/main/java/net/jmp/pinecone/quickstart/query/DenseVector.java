@@ -1,5 +1,7 @@
+package net.jmp.pinecone.quickstart.query;
+
 /*
- * (#)package-info.java 0.4.0   06/08/2025
+ * (#)DenseVector.java  0.4.0   06/11/2025
  *
  * @author   Jonathan Parker
  *
@@ -26,8 +28,29 @@
  * SOFTWARE.
  */
 
-/// The package for query operations.
+import java.util.List;
+
+/// The dense vector class.
 ///
 /// @version    0.4.0
-/// @since      0.2.0
-package net.jmp.pinecone.quickstart.hybridquery;
+/// @since      0.4.0
+final class DenseVector extends Vector {
+    /// The default constructor.
+    DenseVector() {
+        super();
+    }
+
+    /// Return the dense values.
+    ///
+    /// @return  java.util.List<java.lang.Float>
+    List<Float> getDenseValues() {
+        return this.getValues();
+    }
+
+    /// Set the dense values.
+    ///
+    /// @param  denseValues  java.util.List<java.lang.Float>
+    void setDenseValues(final List<Float> denseValues) {
+        this.setValues(denseValues);
+    }
+}

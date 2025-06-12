@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)QueryVector.java  0.4.0   06/11/2025
  * (#)QueryVector.java  0.2.0   05/26/2025
  *
  * @author   Jonathan Parker
@@ -39,6 +40,7 @@ import java.util.Map;
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.openapitools.inference.client.ApiException;
+
 import org.openapitools.inference.client.model.Embedding;
 import org.openapitools.inference.client.model.EmbeddingsList;
 
@@ -47,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query vector class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 final class QueryVector {
     /// The logger.
@@ -70,19 +72,18 @@ final class QueryVector {
         this.embeddingModel = embeddingModel;
     }
 
-    /// Convert the query text to a vector.
+    /// Convert the query text to a dense vector.
     ///
     /// @param  queryText  java.lang.String
-    /// @return            java.util.List<java.lang.Float>
-    List<Float> queryTextToVector(final String queryText) {
+    /// @return            net.jmp.pinecone.quickstart.query.DenseVector
+    DenseVector queryTextToDenseVector(final String queryText) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(queryText));
         }
 
+        final DenseVector denseVector = new DenseVector();
         final Map<String, Object> parameters = new HashMap<>();
         final Inference client = this.pinecone.getInferenceClient();
-
-        List<Float> values = new ArrayList<>();
 
         parameters.put("input_type", "query");
         parameters.put("truncate", "END");
@@ -100,7 +101,9 @@ final class QueryVector {
 
             assert embeddingsList.size() == 1;
 
-            values = embeddingsList.getFirst().getDenseEmbedding().getValues();
+            final List<Float> values = embeddingsList.getFirst().getDenseEmbedding().getValues();
+
+            denseVector.setDenseValues(values);
 
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Query: {}: {}", queryText, embeddings.toJson());
@@ -108,9 +111,56 @@ final class QueryVector {
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(values));
+            this.logger.trace(exitWith(denseVector));
         }
 
-        return values;
+        return denseVector;
+    }
+
+    /// Convert the query text to a sparse vector.
+    ///
+    /// @param  queryText  java.lang.String
+    /// @return            net.jmp.pinecone.quickstart.query.SparseVector
+    SparseVector queryTextToSparseVector(final String queryText) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(queryText));
+        }
+
+        final SparseVector sparseVector = new SparseVector();
+        final Map<String, Object> parameters = new HashMap<>();
+        final Inference client = this.pinecone.getInferenceClient();
+
+        parameters.put("input_type", "query");
+        parameters.put("truncate", "END");
+
+        EmbeddingsList sparseEmbeddings = null;
+
+        try {
+            sparseEmbeddings = client.embed(this.embeddingModel, parameters, List.of(queryText));
+        } catch (ApiException e) {
+            this.logger.error(e.getMessage());
+        }
+
+        if (sparseEmbeddings != null) {
+            final List<Embedding> embeddingsList = sparseEmbeddings.getData();
+
+            assert embeddingsList.size() == 1;
+
+            final List<Float> sparseValues = embeddingsList.getFirst().getSparseEmbedding().getSparseValues();
+            final List<Integer> sparseIndices = embeddingsList.getFirst().getSparseEmbedding().getSparseIndices();
+
+            sparseVector.setSparseValues(sparseValues);
+            sparseVector.setIntSparseIndices(sparseIndices);
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Query sparse embeddings: {}: {}", queryText, sparseEmbeddings.toJson());
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(sparseVector));
+        }
+
+        return sparseVector;
     }
 }

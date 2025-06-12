@@ -1,7 +1,8 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
- * (#)QueryIndex.java   0.2.0   05/21/2025
+ * (#)QueryDenseIndex.java  0.4.0   06/09/2025
+ * (#)QueryDenseIndex.java  0.2.0   05/21/2025
  *
  * @author   Jonathan Parker
  *
@@ -45,22 +46,22 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/// The query index class.
+/// The query dense index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
-public final class QueryIndex extends Operation {
+public final class QueryDenseIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The constructor.
     ///
-    /// @param  builder net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-    private QueryIndex(final Builder builder) {
+    /// @param  builder net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+    private QueryDenseIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .embeddingModel(builder.embeddingModel)
-                .indexName(builder.indexName)
+                .denseEmbeddingModel(builder.denseEmbeddingModel)
+                .denseIndexName(builder.denseIndexName)
                 .namespace(builder.namespace)
                 .rerankingModel(builder.rerankingModel)
                 .queryText(builder.queryText)
@@ -68,12 +69,13 @@ public final class QueryIndex extends Operation {
                 .mongoClient(builder.mongoClient)
                 .collectionName(builder.collectionName)
                 .dbName(builder.dbName)
+                .topK(builder.topK)
         );
     }
 
     /// Return the builder.
     ///
-    /// @return net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+    /// @return net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
     public static Builder builder() {
         return new Builder();
     }
@@ -85,8 +87,8 @@ public final class QueryIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.indexExists() && this.isIndexLoaded()) {
-            List<ScoredVectorWithUnsignedIndices> matches = null;
+        if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
+            List<ScoredVectorWithUnsignedIndices> matches;
 
             if (this.queryText.startsWith("rec")) {
                 matches = this.queryById();
@@ -111,7 +113,7 @@ public final class QueryIndex extends Operation {
 
             this.logger.info(summary);
         } else {
-            this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
+            this.logger.info("Dense index does not exist or is not loaded: {}", this.denseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -119,7 +121,7 @@ public final class QueryIndex extends Operation {
         }
     }
 
-    /// Query the index by vector ID.
+    /// Query the dense index by vector ID.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
     private List<ScoredVectorWithUnsignedIndices> queryById() {
@@ -129,11 +131,12 @@ public final class QueryIndex extends Operation {
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)
-                .indexName(this.indexName)
+                .indexName(this.denseIndexName)
                 .namespace(this.namespace)
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
                 .dbName(this.dbName)
+                .topK(this.topK)
                 .build();
 
         final List<ScoredVectorWithUnsignedIndices> matches = query.queryById(this.queryText);
@@ -145,7 +148,7 @@ public final class QueryIndex extends Operation {
         return matches;
     }
 
-    /// Query the index by vector.
+    /// Query the dense index by vector.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
     private List<ScoredVectorWithUnsignedIndices> queryByVector() {
@@ -153,89 +156,33 @@ public final class QueryIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        final QueryVector queryVector = new QueryVector(this.pinecone, this.embeddingModel);
-        final List<Float> queryVectorList = queryVector.queryTextToVector(this.queryText);
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
+        final DenseVector denseVector = queryVector.queryTextToDenseVector(this.queryText);
 
         final Query query = Query.builder()
                 .pinecone(this.pinecone)
-                .indexName(this.indexName)
+                .indexName(this.denseIndexName)
                 .namespace(this.namespace)
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
                 .dbName(this.dbName)
+                .topK(this.topK)
                 .build();
 
-        final Set<String> categories = this.getCategories();
+        final CategoryUtil categoryUtil = new CategoryUtil(this.mongoClient, this.dbName);
+        final Set<String> categories = categoryUtil.getCategories(this.queryText);
 
         if (this.logger.isDebugEnabled()) {
             this.logger.debug("Categories: {}", categories);
         }
 
-        final List<ScoredVectorWithUnsignedIndices> matches = query.query(queryVectorList, categories);
+        final List<ScoredVectorWithUnsignedIndices> matches = query.query(denseVector.getDenseValues(), categories);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(matches));
         }
 
         return matches;
-    }
-
-    /// Get any categories found in the query text.
-    ///
-    /// @return java.util.Set<java.lang.String>
-    /// @since  0.3.0
-    private Set<String> getCategories() {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
-        }
-
-        final Set<String> categories = new HashSet<>();
-
-        String textToSplit;
-
-        if (this.queryText.endsWith(".")) {
-            textToSplit = this.queryText.substring(0, this.queryText.length() - 1);
-        } else {
-            textToSplit = this.queryText;
-        }
-
-        final String[] splits = textToSplit.split(" ");
-
-        for (final String split : splits) {
-            if (this.isWordACategory(split)) {
-                categories.add(split);
-            }
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(categories));
-        }
-
-        return categories;
-    }
-
-    /// Check if the word is a category.
-    ///
-    /// @param  word    java.lang.String
-    /// @return         boolean
-    /// @since          0.3.0
-    private boolean isWordACategory(final String word) {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(word));
-        }
-
-        boolean result = false;
-
-        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
-        final MongoCollection<Document> categoriesCollection = database.getCollection("categories");
-
-        result = categoriesCollection.find(new Document("category", word)).first() != null;
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(result));
-        }
-
-        return result;
     }
 
     /// Get the content by vector ID.
@@ -293,11 +240,11 @@ public final class QueryIndex extends Operation {
         /// The Pinecone cliebt.
         private Pinecone pinecone;
 
-        /// The embedding model.
-        private String embeddingModel;
+        /// The dense embedding model.
+        private String denseEmbeddingModel;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -320,6 +267,9 @@ public final class QueryIndex extends Operation {
         /// The MongoDB database name.
         private String dbName;
 
+        /// The number of top results to return when querying.
+        private int topK;
+
         /// The default constructor.
         public Builder() {
             super();
@@ -328,29 +278,29 @@ public final class QueryIndex extends Operation {
         /// Set the Pinecone client.
         ///
         /// @param  pinecone net.jmp.pinecone.Pinecone
-        /// @return          net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return          net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
 
             return this;
         }
 
-        /// Set the embedding model.
+        /// Set the dense embedding model.
         ///
-        /// @param  embeddingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-        public Builder embeddingModel(final String embeddingModel) {
-            this.embeddingModel = embeddingModel;
+        /// @param  denseEmbeddingModel java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+        public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
+            this.denseEmbeddingModel = denseEmbeddingModel;
 
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }
@@ -358,7 +308,7 @@ public final class QueryIndex extends Operation {
         /// Set the namespace.
         ///
         /// @param  namespace java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder namespace(final String namespace) {
             this.namespace = namespace;
 
@@ -368,7 +318,7 @@ public final class QueryIndex extends Operation {
         /// Set the re-ranking model.
         ///
         /// @param  rerankingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder rerankingModel(final String rerankingModel) {
             this.rerankingModel = rerankingModel;
 
@@ -378,7 +328,7 @@ public final class QueryIndex extends Operation {
         /// Set the query text.
         ///
         /// @param  queryText java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder queryText(final String queryText) {
             this.queryText = queryText;
 
@@ -388,7 +338,7 @@ public final class QueryIndex extends Operation {
         /// Set the OpenAI API key.
         ///
         /// @param  openAiApiKey java.lang.String
-        /// @return              net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return              net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder openAiApiKey(final String openAiApiKey) {
             this.openAiApiKey = openAiApiKey;
 
@@ -398,7 +348,7 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB client.
         ///
         /// @param  mongoClient com.mongodb.client.MongoClient
-        /// @return             net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return             net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder mongoClient(final MongoClient mongoClient) {
             this.mongoClient = mongoClient;
 
@@ -408,7 +358,7 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB collection name.
         ///
         /// @param  collectionName java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder collectionName(final String collectionName) {
             this.collectionName = collectionName;
 
@@ -418,18 +368,28 @@ public final class QueryIndex extends Operation {
         /// Set the MongoDB database name.
         ///
         /// @param  dbName java.lang.String
-        /// @return        net.jmp.pinecone.quickstart.query.QueryIndex.Builder
+        /// @return        net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
 
             return this;
         }
 
-        /// Build the query index.
+        /// Set the topK value.
         ///
-        /// @return  net.jmp.pinecone.quickstart.query.QueryIndex
-        public QueryIndex build() {
-            return new QueryIndex(this);
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.query.QueryDenseIndex.Builder
+        public Builder topK(final int topK) {
+            this.topK = topK;
+
+            return this;
+        }
+
+        /// Build the dense query index.
+        ///
+        /// @return  net.jmp.pinecone.quickstart.query.QueryDenseIndex
+        public QueryDenseIndex build() {
+            return new QueryDenseIndex(this);
         }
     }
 }

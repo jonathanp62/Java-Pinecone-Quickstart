@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.list;
 
 /*
+ * (#)ListIndex.java    0.4.0   06/09/2025
  * (#)ListIndex.java    0.2.0   05/22/2025
  *
  * @author   Jonathan Parker
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /// The list index class.
 ///
-/// @version    0.2.0
+/// @version    0.4.0
 /// @since      0.2.0
 public final class ListIndex extends Operation {
     /// The logger.
@@ -57,7 +58,8 @@ public final class ListIndex extends Operation {
     private ListIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
-                .indexName(builder.indexName)
+                .denseIndexName(builder.denseIndexName)
+                .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
     }
@@ -76,10 +78,10 @@ public final class ListIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.indexExists() && this.isIndexLoaded()) {
-            this.logger.info("Listing index: {}", this.indexName);
+        if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
+            this.logger.info("Listing dense index: {}", this.denseIndexName);
 
-            try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
                 final ListResponse response = index.list(this.namespace);
                 final List<ListItem> vectors = response.getVectorsList();
 
@@ -88,7 +90,22 @@ public final class ListIndex extends Operation {
                 }
             }
         } else {
-            this.logger.info("Index does not exist or is not loaded: {}", this.indexName);
+            this.logger.info("Dense index does not exist or is not loaded: {}", this.denseIndexName);
+        }
+
+        if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
+            this.logger.info("Listing sparse index: {}", this.sparseIndexName);
+
+            try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
+                final ListResponse response = index.list(this.namespace);
+                final List<ListItem> vectors = response.getVectorsList();
+
+                for (final ListItem vector : vectors) {
+                    this.logger.info("ID: {}", vector.getId());
+                }
+            }
+        } else {
+            this.logger.info("Sparse index does not exist or is not loaded: {}", this.sparseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -101,8 +118,11 @@ public final class ListIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
-        /// The index name.
-        private String indexName;
+        /// The dense index name.
+        private String denseIndexName;
+
+        /// The sparse index name.
+        private String sparseIndexName;
 
         /// The namespace.
         private String namespace;
@@ -122,12 +142,22 @@ public final class ListIndex extends Operation {
             return this;
         }
 
-        /// Set the index name.
+        /// Set the dense index name.
         ///
-        /// @param  indexName   java.lang.String
-        /// @return             net.jmp.pinecone.quickstart.list.ListIndex.Builder
-        public Builder indexName(final String indexName) {
-            this.indexName = indexName;
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.list.ListIndex.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the sparse index name.
+        ///
+        /// @param  sparseIndexName java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.list.ListIndex.Builder
+        public Builder sparseIndexName(final String sparseIndexName) {
+            this.sparseIndexName = sparseIndexName;
 
             return this;
         }

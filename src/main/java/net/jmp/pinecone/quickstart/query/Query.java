@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Query.java    0.4.0   06/11/2025
  * (#)Query.java    0.3.0   05/27/2025
  * (#)Query.java    0.2.0   05/26/2025
  *
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query class.
 ///
-/// @version    0.3.0
+/// @version    0.4.0
 /// @since      0.2.0
 final class Query {
     /// The logger.
@@ -76,6 +77,9 @@ final class Query {
     /// The MongoDB database name.
     private final String dbName;
 
+    /// The number of top results to return when querying.
+    private final int topK;
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.query.Query.Builder
@@ -88,6 +92,7 @@ final class Query {
         this.mongoClient = builder.mongoClient;
         this.collectionName = builder.collectionName;
         this.dbName = builder.dbName;
+        this.topK = builder.topK;
     }
 
     /// Return the builder.
@@ -113,7 +118,7 @@ final class Query {
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
-                    index.queryByVectorId(10,
+                    index.queryByVectorId(this.topK,
                             vectorId,
                             this.namespace,
                             null,
@@ -122,23 +127,7 @@ final class Query {
 
             matches = queryResponse.getMatchesList();
 
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID: {}", match.getId());
-                    this.logger.debug("Score    : {}", match.getScore());
-                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
-                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
-                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
-
-                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
-                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
-
-                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
-                }
-            }
+            this.logMatches(matches);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -148,7 +137,7 @@ final class Query {
         return matches;
     }
 
-    /// Query the index by query vector.
+    /// Query the index by dense query vector.
     ///
     /// @param  queryVector java.util.List<java.lang.Float>
     /// @param  categories  java.util.Set<java.lang.String>
@@ -167,7 +156,7 @@ final class Query {
 
         try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
             final QueryResponseWithUnsignedIndices queryResponse =
-                    index.query(10,
+                    index.query(this.topK,
                             queryVector,
                             null,
                             null,
@@ -179,23 +168,51 @@ final class Query {
 
             matches = queryResponse.getMatchesList();
 
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
+            this.logMatches(matches);
+        }
 
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID: {}", match.getId());
-                    this.logger.debug("Score    : {}", match.getScore());
-                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
-                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
-                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
 
-                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
-                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
+        return matches;
+    }
 
-                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
-                }
-            }
+    /// Query the index by sparse query vector.
+    ///
+    /// @param  sparseIndices   java.util.List<java.lang.Long>
+    /// @param  sparseValues    java.util.List<java.lang.Float>
+    /// @param  categories      java.util.Set<java.lang.String>
+    /// @return                 java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    List<ScoredVectorWithUnsignedIndices> query(final List<Long> sparseIndices,
+                                                final List<Float> sparseValues,
+                                                final Set<String> categories) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sparseIndices.toString(), sparseValues.toString(), categories));
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches;
+
+        this.logger.info("Querying sparse index: {}", this.indexName);
+
+        final Struct filter = this.createFilter(categories);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            final QueryResponseWithUnsignedIndices response = index.query(
+                    this.topK,
+                    Collections.emptyList(),
+                    sparseIndices,
+                    sparseValues,
+                    null,
+                    this.namespace,
+                    filter,
+                    true,
+                    true
+            );
+
+            matches = response.getMatchesList();
+
+            this.logMatches(matches);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -257,6 +274,37 @@ final class Query {
         return filter;
     }
 
+    /// Log the matches.
+    ///
+    /// @param  matches java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private void logMatches(final List<ScoredVectorWithUnsignedIndices> matches) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(matches));
+        }
+
+        if (this.logger.isDebugEnabled()) {
+            for (final ScoredVectorWithUnsignedIndices match : matches) {
+                final Struct metadata = match.getMetadata();
+                final Map<String, Value> fields = metadata.getFieldsMap();
+
+                this.logger.debug("Vector ID: {}", match.getId());
+                this.logger.debug("Score    : {}", match.getScore());
+                this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
+                this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
+                this.logger.debug("Category : {}", fields.get("category").getStringValue());
+
+                final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
+                final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
+
+                content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
     /// The builder class.
     static class Builder {
         /// The Pinecone client.
@@ -277,9 +325,12 @@ final class Query {
         /// The MongoDB database name.
         private String dbName;
 
+        /// The number of top results to return when querying.
+        private int topK;
+
         /// The default constructor.
         Builder() {
-
+            super();
         }
 
         /// Set the Pinecone client.
@@ -338,6 +389,16 @@ final class Query {
         /// @return        net.jmp.pinecone.quickstart.query.Query.Builder
         Builder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topK value.
+        ///
+        /// @param  topK    int
+        /// @return         net.jmp.pinecone.quickstart.query.Query.Builder
+        Builder topK(final int topK) {
+            this.topK = topK;
 
             return this;
         }
