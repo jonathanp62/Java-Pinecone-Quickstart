@@ -201,6 +201,13 @@ tasks.register('query-sparse', JavaExec) {
 	sysProps.put('app.queryText', 'light')
 }
 
+tasks.register('query-sparse-category', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-sparse')
+	sysProps.put('app.queryText', 'light physics')
+}
+
 tasks.register('store', JavaExec) {
 	getSystemProperties().put('app.operation', 'store')
 }

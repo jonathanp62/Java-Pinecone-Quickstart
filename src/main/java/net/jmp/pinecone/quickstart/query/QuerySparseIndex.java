@@ -99,10 +99,17 @@ public final class QuerySparseIndex extends Operation {
                         .dbName(this.dbName)
                         .build();
 
+                final CategoryUtil categoryUtil = new CategoryUtil(this.mongoClient, this.dbName);
+                final Set<String> categories = categoryUtil.getCategories(this.queryText);
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Categories: {}", categories);
+                }
+
                 final List<ScoredVectorWithUnsignedIndices> matches = query.query(
                         sparseVector.getSparseIndices(),
                         sparseVector.getSparseValues(),
-                        Collections.emptySet());
+                        categories);
 
                 if (this.logger.isDebugEnabled()) {
                     this.logger.debug("Matches: {}", matches);
