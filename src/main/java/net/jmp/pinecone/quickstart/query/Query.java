@@ -223,9 +223,45 @@ final class Query {
             this.logger.trace(entryWith(sparseIndices.toString(), sparseValues.toString(), categories));
         }
 
-        List<ScoredVectorWithUnsignedIndices> matches = null;
+        List<ScoredVectorWithUnsignedIndices> matches;
 
         this.logger.info("Querying sparse index: {}", this.indexName);
+
+        final Struct filter = this.createFilter(categories);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.indexName)) {
+            final QueryResponseWithUnsignedIndices response = index.query(
+                    this.topK,
+                    Collections.emptyList(),
+                    sparseIndices,
+                    sparseValues,
+                    null,
+                    this.namespace,
+                    filter,
+                    true,
+                    true
+            );
+
+            matches = response.getMatchesList();
+
+            for (final ScoredVectorWithUnsignedIndices match : matches) {
+                final Struct metadata = match.getMetadata();
+                final Map<String, Value> fields = metadata.getFieldsMap();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Vector ID: {}", match.getId());
+                    this.logger.debug("Score    : {}", match.getScore());
+                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
+                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
+                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
+
+                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
+                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
+
+                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
+                }
+            }
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exitWith(matches));

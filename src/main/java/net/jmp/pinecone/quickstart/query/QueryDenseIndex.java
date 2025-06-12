@@ -88,7 +88,7 @@ public final class QueryDenseIndex extends Operation {
         }
 
         if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
-            List<ScoredVectorWithUnsignedIndices> matches = null;
+            List<ScoredVectorWithUnsignedIndices> matches;
 
             if (this.queryText.startsWith("rec")) {
                 matches = this.queryById();

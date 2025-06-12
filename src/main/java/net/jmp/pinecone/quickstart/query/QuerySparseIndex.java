@@ -30,10 +30,8 @@ package net.jmp.pinecone.quickstart.query;
 
 import com.mongodb.client.MongoClient;
 
-import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
 
-import io.pinecone.unsigned_indices_model.QueryResponseWithUnsignedIndices;
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
 
 import java.util.*;
@@ -91,24 +89,23 @@ public final class QuerySparseIndex extends Operation {
             final SparseVector sparseVector = queryVector.queryTextToSparseVector(this.queryText);
 
             if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
-                try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
-                    final QueryResponseWithUnsignedIndices response = index.query(
-                            this.topK,
-                            Collections.emptyList(),
-                            sparseVector.getSparseIndices(),
-                            sparseVector.getSparseValues(),
-                            null,
-                            this.namespace,
-                            null,
-                            true,
-                            true
-                    );
+                final Query query = Query.builder()
+                        .pinecone(this.pinecone)
+                        .indexName(this.sparseIndexName)
+                        .topK(this.topK)
+                        .namespace(this.namespace)
+                        .mongoClient(this.mongoClient)
+                        .collectionName(this.collectionName)
+                        .dbName(this.dbName)
+                        .build();
 
-                    final List<ScoredVectorWithUnsignedIndices> matches = response.getMatchesList();
+                final List<ScoredVectorWithUnsignedIndices> matches = query.query(
+                        sparseVector.getSparseIndices(),
+                        sparseVector.getSparseValues(),
+                        Collections.emptySet());
 
-                    if (this.logger.isDebugEnabled()) {
-                        this.logger.debug("Matches: {}", matches);
-                    }
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Matches: {}", matches);
                 }
             } else {
                 this.logger.error("The sparse embeddings are empty");
