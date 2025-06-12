@@ -184,23 +184,7 @@ final class Query {
 
             matches = queryResponse.getMatchesList();
 
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID: {}", match.getId());
-                    this.logger.debug("Score    : {}", match.getScore());
-                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
-                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
-                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
-
-                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
-                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
-
-                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
-                }
-            }
+            this.logMatches(matches);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -244,23 +228,7 @@ final class Query {
 
             matches = response.getMatchesList();
 
-            for (final ScoredVectorWithUnsignedIndices match : matches) {
-                final Struct metadata = match.getMetadata();
-                final Map<String, Value> fields = metadata.getFieldsMap();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Vector ID: {}", match.getId());
-                    this.logger.debug("Score    : {}", match.getScore());
-                    this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
-                    this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
-                    this.logger.debug("Category : {}", fields.get("category").getStringValue());
-
-                    final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
-                    final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
-
-                    content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
-                }
-            }
+            this.logMatches(matches);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -320,6 +288,37 @@ final class Query {
         }
 
         return filter;
+    }
+
+    /// Log the matches.
+    ///
+    /// @param  matches java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private void logMatches(final List<ScoredVectorWithUnsignedIndices> matches) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(matches));
+        }
+
+        for (final ScoredVectorWithUnsignedIndices match : matches) {
+            final Struct metadata = match.getMetadata();
+            final Map<String, Value> fields = metadata.getFieldsMap();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Vector ID: {}", match.getId());
+                this.logger.debug("Score    : {}", match.getScore());
+                this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
+                this.logger.debug("Doc ID   : {}", fields.get("documentid").getStringValue());
+                this.logger.debug("Category : {}", fields.get("category").getStringValue());
+
+                final DocumentFetcher fetcher = new DocumentFetcher(this.mongoClient, this.collectionName, this.dbName);
+                final Optional<UnstructuredTextDocument> content = fetcher.getDocument(fields.get("mongoid").getStringValue());
+
+                content.ifPresent(doc -> this.logger.debug("Content  : {}", doc.getContent()));
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 
     /// The builder class.
