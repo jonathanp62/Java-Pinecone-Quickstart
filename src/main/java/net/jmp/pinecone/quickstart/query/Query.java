@@ -282,11 +282,11 @@ final class Query {
             this.logger.trace(entryWith(matches));
         }
 
-        for (final ScoredVectorWithUnsignedIndices match : matches) {
-            final Struct metadata = match.getMetadata();
-            final Map<String, Value> fields = metadata.getFieldsMap();
+        if (this.logger.isDebugEnabled()) {
+            for (final ScoredVectorWithUnsignedIndices match : matches) {
+                final Struct metadata = match.getMetadata();
+                final Map<String, Value> fields = metadata.getFieldsMap();
 
-            if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Vector ID: {}", match.getId());
                 this.logger.debug("Score    : {}", match.getScore());
                 this.logger.debug("Mongo ID : {}", fields.get("mongoid").getStringValue());
