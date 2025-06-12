@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 
 import java.util.*;
 
+import net.jmp.pinecone.quickstart.corenlp.CoreNLP;
 import net.jmp.pinecone.quickstart.create.CreateIndex;
 import net.jmp.pinecone.quickstart.delete.DeleteIndex;
 import net.jmp.pinecone.quickstart.describe.DescribeIndex;
@@ -148,6 +149,7 @@ final class Quickstart {
 
         try (final MongoClient mongoClient = MongoClients.create(mongoDbUri)) {
             switch (operation) {
+                case "corenlp" -> this.coreNLP();
                 case "create" -> this.createIndex(pinecone);
                 case "delete" -> this.deleteIndex(pinecone);
                 case "describe" -> this.describeIndex(pinecone);
@@ -263,6 +265,21 @@ final class Quickstart {
         }
 
         return Optional.ofNullable(mongoDbUri);
+    }
+
+    ///  Perform core natural language processing.
+    private void coreNLP() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final CoreNLP coreNLP = new CoreNLP(this.queryText);
+
+        coreNLP.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 
     /// Fetch from the indexes.
