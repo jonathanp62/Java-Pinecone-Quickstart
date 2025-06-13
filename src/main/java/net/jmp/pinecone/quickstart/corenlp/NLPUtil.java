@@ -55,6 +55,31 @@ public final class NLPUtil {
         super();
     }
 
+    /// Gets the significant words as a string.
+    ///
+    /// @param  text    java.lang.String
+    /// @return         java.lang.String
+    public static String getSignificantWordsAsString(final String text) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(entryWith(text));
+        }
+
+        final Set<String> significantWords = NLPUtil.getSignificantWords(text);
+        final StringBuilder sb = new StringBuilder();
+
+        for (String word : significantWords) {
+            sb.append(word).append(" ");
+        }
+
+        final String result = sb.toString().trim();
+
+        if (logger.isTraceEnabled()) {
+            logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
     /// Gets the significant words from the text.
     ///
     /// @param  text    java.lang.String
