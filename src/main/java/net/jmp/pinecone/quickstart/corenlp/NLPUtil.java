@@ -32,10 +32,7 @@ import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,13 +55,14 @@ public final class NLPUtil {
     /// Gets the significant words as a string.
     ///
     /// @param  text    java.lang.String
+    /// @param  ordered boolean
     /// @return         java.lang.String
-    public static String getSignificantWordsAsString(final String text) {
+    public static String getSignificantWordsAsString(final String text, final boolean ordered) {
         if (logger.isTraceEnabled()) {
-            logger.trace(entryWith(text));
+            logger.trace(entryWith(text, ordered));
         }
 
-        final Set<String> significantWords = NLPUtil.getSignificantWords(text);
+        final Set<String> significantWords = NLPUtil.getSignificantWords(text, ordered);
         final StringBuilder sb = new StringBuilder();
 
         for (String word : significantWords) {
@@ -83,13 +81,20 @@ public final class NLPUtil {
     /// Gets the significant words from the text.
     ///
     /// @param  text    java.lang.String
+    /// @param  ordered boolean
     /// @return         java.util.Set<java.lang.String> j
-    public static Set<String> getSignificantWords(final String text) {
+    public static Set<String> getSignificantWords(final String text, final boolean ordered) {
         if (logger.isTraceEnabled()) {
-            logger.trace(entryWith(text));
+            logger.trace(entryWith(text, ordered));
         }
 
-        Set<String> significantWords = new HashSet<>();
+        Set<String> significantWords;
+
+        if (ordered) {
+            significantWords = new LinkedHashSet<>();   // Preserve insertion order
+        } else {
+            significantWords = new HashSet<>();
+        }
 
         final Properties props = new Properties();    // Set up pipeline properties
 
@@ -109,8 +114,12 @@ public final class NLPUtil {
                 logger.info("Core sentence: {}", sentence.text());
             }
 
-            significantWords.addAll(getNouns(sentence));
-            significantWords.addAll(getAdjectives(sentence));
+            if (ordered) {
+                significantWords.addAll(getAdjectivesAndNouns(sentence));
+            } else {
+                significantWords.addAll(getNouns(sentence));
+                significantWords.addAll(getAdjectives(sentence));
+            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Significant words: {}", significantWords);
@@ -187,6 +196,40 @@ public final class NLPUtil {
 
             if (tag.startsWith(posTag)) {
                 results.add(words.get(i));
+            }
+        }
+
+        if (logger.isTraceEnabled()) {
+            logger.trace(exit());
+        }
+
+        return results;
+    }
+
+    /// Get the words that are adjectives and nouns in a more natural order.
+    ///
+    /// @param  sentence edu.stanford.nlp.trees.CoreSentence
+    /// @return          java.util.Set<java.lang.String>
+    private static Set<String> getAdjectivesAndNouns(final CoreSentence sentence) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(entryWith(sentence));
+        }
+
+        final Set<String> results = new LinkedHashSet<>();  // Preserve insertion order
+
+        final List<String> posTags = sentence.posTags();
+        final List<String> tokens = sentence.tokensAsStrings();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("POS tags: {}", posTags);
+            logger.debug("Tokens  : {}", tokens);
+        }
+
+        for (int i = 0; i < posTags.size(); i++) {
+            final String tag = posTags.get(i);
+
+            if (tag.startsWith("JJ") || tag.startsWith("NN")) {
+                results.add(tokens.get(i));
             }
         }
 

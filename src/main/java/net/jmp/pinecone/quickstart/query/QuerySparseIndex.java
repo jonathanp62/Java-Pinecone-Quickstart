@@ -87,7 +87,7 @@ public final class QuerySparseIndex extends Operation {
         }
 
         if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
-            final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText);
+            final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText, true);
             final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
             final SparseVector sparseVector = queryVector.queryTextToSparseVector(significantWords);
 
