@@ -38,6 +38,8 @@ import java.util.*;
 
 import net.jmp.pinecone.quickstart.Operation;
 
+import net.jmp.pinecone.quickstart.corenlp.NLPUtil;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
@@ -85,8 +87,9 @@ public final class QuerySparseIndex extends Operation {
         }
 
         if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
+            final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText, true);
             final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
-            final SparseVector sparseVector = queryVector.queryTextToSparseVector(this.queryText);
+            final SparseVector sparseVector = queryVector.queryTextToSparseVector(significantWords);
 
             if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
                 final Query query = Query.builder()

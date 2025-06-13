@@ -1,9 +1,10 @@
 #
+# (#)libs.versions.toml 0.5.0   06/12/2025
 # (#)libs.versions.toml 0.2.0   05/23/2025
 # (#)libs.versions.toml 0.1.0   05/17/2025
 #
 #  @author   Jonathan Parker
-#  @version  0.2.0
+#  @version  0.5.0
 #  @since    0.1.0
 #
 #  MIT License
@@ -32,6 +33,7 @@
 ch-qos-logback-logback-classic = "1.5.18"
 ch-qos-logback-logback-core = "1.5.18"
 com-openai-openai-java = "1.6.1"
+edu-stanford-nlp-stanford-corenlp = "4.5.5"
 io-pinecone-pinecone-client = "4.0.1"
 net-jmp-util-logging-logging-utilities = "1.2.0"
 org-mongodb-mongodb-driver-sync = "5.5.0"
@@ -41,6 +43,7 @@ org-slf4j-slf4j-api = "2.0.17"
 ch-qos-logback-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "ch-qos-logback-logback-classic" }
 ch-qos-logback-logback-core = { module = "ch.qos.logback:logback-core", version.ref = "ch-qos-logback-logback-core" }
 com-openai-openai-java = { module = "com.openai:openai-java", version.ref = "com-openai-openai-java" }
+edu-stanford-nlp-stanford-corenlp = { module = "edu.stanford.nlp:stanford-corenlp", version.ref = "edu-stanford-nlp-stanford-corenlp" }
 io-pinecone-pinecone-client = { module = "io.pinecone:pinecone-client", version.ref = "io-pinecone-pinecone-client" }
 net-jmp-util-logging-logging-utilities = { module = "net.jmp.util.logging:logging-utilities", version.ref = "net-jmp-util-logging-logging-utilities" }
 org-mongodb-mongodb-driver-sync = { module = "org.mongodb:mongodb-driver-sync", version.ref = "org-mongodb-mongodb-driver-sync" }

@@ -79,8 +79,13 @@ repositories {
 dependencies {
 	implementation		(libs.bundles.logging)
 	implementation		(libs.com.openai.openai.java)
+	implementation		(libs.edu.stanford.nlp.stanford.corenlp)
 	implementation		(libs.io.pinecone.pinecone.client)
 	implementation		(libs.org.mongodb.mongodb.driver.sync)
+
+	implementation		"edu.stanford.nlp:stanford-corenlp:4.5.5:models"
+	implementation		"edu.stanford.nlp:stanford-corenlp:4.5.5:models-english"
+	implementation		"edu.stanford.nlp:stanford-corenlp:4.5.5:models-english-kbp"
 
 	runtimeOnly			(libs.bundles.logging.runtime)
 
@@ -132,6 +137,13 @@ tasks.withType(JavaExec).configureEach {
 	classpath = sourceSets.main.runtimeClasspath
 	javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 	mainClass = javaMainClass
+}
+
+tasks.register('corenlp', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'corenlp')
+	sysProps.put('app.queryText', 'The quick brown fox jumps over the lazy dog.')
 }
 
 tasks.register('create', JavaExec) {
@@ -199,14 +211,14 @@ tasks.register('query-sparse', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'query-sparse')
-	sysProps.put('app.queryText', 'light')
+	sysProps.put('app.queryText', 'Tell me about light and the human body')
 }
 
 tasks.register('query-sparse-category', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'query-sparse')
-	sysProps.put('app.queryText', 'light physics')
+	sysProps.put('app.queryText', 'Tell me about the physics of light')
 }
 
 tasks.register('store', JavaExec) {

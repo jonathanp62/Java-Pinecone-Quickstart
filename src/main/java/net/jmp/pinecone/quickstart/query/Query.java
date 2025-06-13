@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Query.java    0.5.0   06/13/2025
  * (#)Query.java    0.4.0   06/11/2025
  * (#)Query.java    0.3.0   05/27/2025
  * (#)Query.java    0.2.0   05/26/2025
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.2.0
 final class Query {
     /// The logger.
