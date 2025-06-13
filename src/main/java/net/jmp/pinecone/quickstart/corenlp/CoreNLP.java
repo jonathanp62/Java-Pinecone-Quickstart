@@ -34,8 +34,10 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 
 import edu.stanford.nlp.trees.Tree;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import net.jmp.pinecone.quickstart.Operation;
 
@@ -71,39 +73,116 @@ public final class CoreNLP extends Operation {
         props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,depparse");
 
         final StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        final CoreDocument document = new CoreDocument(this.queryText);   // Create a document object
 
-        pipeline.annotate(document);    // Annotate the document
+        final List<String> documents = List.of(
+            this.queryText,
+            "Famous historical structures and monuments",
+            "Tell me about famous persons in history and science",
+            "Tell me about the physics of light",
+            "The Great Wall of China was built to protect against invasions",
+            "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
+            "Albert Einstein developed the theory of relativity."
+        );
 
-        /* Use the second sentence for POS, NER, and constituency and dependency parses */
+        for (final String documentText : documents) {
+            final CoreDocument document = new CoreDocument(documentText);   // Create a document object
 
-        for (final CoreSentence sentence : document.sentences()) {
-            this.logger.info("Core sentence:");
-            this.logger.info("{}", sentence.text());
+            pipeline.annotate(document);    // Annotate the document
 
-            final List<String> posTags = sentence.posTags();    // List of the part-of-speech tags
+            /* Use the second sentence for POS, NER, and constituency and dependency parses */
 
-            this.logger.info("POS tags:");
-            this.logger.info("{}", posTags);
+            for (final CoreSentence sentence : document.sentences()) {
+                this.logger.info("Core sentence: {}", sentence.text());
 
-            final List<String> nerTags = sentence.nerTags();  // List of the named-entity-recognition tags
+                final Set<String> significantWords = this.getNouns(sentence);
 
-            this.logger.info("NER tags:");
-            this.logger.info("{}", nerTags);
+                significantWords.addAll(this.getAdjectives(sentence));
 
-            final Tree constituencyParse = sentence.constituencyParse();
+                this.logger.info("Significant words: {}", significantWords);
 
-            this.logger.info("Constituency parse:");
-            this.logger.info("{}", constituencyParse);
+                if (this.logger.isDebugEnabled()) {
+                    final Tree constituencyParse = sentence.constituencyParse();
+                    final SemanticGraph dependencyParse = sentence.dependencyParse();
 
-            final SemanticGraph dependencyParse = sentence.dependencyParse();
-
-            this.logger.info("Dependency parse:");
-            this.logger.info("{}", dependencyParse);
+                    this.logger.debug("Constituency parse: {}", constituencyParse);
+                    this.logger.debug("Dependency parse: {}", dependencyParse);
+                }
+            }
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
+            this.logger.trace(exit());
         }
+    }
+
+    /// Get the nouns.
+    ///
+    /// @param  sentence edu.stanford.nlp.trees.CoreSentence
+    /// @return          java.util.Set<java.lang.String>
+    private Set<String> getNouns(final CoreSentence sentence) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sentence));
+        }
+
+        final Set<String> nouns = this.getWordsMatchingPOS(sentence, "NN");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(nouns));
+        }
+
+        return nouns;
+    }
+
+    /// Get the adjectives.
+    ///
+    /// @param  sentence edu.stanford.nlp.trees.CoreSentence
+    /// @return          java.util.Set<java.lang.String>
+    private Set<String> getAdjectives(final CoreSentence sentence) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sentence));
+        }
+
+        final Set<String> adjectives = this.getWordsMatchingPOS(sentence, "JJ");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(adjectives));
+        }
+
+        return adjectives;
+    }
+
+    /// Get the words matching the specified part of speech.
+    ///
+    /// @param  sentence edu.stanford.nlp.trees.CoreSentence
+    /// @param  posTag   java.lang.String
+    /// @return          java.util.Set<java.lang.String>
+    private Set<String> getWordsMatchingPOS(final CoreSentence sentence, final String posTag) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sentence, posTag));
+        }
+
+        final Set<String> results = new HashSet<>();
+
+        final List<String> posTags = sentence.posTags();
+        final List<String> words = sentence.tokensAsStrings();
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("POS tags: {}", posTags);
+            this.logger.debug("Tokens  : {}", sentence.tokensAsStrings());
+        }
+
+        for (int i = 0; i < posTags.size(); i++) {
+            final String tag = posTags.get(i);
+
+            if (tag.startsWith(posTag)) {
+                results.add(words.get(i));
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+
+        return results;
     }
 }
