@@ -32,12 +32,18 @@ import com.mongodb.client.MongoClient;
 
 import io.pinecone.clients.Pinecone;
 
+import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
+
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /// The query hybrid class.
 ///
@@ -82,11 +88,109 @@ public final class QueryHybrid extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.info("Hello from QueryHybrid");
+        final List<ScoredVectorWithUnsignedIndices> denseMatches = this.getDenseMatches();
+        final List<ScoredVectorWithUnsignedIndices> sparseMatches = this.getSparseMatches();
+
+        final List<ScoredVectorWithUnsignedIndices> mergedMatches = this.mergeDenseAndSparseMatches(denseMatches, sparseMatches);
+
+        // Rerank the matches
+        // Summarize the reranked matches
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Get dense matches.
+    ///
+    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> getDenseMatches() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
+
+        if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
+            final QueryDenseIndex queryDenseIndex = QueryDenseIndex.builder()
+                    .pinecone(pinecone)
+                    .denseEmbeddingModel(this.denseEmbeddingModel)
+                    .denseIndexName(this.denseIndexName)
+                    .namespace(this.namespace)
+                    .rerankingModel(this.rerankingModel)
+                    .queryText(this.queryText)
+                    .openAiApiKey(this.openAiApiKey)
+                    .mongoClient(mongoClient)
+                    .collectionName(this.collectionName)
+                    .dbName(this.dbName)
+                    .topK(this.topK)
+                    .build();
+
+            matches = queryDenseIndex.queryByVector();
+        } else {
+            this.logger.info("Dense index does not exist or is not loaded: {}", this.denseIndexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Get sparse matches.
+    ///
+    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> getSparseMatches() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
+
+        if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
+            final QuerySparseIndex querySparseIndex = QuerySparseIndex.builder()
+                    .pinecone(pinecone)
+                    .sparseEmbeddingModel(this.sparseEmbeddingModel)
+                    .sparseIndexName(this.sparseIndexName)
+                    .namespace(this.namespace)
+                    .rerankingModel(this.rerankingModel)
+                    .queryText(this.queryText)
+                    .openAiApiKey(this.openAiApiKey)
+                    .mongoClient(mongoClient)
+                    .collectionName(this.collectionName)
+                    .dbName(this.dbName)
+                    .topK(this.topK)
+                    .build();
+
+            matches = querySparseIndex.query();
+        } else {
+            this.logger.info("Sparse index does not exist or is not loaded: {}", this.denseIndexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
+    }
+
+    /// Merge dense and sparse matches.
+    ///
+    /// @param  denseMatches    java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    /// @param  sparseMatches   java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    /// @return                 java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> mergeDenseAndSparseMatches(final List<ScoredVectorWithUnsignedIndices> denseMatches,
+                                                                            final List<ScoredVectorWithUnsignedIndices> sparseMatches) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(denseMatches, sparseMatches));
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(null));
+        }
+
+        return null;
     }
 
     /// The builder class.

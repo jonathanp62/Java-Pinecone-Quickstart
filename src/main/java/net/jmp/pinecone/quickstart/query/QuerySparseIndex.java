@@ -116,7 +116,7 @@ public final class QuerySparseIndex extends Operation {
     /// Query the sparse index.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    private List<ScoredVectorWithUnsignedIndices> query() {
+    List<ScoredVectorWithUnsignedIndices> query() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }

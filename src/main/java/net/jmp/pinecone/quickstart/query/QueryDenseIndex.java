@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)QueryDenseIndex.java  0.5.0   06/14/2025
  * (#)QueryDenseIndex.java  0.4.0   06/09/2025
  * (#)QueryDenseIndex.java  0.2.0   05/21/2025
  *
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query dense index class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.2.0
 public final class QueryDenseIndex extends Operation {
     /// The logger.
@@ -151,7 +152,7 @@ public final class QueryDenseIndex extends Operation {
     /// Query the dense index by vector.
     ///
     /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    private List<ScoredVectorWithUnsignedIndices> queryByVector() {
+    List<ScoredVectorWithUnsignedIndices> queryByVector() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
