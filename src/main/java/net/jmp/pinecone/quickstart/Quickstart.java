@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.5.0   06/14/2025
  * (#)Quickstart.java   0.4.0   06/04/2025
  * (#)Quickstart.java   0.3.0   05/27/2025
  * (#)Quickstart.java   0.2.0   05/21/2025
@@ -55,6 +56,7 @@ import net.jmp.pinecone.quickstart.list.ListIndexes;
 import net.jmp.pinecone.quickstart.list.ListNamespaces;
 import net.jmp.pinecone.quickstart.load.LoadIndex;
 import net.jmp.pinecone.quickstart.query.QueryDenseIndex;
+import net.jmp.pinecone.quickstart.query.QueryHybrid;
 import net.jmp.pinecone.quickstart.query.QuerySparseIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 
@@ -65,7 +67,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -161,6 +163,7 @@ final class Quickstart {
                 case "listNamespaces" -> this.listNamespaces(pinecone);
                 case "load" -> this.loadIndex(pinecone, mongoClient);
                 case "query-dense" -> this.queryDenseIndex(pinecone, mongoClient);
+                case "query-hybrid" -> this.queryHybrid(pinecone, mongoClient);
                 case "query-sparse" -> this.querySparseIndex(pinecone, mongoClient);
                 case "store" -> this.storeUnstructuredText(mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
@@ -526,6 +529,38 @@ final class Quickstart {
                 .build();
 
         querySparseIndex.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Query both the sparse and the dense index to make it hybrid
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  mongoClient com.mongodb.client.MongoClient
+    private void queryHybrid(final Pinecone pinecone, final MongoClient mongoClient) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, mongoClient));
+        }
+
+        final QueryHybrid queryHybrid = QueryHybrid.builder()
+                .pinecone(pinecone)
+                .denseEmbeddingModel(this.denseEmbeddingModel)
+                .sparseEmbeddingModel(this.sparseEmbeddingModel)
+                .denseIndexName(this.denseIndexName)
+                .sparseIndexName(this.sparseIndexName)
+                .namespace(this.namespace)
+                .rerankingModel(this.rerankingModel)
+                .queryText(this.queryText)
+                .openAiApiKey(this.openAiApiKey)
+                .mongoClient(mongoClient)
+                .collectionName(this.mongoDbCollection)
+                .dbName(this.mongoDbName)
+                .topK(this.topK)
+                .build();
+
+        queryHybrid.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

@@ -237,7 +237,7 @@ public final class QueryDenseIndex extends Operation {
 
     /// The builder class.
     public static class Builder {
-        /// The Pinecone cliebt.
+        /// The Pinecone client.
         private Pinecone pinecone;
 
         /// The dense embedding model.

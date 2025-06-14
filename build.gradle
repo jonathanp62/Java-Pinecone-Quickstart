@@ -207,6 +207,13 @@ tasks.register('query-dense-persons', JavaExec) {
 	sysProps.put('app.queryText', 'Tell me about famous persons in history and science')
 }
 
+tasks.register('query-hybrid', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'query-hybrid')
+	sysProps.put('app.queryText', 'Tell me about light and the human body')
+}
+
 tasks.register('query-sparse', JavaExec) {
 	var sysProps = getSystemProperties()
 

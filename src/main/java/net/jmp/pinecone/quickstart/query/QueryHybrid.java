@@ -1,8 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
- * (#)QuerySparseIndex.java 0.5.0   06/14/2025
- * (#)QuerySparseIndex.java 0.4.0   06/10/2025
+ * (#)QueryHybrid.java  0.5.0   06/14/2025
  *
  * @author   Jonathan Parker
  *
@@ -33,34 +32,30 @@ import com.mongodb.client.MongoClient;
 
 import io.pinecone.clients.Pinecone;
 
-import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
-
-import java.util.*;
-
 import net.jmp.pinecone.quickstart.Operation;
-
-import net.jmp.pinecone.quickstart.corenlp.NLPUtil;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/// The query sparse index class.
+/// The query hybrid class.
 ///
 /// @version    0.5.0
-/// @since      0.4.0
-public final class QuerySparseIndex extends Operation {
+/// @since      0.5.0
+public final class QueryHybrid extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The constructor.
     ///
-    /// @param  builder net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
-    private QuerySparseIndex(final Builder builder) {
+    /// @param  builder net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
+    private QueryHybrid(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
+                .denseEmbeddingModel(builder.denseEmbeddingModel)
                 .sparseEmbeddingModel(builder.sparseEmbeddingModel)
+                .denseIndexName(builder.denseIndexName)
                 .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
                 .rerankingModel(builder.rerankingModel)
@@ -75,7 +70,7 @@ public final class QuerySparseIndex extends Operation {
 
     /// Return the builder.
     ///
-    /// @return net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+    /// @return net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
     public static Builder builder() {
         return new Builder();
     }
@@ -87,81 +82,11 @@ public final class QuerySparseIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
-            final List<ScoredVectorWithUnsignedIndices> matches = this.query();
-
-            final Reranker reranker = Reranker.builder()
-                    .pinecone(this.pinecone)
-                    .rerankingModel(this.rerankingModel)
-                    .queryText(this.queryText)
-                    .mongoClient(this.mongoClient)
-                    .collectionName(this.collectionName)
-                    .dbName(this.dbName)
-                    .build();
-
-            final List<String> reranked = reranker.rerank(matches);
-            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText);
-            final String summary = summarizer.summarize(reranked);
-
-            this.logger.info(summary);
-        } else {
-            this.logger.info("Sparse index does not exist or is not loaded: {}", this.sparseIndexName);
-        }
+        this.logger.info("Hello from QueryHybrid");
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
-    }
-
-    /// Query the sparse index.
-    ///
-    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
-    private List<ScoredVectorWithUnsignedIndices> query() {
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entry());
-        }
-
-        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
-
-        final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText, true);
-        final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
-        final SparseVector sparseVector = queryVector.queryTextToSparseVector(significantWords);
-
-        if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
-            final Query query = Query.builder()
-                    .pinecone(this.pinecone)
-                    .indexName(this.sparseIndexName)
-                    .topK(this.topK)
-                    .namespace(this.namespace)
-                    .mongoClient(this.mongoClient)
-                    .collectionName(this.collectionName)
-                    .dbName(this.dbName)
-                    .build();
-
-            final CategoryUtil categoryUtil = new CategoryUtil(this.mongoClient, this.dbName);
-            final Set<String> categories = categoryUtil.getCategories(this.queryText);
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Categories: {}", categories);
-            }
-
-            matches = query.query(
-                    sparseVector.getSparseIndices(),
-                    sparseVector.getSparseValues(),
-                    categories);
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Matches: {}", matches);
-            }
-        } else {
-            this.logger.error("The sparse embeddings are empty");
-        }
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(matches));
-        }
-
-        return matches;
     }
 
     /// The builder class.
@@ -169,8 +94,14 @@ public final class QuerySparseIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
+        /// The dense embedding model.
+        private String denseEmbeddingModel;
+
         /// The sparse embedding model.
         private String sparseEmbeddingModel;
+
+        /// The dense index name.
+        private String denseIndexName;
 
         /// The sparse index name.
         private String sparseIndexName;
@@ -207,9 +138,19 @@ public final class QuerySparseIndex extends Operation {
         /// Set the Pinecone client.
         ///
         /// @param  pinecone net.jmp.pinecone.Pinecone
-        /// @return          net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return          net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the dense embedding model.
+        ///
+        /// @param  denseEmbeddingModel java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
+        public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
+            this.denseEmbeddingModel = denseEmbeddingModel;
 
             return this;
         }
@@ -217,9 +158,19 @@ public final class QuerySparseIndex extends Operation {
         /// Set the sparse embedding model.
         ///
         /// @param  sparseEmbeddingModel    java.lang.String
-        /// @return                         net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return                         net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder sparseEmbeddingModel(final String sparseEmbeddingModel) {
             this.sparseEmbeddingModel = sparseEmbeddingModel;
+
+            return this;
+        }
+
+        /// Set the dense index name.
+        ///
+        /// @param  denseIndexName  java.lang.String
+        /// @return                 net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
+        public Builder denseIndexName(final String denseIndexName) {
+            this.denseIndexName = denseIndexName;
 
             return this;
         }
@@ -227,7 +178,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the sparse index name.
         ///
         /// @param  sparseIndexName java.lang.String
-        /// @return                 net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return                 net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder sparseIndexName(final String sparseIndexName) {
             this.sparseIndexName = sparseIndexName;
 
@@ -237,7 +188,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the namespace.
         ///
         /// @param  namespace java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder namespace(final String namespace) {
             this.namespace = namespace;
 
@@ -247,7 +198,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the re-ranking model.
         ///
         /// @param  rerankingModel java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder rerankingModel(final String rerankingModel) {
             this.rerankingModel = rerankingModel;
 
@@ -257,7 +208,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the query text.
         ///
         /// @param  queryText java.lang.String
-        /// @return           net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return           net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder queryText(final String queryText) {
             this.queryText = queryText;
 
@@ -267,7 +218,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the OpenAI API key.
         ///
         /// @param  openAiApiKey java.lang.String
-        /// @return              net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return              net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder openAiApiKey(final String openAiApiKey) {
             this.openAiApiKey = openAiApiKey;
 
@@ -277,7 +228,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the MongoDB client.
         ///
         /// @param  mongoClient com.mongodb.client.MongoClient
-        /// @return             net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return             net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder mongoClient(final MongoClient mongoClient) {
             this.mongoClient = mongoClient;
 
@@ -287,7 +238,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the MongoDB collection name.
         ///
         /// @param  collectionName java.lang.String
-        /// @return                net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return                net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder collectionName(final String collectionName) {
             this.collectionName = collectionName;
 
@@ -297,7 +248,7 @@ public final class QuerySparseIndex extends Operation {
         /// Set the MongoDB database name.
         ///
         /// @param  dbName java.lang.String
-        /// @return        net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return        net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
 
@@ -307,18 +258,18 @@ public final class QuerySparseIndex extends Operation {
         /// Set the topK value.
         ///
         /// @param  topK    int
-        /// @return         net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        /// @return         net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder topK(final int topK) {
             this.topK = topK;
 
             return this;
         }
 
-        /// Build the query sparse index.
+        /// Build the dense hybrid instance.
         ///
-        /// @return  net.jmp.pinecone.quickstart.query.QuerySparseIndex
-        public QuerySparseIndex build() {
-            return new QuerySparseIndex(this);
+        /// @return  net.jmp.pinecone.quickstart.query.QueryHybrid
+        public QueryHybrid build() {
+            return new QueryHybrid(this);
         }
     }
 }
