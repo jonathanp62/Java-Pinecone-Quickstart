@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)QuerySparseIndex.java 0.5.0   06/14/2025
  * (#)QuerySparseIndex.java 0.4.0   06/10/2025
  *
  * @author   Jonathan Parker
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 /// The query sparse index class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.4.0
 public final class QuerySparseIndex extends Operation {
     /// The logger.
@@ -87,39 +88,22 @@ public final class QuerySparseIndex extends Operation {
         }
 
         if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
-            final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText, true);
-            final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
-            final SparseVector sparseVector = queryVector.queryTextToSparseVector(significantWords);
+            final List<ScoredVectorWithUnsignedIndices> matches = this.query();
 
-            if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
-                final Query query = Query.builder()
-                        .pinecone(this.pinecone)
-                        .indexName(this.sparseIndexName)
-                        .topK(this.topK)
-                        .namespace(this.namespace)
-                        .mongoClient(this.mongoClient)
-                        .collectionName(this.collectionName)
-                        .dbName(this.dbName)
-                        .build();
+            final Reranker reranker = Reranker.builder()
+                    .pinecone(this.pinecone)
+                    .rerankingModel(this.rerankingModel)
+                    .queryText(this.queryText)
+                    .mongoClient(this.mongoClient)
+                    .collectionName(this.collectionName)
+                    .dbName(this.dbName)
+                    .build();
 
-                final CategoryUtil categoryUtil = new CategoryUtil(this.mongoClient, this.dbName);
-                final Set<String> categories = categoryUtil.getCategories(this.queryText);
+            final List<String> reranked = reranker.rerank(matches);
+            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText);
+            final String summary = summarizer.summarize(reranked);
 
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Categories: {}", categories);
-                }
-
-                final List<ScoredVectorWithUnsignedIndices> matches = query.query(
-                        sparseVector.getSparseIndices(),
-                        sparseVector.getSparseValues(),
-                        categories);
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Matches: {}", matches);
-                }
-            } else {
-                this.logger.error("The sparse embeddings are empty");
-            }
+            this.logger.info(summary);
         } else {
             this.logger.info("Sparse index does not exist or is not loaded: {}", this.sparseIndexName);
         }
@@ -127,6 +111,57 @@ public final class QuerySparseIndex extends Operation {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Query the sparse index.
+    ///
+    /// @return java.util.List<io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices>
+    private List<ScoredVectorWithUnsignedIndices> query() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        List<ScoredVectorWithUnsignedIndices> matches = new ArrayList<>();
+
+        final String significantWords = NLPUtil.getSignificantWordsAsString(this.queryText, true);
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.sparseEmbeddingModel);
+        final SparseVector sparseVector = queryVector.queryTextToSparseVector(significantWords);
+
+        if (!sparseVector.getSparseValues().isEmpty() && !sparseVector.getSparseIndices().isEmpty()) {
+            final Query query = Query.builder()
+                    .pinecone(this.pinecone)
+                    .indexName(this.sparseIndexName)
+                    .topK(this.topK)
+                    .namespace(this.namespace)
+                    .mongoClient(this.mongoClient)
+                    .collectionName(this.collectionName)
+                    .dbName(this.dbName)
+                    .build();
+
+            final CategoryUtil categoryUtil = new CategoryUtil(this.mongoClient, this.dbName);
+            final Set<String> categories = categoryUtil.getCategories(this.queryText);
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Categories: {}", categories);
+            }
+
+            matches = query.query(
+                    sparseVector.getSparseIndices(),
+                    sparseVector.getSparseValues(),
+                    categories);
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Matches: {}", matches);
+            }
+        } else {
+            this.logger.error("The sparse embeddings are empty");
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(matches));
+        }
+
+        return matches;
     }
 
     /// The builder class.
