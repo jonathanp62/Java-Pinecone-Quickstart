@@ -59,6 +59,7 @@ public final class QueryHybrid extends Operation {
     private QueryHybrid(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
+                .chatModel(builder.chatModel)
                 .denseEmbeddingModel(builder.denseEmbeddingModel)
                 .sparseEmbeddingModel(builder.sparseEmbeddingModel)
                 .denseIndexName(builder.denseIndexName)
@@ -198,6 +199,9 @@ public final class QueryHybrid extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
+        /// The chat model.
+        private String chatModel;
+
         /// The dense embedding model.
         private String denseEmbeddingModel;
 
@@ -245,6 +249,16 @@ public final class QueryHybrid extends Operation {
         /// @return          net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the chat model.
+        ///
+        /// @param  chatModel   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.query.QueryHybrid.Builder
+        public Builder chatModel(final String chatModel) {
+            this.chatModel = chatModel;
 
             return this;
         }

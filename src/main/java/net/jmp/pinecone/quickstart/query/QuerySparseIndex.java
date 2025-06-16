@@ -60,6 +60,7 @@ public final class QuerySparseIndex extends Operation {
     private QuerySparseIndex(final Builder builder) {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
+                .chatModel(builder.chatModel)
                 .sparseEmbeddingModel(builder.sparseEmbeddingModel)
                 .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
@@ -169,6 +170,9 @@ public final class QuerySparseIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
+        /// The chat model.
+        private String chatModel;
+
         /// The sparse embedding model.
         private String sparseEmbeddingModel;
 
@@ -210,6 +214,16 @@ public final class QuerySparseIndex extends Operation {
         /// @return          net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the chat model.
+        ///
+        /// @param  chatModel   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.query.QuerySparseIndex.Builder
+        public Builder chatModel(final String chatModel) {
+            this.chatModel = chatModel;
 
             return this;
         }

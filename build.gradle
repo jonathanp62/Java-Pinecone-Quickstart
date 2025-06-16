@@ -45,6 +45,7 @@ plugins {
 apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
+	chatModel = 'gpt-4.1'
 	denseEmbeddingModel = 'llama-text-embed-v2'
 	denseIndexName = 'quickstart-dense'
 	javaMainClass = 'net.jmp.pinecone.quickstart.Main'
@@ -118,6 +119,7 @@ tasks.withType(JavaExec).configureEach {
 
 	systemProperties(
 			[
+ 			 'app.chatModel': chatModel,
  			 'app.denseEmbeddingModel': denseEmbeddingModel,
 			 'app.denseIndexName': denseIndexName,
 			 'app.mongoDbCollection': mongoDbCollection,

@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Operation.java    0.5.0   06/16/2025
  * (#)Operation.java    0.4.0   06/04/2025
  * (#)Operation.java    0.2.0   05/21/2025
  *
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// The index operation class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.2.0
 public abstract class Operation {
     /// The logger.
@@ -60,6 +61,9 @@ public abstract class Operation {
 
     /// The Pinecone client.
     protected final Pinecone pinecone;
+
+    /// The chat model.
+    protected final String chatModel;
 
     /// The dense embedding model.
     protected final String denseEmbeddingModel;
@@ -107,6 +111,7 @@ public abstract class Operation {
         super();
 
         this.pinecone = operationBuilder.pinecone;
+        this.chatModel = operationBuilder.chatModel;
         this.denseEmbeddingModel = operationBuilder.denseEmbeddingModel;
         this.sparseEmbeddingModel = operationBuilder.sparseEmbeddingModel;
         this.denseIndexName = operationBuilder.denseIndexName;
@@ -268,6 +273,9 @@ public abstract class Operation {
         /// The Pinecone client.
         protected Pinecone pinecone;
 
+        /// The chat model.
+        protected String chatModel;
+
         /// The dense embedding model.
         protected String denseEmbeddingModel;
 
@@ -315,6 +323,16 @@ public abstract class Operation {
         /// @return          net.jmp.pinecone.quickstart.Operation.OperationBuilder
         public OperationBuilder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the chat model.
+        ///
+        /// @param  chatModel   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder chatModel(final String chatModel) {
+            this.chatModel = chatModel;
 
             return this;
         }

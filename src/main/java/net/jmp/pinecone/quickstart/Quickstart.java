@@ -73,6 +73,9 @@ final class Quickstart {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    /// The chat model.
+    private final String chatModel;
+
     /// The dense embedding model.
     private final String denseEmbeddingModel;
 
@@ -115,6 +118,7 @@ final class Quickstart {
     private Quickstart(final Builder builder) {
         super();
 
+        this.chatModel = builder.chatModel;
         this.denseEmbeddingModel = builder.denseEmbeddingModel;
         this.sparseEmbeddingModel = builder.sparseEmbeddingModel;
         this.denseIndexName = builder.denseIndexName;
@@ -516,6 +520,7 @@ final class Quickstart {
 
         final QuerySparseIndex querySparseIndex = QuerySparseIndex.builder()
                 .pinecone(pinecone)
+                .chatModel(this.chatModel)
                 .sparseEmbeddingModel(this.sparseEmbeddingModel)
                 .sparseIndexName(this.sparseIndexName)
                 .namespace(this.namespace)
@@ -546,6 +551,7 @@ final class Quickstart {
 
         final QueryHybrid queryHybrid = QueryHybrid.builder()
                 .pinecone(pinecone)
+                .chatModel(this.chatModel)
                 .denseEmbeddingModel(this.denseEmbeddingModel)
                 .sparseEmbeddingModel(this.sparseEmbeddingModel)
                 .denseIndexName(this.denseIndexName)
@@ -578,6 +584,7 @@ final class Quickstart {
 
         final QueryDenseIndex queryDenseIndex = QueryDenseIndex.builder()
             .pinecone(pinecone)
+            .chatModel(this.chatModel)
             .denseEmbeddingModel(this.denseEmbeddingModel)
             .denseIndexName(this.denseIndexName)
             .namespace(this.namespace)
@@ -620,6 +627,9 @@ final class Quickstart {
 
     /// The builder class.
     static class Builder {
+        /// The chat model.
+        private String chatModel;
+
         /// The dense embedding model.
         private String denseEmbeddingModel;
 
@@ -656,6 +666,16 @@ final class Quickstart {
         /// The default constructor.
         Builder() {
             super();
+        }
+
+        /// Set the chat model.
+        ///
+        /// @param  chatModel   java.lang.String
+        /// @return             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder chatModel(final String chatModel) {
+            this.chatModel = chatModel;
+
+            return this;
         }
 
         /// Set the dense embedding model.

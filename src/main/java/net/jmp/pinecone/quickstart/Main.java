@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Main.java 0.5.0   06/16/2025
  * (#)Main.java 0.4.0   06/04/2025
  * (#)Main.java 0.2.0   05/22/2025
  * (#)Main.java 0.1.0   05/17/2025
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /// The main application class.
 ///
-/// @version    0.4.0
+/// @version    0.5.0
 /// @since      0.1.0
 public final class Main implements Runnable {
     /// The logger.
@@ -57,6 +58,7 @@ public final class Main implements Runnable {
 
         final String operation = System.getProperty("app.operation");
 
+        final String chatModel = System.getProperty("app.chatModel");
         final String denseEmbeddingModel = System.getProperty("app.denseEmbeddingModel");
         final String denseIndexName = System.getProperty("app.denseIndexName");
         final String mongoDbCollection = System.getProperty("app.mongoDbCollection");
@@ -72,6 +74,7 @@ public final class Main implements Runnable {
         this.logger.info("Pinecone Quickstart");
 
         this.logger.info("Operation             : {}", operation);
+        this.logger.info("Chat Model            : {}", chatModel);
         this.logger.info("Dense Embedding Model : {}", denseEmbeddingModel);
         this.logger.info("Dense Index Name      : {}", denseIndexName);
         this.logger.info("MongoDB Collection    : {}", mongoDbCollection);
@@ -85,6 +88,7 @@ public final class Main implements Runnable {
         this.logger.info("TopK                  : {}", topK);
 
         final Quickstart quickstart = Quickstart.builder()
+            .chatModel(chatModel)
             .denseEmbeddingModel(denseEmbeddingModel)
             .sparseEmbeddingModel(sparseEmbeddingModel)
             .denseIndexName(denseIndexName)
