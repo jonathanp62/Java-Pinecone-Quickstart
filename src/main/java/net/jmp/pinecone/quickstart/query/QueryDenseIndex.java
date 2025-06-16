@@ -110,7 +110,7 @@ public final class QueryDenseIndex extends Operation {
             final List<String> reranked = reranker.rerank(matches);
             final String question = this.getQuestion(reranked.getFirst());
 
-            final Summarizer summarizer = new Summarizer(this.openAiApiKey, question);
+            final Summarizer summarizer = new Summarizer(this.openAiApiKey, question, this.chatModel);
             final String summary = summarizer.summarize(reranked);
 
             this.logger.info(summary);

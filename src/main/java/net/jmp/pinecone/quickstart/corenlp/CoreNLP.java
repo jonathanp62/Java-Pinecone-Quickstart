@@ -54,7 +54,9 @@ public final class CoreNLP extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The default constructor.
+    /// The constructor.
+    ///
+    /// @param  queryText   java.lang.String
     public CoreNLP(final String queryText) {
         super(Operation.operationBuilder().queryText(queryText));
     }

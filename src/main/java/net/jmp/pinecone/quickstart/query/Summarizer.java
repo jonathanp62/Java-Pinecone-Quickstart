@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Summarizer.java   0.5.0   06/16/2025
  * (#)Summarizer.java   0.2.0   05/26/2025
  *
  * @author   Jonathan Parker
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 /// The summarizer class.
 ///
-/// @version    0.2.0
+/// @version    0.5.0
 /// @since      0.2.0
 final class Summarizer {
     /// The logger.
@@ -58,15 +59,20 @@ final class Summarizer {
     /// The question.
     private final String question;
 
+    /// The chat model.
+    private final String chatModel;
+
     /// The constructor.
     ///
     /// @param  openAiApiKey    java.lang.String
     /// @param  question        java.lang.String
-    Summarizer(final String openAiApiKey, final String question) {
+    /// @param  chatModel       java.lang.String
+    Summarizer(final String openAiApiKey, final String question, final String chatModel) {
         super();
 
         this.openAiApiKey = openAiApiKey;
         this.question = question;
+        this.chatModel = chatModel;
     }
 
     /// Generate a summary.
@@ -80,6 +86,13 @@ final class Summarizer {
 
         String response = "";
         OpenAIClient openai = null;
+        ChatModel chatModel;
+
+        if ("gpt-4.1".equals(this.chatModel)) {
+            chatModel = ChatModel.GPT_4_1;
+        } else {
+            throw new IllegalArgumentException("Unsupported chat model: " + this.chatModel);
+        }
 
         try {
             openai = OpenAIOkHttpClient.builder()
@@ -98,14 +111,17 @@ final class Summarizer {
             sb.append("\nQuestion: ").append(this.question).append("\n");
             final String prompt = sb.toString();
 
-            this.logger.info("Prompt: {}", prompt);
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Chat Model: {}", chatModel.asString());
+                this.logger.info("Prompt    : {}", prompt);
+            }
 
             if (this.logger.isDebugEnabled()) {
                 this.logger.info("Size  : {}", prompt.length());
             }
 
             final ChatCompletionCreateParams chatCompletionCreateParams = ChatCompletionCreateParams.builder()
-                    .model(ChatModel.GPT_4_1)
+                    .model(chatModel)
                     .addUserMessage(prompt)
                     .build();
 

@@ -101,7 +101,7 @@ public final class QuerySparseIndex extends Operation {
                     .build();
 
             final List<String> reranked = reranker.rerank(matches);
-            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText);
+            final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText, this.chatModel);
             final String summary = summarizer.summarize(reranked);
 
             this.logger.info(summary);
