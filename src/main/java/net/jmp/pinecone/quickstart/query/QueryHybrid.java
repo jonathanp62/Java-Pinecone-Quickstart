@@ -104,7 +104,11 @@ public final class QueryHybrid extends Operation {
                 .topN(((denseMatches.size() + sparseMatches.size()) / 2) + 1)
                 .build();
 
-        // Summarize the reranked matches
+        final List<String> reranked = reranker.rerank(mergedMatches);
+        final Summarizer summarizer = new Summarizer(this.openAiApiKey, this.queryText, this.chatModel);
+        final String summary = summarizer.summarize(reranked);
+
+        this.logger.info(summary);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
