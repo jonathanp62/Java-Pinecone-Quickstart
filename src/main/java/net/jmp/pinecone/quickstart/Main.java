@@ -31,6 +31,8 @@ package net.jmp.pinecone.quickstart;
  * SOFTWARE.
  */
 
+import ch.qos.logback.classic.Level;
+
 import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
@@ -44,9 +46,16 @@ public final class Main implements Runnable {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The default constructor.
-    private Main() {
+    /// Any command line arguments.
+    private final String[] args;
+
+    /// The constructor.
+    ///
+    /// @param  args java.lang.String[]
+    private Main(final String[] args) {
         super();
+
+        this.args = args;
     }
 
     /// The run method.
@@ -55,6 +64,10 @@ public final class Main implements Runnable {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
+
+        this.logger.info("Pinecone Quickstart");
+
+        this.handleCommandLineArguments();
 
         final String operation = System.getProperty("app.operation");
 
@@ -70,8 +83,6 @@ public final class Main implements Runnable {
         final String sparseEmbeddingModel = System.getProperty("app.sparseEmbeddingModel");
         final String sparseIndexName = System.getProperty("app.sparseIndexName");
         final String topK = System.getProperty("app.topK");
-
-        this.logger.info("Pinecone Quickstart");
 
         this.logger.info("Operation             : {}", operation);
         this.logger.info("Chat Model            : {}", chatModel);
@@ -109,10 +120,60 @@ public final class Main implements Runnable {
         }
     }
 
+    /// Handle any command line arguments.
+    private void handleCommandLineArguments() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        for (final String arg : this.args) {
+            this.logger.info("Command line argument : {}", arg);
+
+            switch (arg) {
+                case "--log-debug": this.setLogLevel(Level.DEBUG); break;
+                case "--log-error": this.setLogLevel(Level.ERROR); break;
+                case "--log-info": this.setLogLevel(Level.INFO); break;
+                case "--log-off": this.setLogLevel(Level.OFF); break;
+                case "--log-trace": this.setLogLevel(Level.TRACE); break;
+                case "--log-warn": this.setLogLevel(Level.WARN); break;
+                default: throw new IllegalArgumentException("Unknown argument: " + arg);
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Set the log level.
+    ///
+    /// @param  level   ch.qos.logback.classic.Level
+    private void setLogLevel(final Level level) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(level));
+        }
+
+        final Class<?> clazz = this.getClass();
+        final String packageName = clazz.getPackage().getName();
+        final Logger packageLogger = LoggerFactory.getLogger(packageName);
+
+        /* Get the Logback logger and change it to the new level */
+
+        ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) packageLogger;
+
+        logbackLogger.setLevel(level);
+
+        this.logger.info("{} level logging enabled for package: {}", level.levelStr, packageName);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
     /// The main application entry point.
     ///
     /// @param  args    java.lang.String[]
     public static void main(String[] args) {
-        new Main().run();
+        new Main(args).run();
     }
 }

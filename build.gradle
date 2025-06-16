@@ -35,6 +35,10 @@
 /*
  * The following system property must be set in HOME/.gradle/gradle.properties:
  *   systemProp.macosArchitecture=silicon
+ *
+ * Pass command line arguments to the Java program as follows:
+ *   gradle <JavaExec Task> --args="arg1 arg2 arg3"
+ *
  */
 
 plugins {
