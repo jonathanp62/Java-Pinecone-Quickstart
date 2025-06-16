@@ -105,6 +105,7 @@ public final class QueryDenseIndex extends Operation {
                 .mongoClient(this.mongoClient)
                 .collectionName(this.collectionName)
                 .dbName(this.dbName)
+                .topN(this.topK)
                 .build();
 
             final List<String> reranked = reranker.rerank(matches);

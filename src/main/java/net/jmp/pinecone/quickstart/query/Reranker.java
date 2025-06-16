@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Reranker.java 0.5.0   06/16/2025
  * (#)Reranker.java 0.3.0   05/27/2025
  * (#)Reranker.java 0.2.0   05/26/2025
  *
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 /// The re-ranker class.
 ///
-/// @version    0.3.0
+/// @version    0.5.0
 /// @since      0.2.0
 final class Reranker {
     /// The logger.
@@ -79,6 +80,9 @@ final class Reranker {
     /// The database name.
     private final String dbName;
 
+    /// The top N documents to rerank.
+    private final int topN;
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.query.Reranker.Builder
@@ -91,6 +95,7 @@ final class Reranker {
         this.mongoClient = builder.mongoClient;
         this.collectionName = builder.collectionName;
         this.dbName = builder.dbName;
+        this.topN = builder.topN;
     }
 
     /// Return the builder.
@@ -195,7 +200,8 @@ final class Reranker {
                     this.rerankingModel,
                     this.queryText,
                     documents,
-                    rankFields, 10,
+                    rankFields,
+                    this.topN,
                     true,
                     parameters
             );
@@ -277,6 +283,9 @@ final class Reranker {
         /// The MongoDB database name.
         private String dbName;
 
+        /// The top N documents to rerank.
+        private int topN;
+
         /// The default constructor.
         public Builder() {
             super();
@@ -338,6 +347,16 @@ final class Reranker {
         /// @return         net.jmp.pinecone.quickstart.query.Reranker.Builder
         public Builder dbName(final String dbName) {
             this.dbName = dbName;
+
+            return this;
+        }
+
+        /// Set the topN results to rerank.
+        ///
+        /// @param  topN    int
+        /// @return         net.jmp.pinecone.quickstart.query.Reranker.Builder
+        public Builder topN(final int topN) {
+            this.topN = topN;
 
             return this;
         }

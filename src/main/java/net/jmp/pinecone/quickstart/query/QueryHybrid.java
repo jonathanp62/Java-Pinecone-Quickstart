@@ -28,11 +28,16 @@ package net.jmp.pinecone.quickstart.query;
  * SOFTWARE.
  */
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
+
 import com.mongodb.client.MongoClient;
 
 import io.pinecone.clients.Pinecone;
 
 import io.pinecone.unsigned_indices_model.ScoredVectorWithUnsignedIndices;
+
+import java.util.*;
 
 import net.jmp.pinecone.quickstart.Operation;
 
@@ -40,10 +45,6 @@ import static net.jmp.util.logging.LoggerUtils.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /// The query hybrid class.
 ///
@@ -91,10 +92,18 @@ public final class QueryHybrid extends Operation {
 
         final List<ScoredVectorWithUnsignedIndices> denseMatches = this.getDenseMatches();
         final List<ScoredVectorWithUnsignedIndices> sparseMatches = this.getSparseMatches();
-
         final List<ScoredVectorWithUnsignedIndices> mergedMatches = this.mergeDenseAndSparseMatches(denseMatches, sparseMatches);
 
-        // Rerank the matches
+        final Reranker reranker = Reranker.builder()
+                .pinecone(this.pinecone)
+                .rerankingModel(this.rerankingModel)
+                .queryText(this.queryText)
+                .mongoClient(this.mongoClient)
+                .collectionName(this.collectionName)
+                .dbName(this.dbName)
+                .topN(((denseMatches.size() + sparseMatches.size()) / 2) + 1)
+                .build();
+
         // Summarize the reranked matches
 
         if (this.logger.isTraceEnabled()) {
@@ -187,11 +196,39 @@ public final class QueryHybrid extends Operation {
             this.logger.trace(entryWith(denseMatches, sparseMatches));
         }
 
-        if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(null));
+        final int collectionSize = denseMatches.size() + sparseMatches.size();
+        final List<ScoredVectorWithUnsignedIndices> mergedMatches = new ArrayList<>(collectionSize);
+        final Set<String> documentIds = HashSet.newHashSet(collectionSize);
+
+        for (final ScoredVectorWithUnsignedIndices match : denseMatches) {
+            final Struct metadata = match.getMetadata();
+            final Map<String, Value> fields = metadata.getFieldsMap();
+            final String documentId = fields.get("documentid").getStringValue();
+
+            if (!documentIds.contains(documentId)) {
+                documentIds.add(documentId);
+                mergedMatches.add(match);
+            }
         }
 
-        return null;
+        for (final ScoredVectorWithUnsignedIndices match : sparseMatches) {
+            final Struct metadata = match.getMetadata();
+            final Map<String, Value> fields = metadata.getFieldsMap();
+            final String documentId = fields.get("documentid").getStringValue();
+
+            if (!documentIds.contains(documentId)) {
+                documentIds.add(documentId);
+                mergedMatches.add(match);
+            }
+        }
+
+        int i = 1;
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(mergedMatches));
+        }
+
+        return mergedMatches;
     }
 
     /// The builder class.
