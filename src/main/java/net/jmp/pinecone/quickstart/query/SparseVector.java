@@ -70,13 +70,14 @@ final class SparseVector extends Vector {
     /// Set the sparse indices.
     ///
     /// @param  sparseIndices  java.util.List<java.lang.Long>
-    void setLongSparseIndices(final List<Long> sparseIndices) {
+    void setSparseIndices(final List<Long> sparseIndices) {
         this.sparseIndices = sparseIndices;
     }
 
     /// Set the sparse indices from a list of integers.
     ///
     /// @param  sparseIndices  java.util.List<java.lang.Integer>
+    @Deprecated
     void setIntSparseIndices(final List<Integer> sparseIndices) {
         final List<Long> sparseIndicesAsLongs = new ArrayList<>(sparseIndices.size());
 

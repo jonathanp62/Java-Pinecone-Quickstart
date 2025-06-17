@@ -112,7 +112,8 @@ public final class CreateIndex extends Operation {
             final IndexModel indexModel = this.pinecone.configureServerlessIndex(
                     this.denseIndexName,
                     DeletionProtection.DISABLED,
-                    Map.of("env", "development")
+                    Map.of("env", "development"),
+                    null
             );
 
             this.indexStatus(indexModel);
@@ -148,7 +149,8 @@ public final class CreateIndex extends Operation {
             final IndexModel indexModel = this.pinecone.configureServerlessIndex(
                     this.sparseIndexName,
                     DeletionProtection.DISABLED,
-                    Map.of("env", "development")
+                    Map.of("env", "development"),
+                    null
             );
 
             this.indexStatus(indexModel);

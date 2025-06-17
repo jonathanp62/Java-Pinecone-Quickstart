@@ -193,12 +193,7 @@ public final class LoadIndex extends Operation {
                     final Struct metadataStruct = metadata.get(i);
                     final String vectorId = metadataStruct.getFieldsMap().get("documentid").getStringValue();
 
-                    final List<Long> sparseIndices = new ArrayList<>(sparseEmbedding.getSparseEmbedding().getSparseIndices().size());
-
-                    for (int j = 0; j < sparseEmbedding.getSparseEmbedding().getSparseIndices().size(); j++) {
-                        sparseIndices.add(toUnsignedLong(sparseEmbedding.getSparseEmbedding().getSparseIndices().get(j)));
-                    }
-
+                    final List<Long> sparseIndices = sparseEmbedding.getSparseEmbedding().getSparseIndices();
                     final List<Float> sparseValues = sparseEmbedding.getSparseEmbedding().getSparseValues();
 
                     final UpsertResponse result = index.upsert(

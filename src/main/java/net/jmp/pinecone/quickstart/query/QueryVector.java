@@ -32,7 +32,6 @@ package net.jmp.pinecone.quickstart.query;
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,10 +146,10 @@ final class QueryVector {
             assert embeddingsList.size() == 1;
 
             final List<Float> sparseValues = embeddingsList.getFirst().getSparseEmbedding().getSparseValues();
-            final List<Integer> sparseIndices = embeddingsList.getFirst().getSparseEmbedding().getSparseIndices();
+            final List<Long> sparseIndices = embeddingsList.getFirst().getSparseEmbedding().getSparseIndices();
 
             sparseVector.setSparseValues(sparseValues);
-            sparseVector.setIntSparseIndices(sparseIndices);
+            sparseVector.setSparseIndices(sparseIndices);
 
             if (this.logger.isDebugEnabled()) {
                 this.logger.debug("Query sparse embeddings: {}: {}", queryText, sparseEmbeddings.toJson());
