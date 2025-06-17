@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.load;
 
 /*
+ * (#)LoadIndex.java    0.6.0   06/17/2025
  * (#)LoadIndex.java    0.4.0   06/04/2025
  * (#)LoadIndex.java    0.2.0   05/21/2025
  *
@@ -50,8 +51,6 @@ import io.pinecone.proto.UpsertResponse;
 
 import io.pinecone.unsigned_indices_model.VectorWithUnsignedIndices;
 
-import static java.lang.Integer.toUnsignedLong;
-
 import java.util.*;
 
 import java.util.stream.Collectors;
@@ -75,7 +74,7 @@ import org.slf4j.LoggerFactory;
 
 /// The load index class.
 ///
-/// @version    0.4.0
+/// @version    0.6.0
 /// @since      0.2.0
 public final class LoadIndex extends Operation {
     /// The logger.

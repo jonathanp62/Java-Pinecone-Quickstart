@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.create;
 
 /*
+ * (#)CreateIndex.java  0.6.0   06/17/2025
  * (#)CreateIndex.java  0.4.0   06/04/2025
  * (#)CreateIndex.java  0.2.0   05/21/2025
  *
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 /// The create index class.
 ///
-/// @version    0.4.0
+/// @version    0.7.0
 /// @since      0.2.0
 public final class CreateIndex extends Operation {
     /// The logger.

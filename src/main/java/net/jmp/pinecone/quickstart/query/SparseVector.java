@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)SparseVector.java 0.6.0   06/17/2025
  * (#)SparseVector.java 0.4.0   06/11/2025
  *
  * @author   Jonathan Parker
@@ -35,7 +36,7 @@ import java.util.List;
 
 /// The sparse vector class.
 ///
-/// @version    0.4.0
+/// @version    0.6.0
 /// @since      0.4.0
 final class SparseVector extends Vector {
     /// The sparse indices.
