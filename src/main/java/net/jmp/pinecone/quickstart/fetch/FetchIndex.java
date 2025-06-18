@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.fetch;
 
 /*
+ * (#)FetchIndex.java   0.6.0   06/18/2025
  * (#)FetchIndex.java   0.4.0   06/09/2025
  * (#)FetchIndex.java   0.2.0   05/22/2025
  *
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 /// The fetch index class.
 ///
-/// @version    0.4.0
+/// @version    0.6.0
 /// @since      0.2.0
 public final class FetchIndex extends Operation {
     /// The logger.
@@ -81,6 +82,20 @@ public final class FetchIndex extends Operation {
             this.logger.trace(entry());
         }
 
+        this.fetchFromDenseIndex();
+        this.fetchFromSparseIndex();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// The fetch from dense index method.
+    public void fetchFromDenseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
         if (this.doesDenseIndexExist() && this.isDenseIndexLoaded()) {
             this.logger.info("Fetching dense index: {}", this.denseIndexName);
 
@@ -105,6 +120,45 @@ public final class FetchIndex extends Operation {
             }
         } else {
             this.logger.info("Dense index does not exist or is not loaded: {}", this.denseIndexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// The fetch from sparse index method.
+    public void fetchFromSparseIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (this.doesSparseIndexExist() && this.isSparseIndexLoaded()) {
+            this.logger.info("Fetching sparse index: {}", this.sparseIndexName);
+
+            try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
+                // Fetch the physics items
+
+                final FetchResponse response = index.fetch(
+                        List.of("rec6", "rec9", "rec10", "rec39", "rec42", "rec49"),
+                        this.namespace
+                );
+
+                final Map<String, Vector> vectors = response.getVectorsMap();
+
+                for (final Map.Entry<String, Vector> vector : vectors.entrySet()) {
+                    final Struct metadata = vector.getValue().getMetadata();
+                    final List<Float> values = vector.getValue().getSparseValues().getValuesList();
+                    final List<Integer> indices = vector.getValue().getSparseValues().getIndicesList();
+
+                    this.logger.info("ID      : {}", vector.getKey());
+                    this.logger.info("Category: {}", metadata.getFieldsMap().get("category").getStringValue());
+                    this.logger.info("Values  : {}", values.size());    // Number of values (dimensionality)
+                    this.logger.info("Indices : {}", indices.size());   // Number of indices (dimensionality)
+                }
+            }
+        } else {
+            this.logger.info("Sparse index does not exist or is not loaded: {}", this.sparseIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {

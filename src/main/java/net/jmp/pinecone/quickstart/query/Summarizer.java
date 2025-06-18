@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)Summarizer.java   0.6.0   06/18/2025
  * (#)Summarizer.java   0.5.0   06/16/2025
  * (#)Summarizer.java   0.2.0   05/26/2025
  *
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 /// The summarizer class.
 ///
-/// @version    0.5.0
+/// @version    0.6.0
 /// @since      0.2.0
 final class Summarizer {
     /// The logger.
@@ -59,20 +60,20 @@ final class Summarizer {
     /// The question.
     private final String question;
 
-    /// The chat model.
-    private final String chatModel;
+    /// The chat model name.
+    private final String chatModelName;
 
     /// The constructor.
     ///
     /// @param  openAiApiKey    java.lang.String
     /// @param  question        java.lang.String
-    /// @param  chatModel       java.lang.String
-    Summarizer(final String openAiApiKey, final String question, final String chatModel) {
+    /// @param  chatModelName   java.lang.String
+    Summarizer(final String openAiApiKey, final String question, final String chatModelName) {
         super();
 
         this.openAiApiKey = openAiApiKey;
         this.question = question;
-        this.chatModel = chatModel;
+        this.chatModelName = chatModelName;
     }
 
     /// Generate a summary.
@@ -86,12 +87,11 @@ final class Summarizer {
 
         String response = "";
         OpenAIClient openai = null;
-        ChatModel chatModel;
 
-        if ("gpt-4.1".equals(this.chatModel)) {
-            chatModel = ChatModel.GPT_4_1;
-        } else {
-            throw new IllegalArgumentException("Unsupported chat model: " + this.chatModel);
+        final ChatModel chatModel = ChatModel.of(this.chatModelName);
+
+        if (!chatModel.asString().equals("gpt-4.1")) {
+            throw new IllegalArgumentException("Unsupported chat model: " + this.chatModelName);
         }
 
         try {
