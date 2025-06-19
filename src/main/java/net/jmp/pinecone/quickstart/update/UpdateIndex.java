@@ -29,12 +29,27 @@ package net.jmp.pinecone.quickstart.update;
  */
 
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
 
 import io.pinecone.clients.Pinecone;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import net.jmp.pinecone.quickstart.Operation;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredTextDocument;
+
 import static net.jmp.util.logging.LoggerUtils.*;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,11 +91,72 @@ public final class UpdateIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.info("Hello from UpdateIndex");
+        final List<UnstructuredTextDocument> documents = this.getDocuments();
+
+        for (final UnstructuredTextDocument document : documents) {
+            final String content = document.getContent();
+            final StringTokenizer tokenizer = new StringTokenizer(content, " ");
+            final int numberOfWords = tokenizer.countTokens();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("{}: {} words", content, numberOfWords);
+            }
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
+    }
+
+    /// Get all the documents from the database.
+    ///
+    /// @return  java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
+    private List<UnstructuredTextDocument> getDocuments() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final List<UnstructuredTextDocument> documents = new LinkedList<>();
+
+        /* Get the text from the database */
+
+        final MongoDatabase database = this.mongoClient.getDatabase(this.dbName);
+        final MongoCollection<Document> collection = database.getCollection(this.collectionName);
+
+        final Bson projectionFields = Projections.fields(
+                Projections.include("id", "content")
+        );
+
+        try (final MongoCursor<Document> cursor = collection
+                .find()
+                .projection(projectionFields)
+                .sort(Sorts.ascending("id"))
+                .iterator()) {
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("There are {} documents available", cursor.available());
+            }
+
+            while (cursor.hasNext()) {
+                final Document document = cursor.next();
+                final String mongoId = document.get("_id").toString();
+                final String documentId = document.get("id").toString();
+                final String content = document.get("content").toString();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("MongoId : {}", mongoId);
+                    this.logger.debug("DocId   : {}", documentId);
+                    this.logger.debug("Content : {}", content);
+                }
+
+                documents.add(new UnstructuredTextDocument(mongoId, documentId, content, null));
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(documents));
+        }
+
+        return documents;
     }
 
     /// The builder class.
