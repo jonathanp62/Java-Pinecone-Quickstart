@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 /// The create index class.
 ///
-/// @version    0.7.0
+/// @version    0.6.0
 /// @since      0.2.0
 public final class CreateIndex extends Operation {
     /// The logger.

@@ -213,6 +213,7 @@ public final class StoreUnstructuredText extends Operation {
         public Builder() {
             super();
         }
+
         /// Set the mongo client.
         ///
         /// @param  mongoClient io.mongodb.client.MongoClient

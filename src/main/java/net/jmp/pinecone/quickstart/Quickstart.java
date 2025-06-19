@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.6.0   06/19/2025
  * (#)Quickstart.java   0.5.0   06/14/2025
  * (#)Quickstart.java   0.4.0   06/04/2025
  * (#)Quickstart.java   0.3.0   05/27/2025
@@ -59,6 +60,7 @@ import net.jmp.pinecone.quickstart.query.QueryDenseIndex;
 import net.jmp.pinecone.quickstart.query.QueryHybrid;
 import net.jmp.pinecone.quickstart.query.QuerySparseIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
+import net.jmp.pinecone.quickstart.update.UpdateIndex;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
@@ -67,7 +69,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.5.0
+/// @version    0.6.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -170,6 +172,7 @@ final class Quickstart {
                 case "query-hybrid" -> this.queryHybrid(pinecone, mongoClient);
                 case "query-sparse" -> this.querySparseIndex(pinecone, mongoClient);
                 case "store" -> this.storeUnstructuredText(mongoClient);
+                case "update" -> this.updateIndex(pinecone, mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
             }
         }
@@ -390,6 +393,31 @@ final class Quickstart {
             .build();
 
         createIndex.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Update the indexes.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void updateIndex(final Pinecone pinecone, final MongoClient mongoClient) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, mongoClient));
+        }
+
+        final UpdateIndex updateIndex = UpdateIndex.builder()
+                .pinecone(pinecone)
+                .denseIndexName(this.denseIndexName)
+                .sparseIndexName(this.sparseIndexName)
+                .namespace(this.namespace)
+                .mongoClient(mongoClient)
+                .collectionName(this.mongoDbCollection)
+                .dbName(this.mongoDbName)
+                .build();
+
+        updateIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

@@ -238,3 +238,7 @@ tasks.register('query-sparse-category', JavaExec) {
 tasks.register('store', JavaExec) {
 	getSystemProperties().put('app.operation', 'store')
 }
+
+tasks.register('update', JavaExec) {
+	getSystemProperties().put('app.operation', 'update')
+}
