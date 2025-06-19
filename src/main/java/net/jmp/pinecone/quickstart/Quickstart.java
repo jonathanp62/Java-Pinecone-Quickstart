@@ -402,6 +402,7 @@ final class Quickstart {
     /// Update the indexes.
     ///
     /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  mongoClient com.mongodb.client.MongoClient
     private void updateIndex(final Pinecone pinecone, final MongoClient mongoClient) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(pinecone, mongoClient));
