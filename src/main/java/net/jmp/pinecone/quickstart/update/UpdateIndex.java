@@ -103,6 +103,10 @@ public final class UpdateIndex extends Operation {
             this.appendNumberOfWords(documents, index);
         }
 
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            this.appendNumberOfWords(documents, index);
+        }
+
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
