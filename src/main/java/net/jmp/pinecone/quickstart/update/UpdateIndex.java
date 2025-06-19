@@ -28,6 +28,9 @@ package net.jmp.pinecone.quickstart.update;
  * SOFTWARE.
  */
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -36,7 +39,10 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 
+import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+
+import io.pinecone.proto.UpdateResponse;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -93,14 +99,8 @@ public final class UpdateIndex extends Operation {
 
         final List<UnstructuredTextDocument> documents = this.getDocuments();
 
-        for (final UnstructuredTextDocument document : documents) {
-            final String content = document.getContent();
-            final StringTokenizer tokenizer = new StringTokenizer(content, " ");
-            final int numberOfWords = tokenizer.countTokens();
-
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("{}: {} words", content, numberOfWords);
-            }
+        try (final Index index = this.pinecone.getIndexConnection(this.sparseIndexName)) {
+            this.appendNumberOfWords(documents, index);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -157,6 +157,47 @@ public final class UpdateIndex extends Operation {
         }
 
         return documents;
+    }
+
+    /// Append the number of words to the metadata of each vector in the index.
+    ///
+    /// @param  documents java.util.List<net.jmp.pinecone.quickstart.text.UnstructuredTextDocument>
+    /// @param  index     io.pinecone.clients.Index
+    private void appendNumberOfWords(final List<UnstructuredTextDocument> documents, final Index index) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(documents, index));
+        }
+
+        for (final UnstructuredTextDocument document : documents) {
+            final String content = document.getContent();
+            final StringTokenizer tokenizer = new StringTokenizer(content, " ");
+            final int numberOfWords = tokenizer.countTokens();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("{}: {} words", content, numberOfWords);
+            }
+
+            final Struct metadataStruct = Struct.newBuilder()
+                    .putFields("words", Value.newBuilder().setNumberValue(numberOfWords).build())
+                    .build();
+
+            final UpdateResponse updateResponse = index.update(
+                    document.getDocumentId(),
+                    null,
+                    metadataStruct,
+                    this.namespace,
+                    null,
+                    null
+            );
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Update response: {}", updateResponse);
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
     }
 
     /// The builder class.
