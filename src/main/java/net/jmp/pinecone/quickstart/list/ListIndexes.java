@@ -71,7 +71,7 @@ public final class ListIndexes extends Operation {
             this.logger.trace(entry());
         }
 
-        final IndexList indexList = pinecone.listIndexes();
+        final IndexList indexList = this.pinecone.listIndexes();
 
         if (this.logger.isInfoEnabled()) {
             this.logger.info("Index list: {}", indexList.toJson());

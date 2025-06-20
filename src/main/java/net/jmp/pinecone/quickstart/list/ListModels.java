@@ -31,12 +31,17 @@ package net.jmp.pinecone.quickstart.list;
 import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
+import java.util.List;
+
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
+import org.openapitools.inference.client.ApiException;
+
 import org.openapitools.inference.client.model.ModelInfo;
 import org.openapitools.inference.client.model.ModelInfoList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,61 +76,79 @@ public final class ListModels extends Operation {
             this.logger.trace(entry());
         }
 
+        final String embed = "embed";
         final Inference inferenceClient = this.pinecone.getInferenceClient();
 
         try {
-            ModelInfoList models = inferenceClient.listModels();
-            this.logger.info("Models: {}", models);
+            final ModelInfoList allModels = inferenceClient.listModels();
+            final ModelInfoList rerankModels = inferenceClient.listModels("rerank");
+            final ModelInfoList embeddingModels = inferenceClient.listModels(embed);
+            final ModelInfoList denseEmbeddingModels = inferenceClient.listModels(embed, "dense");
+            final ModelInfoList sparseEmbeddingModels = inferenceClient.listModels(embed, "sparse");
 
-            for (final ModelInfo model : models.getModels()) {
-                this.logger.info("Model: {}", model.getModel());
-            }
+            this.listModels(allModels.getModels(), "All models");
+            this.listModels(rerankModels.getModels(), "Reranking models");
+            this.listModels(embeddingModels.getModels(), "Embedding models");
+            this.listModels(denseEmbeddingModels.getModels(), "Dense embedding models");
+            this.listModels(sparseEmbeddingModels.getModels(), "Sparse embedding models");
 
-            // list renaking models by filtering with type
-            ModelInfoList rerankMmodels = inferenceClient.listModels("rerank");
+            this.describeModels(inferenceClient, allModels.getModels());
+        } catch (final ApiException ae) {
+            this.logger.error(catching(ae));
+        }
 
-            for (final ModelInfo model : rerankMmodels.getModels()) {
-                this.logger.info("Reranking model: {}", model.getModel());
-            }
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
 
-            // list embedding models by filtering with type
-            ModelInfoList embeddingModels = inferenceClient.listModels("embed");
+    /// List the models.
+    ///
+    /// @param  models  java.util.List<io.pinecone.clients.Inference.ModelInfo>
+    /// @param  title   String
+    private void listModels(final List<ModelInfo> models, final String title) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(models, title));
+        }
 
-            for (final ModelInfo model : embeddingModels.getModels()) {
-                this.logger.info("Embedding model: {}", model.getModel());
-            }
+        for (final ModelInfo model : models) {
+            this.logger.info("{}: {}", title, model.getModel());
+        }
 
-            // list dense embedding models by filtering with type and vector type
-            ModelInfoList denseEmbeddingModels = inferenceClient.listModels("embed", "dense");
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
 
-            for (final ModelInfo model : denseEmbeddingModels.getModels()) {
-                this.logger.info("Dense embedding model: {}", model.getModel());
-            }
+    /// Describe the models.
+    ///
+    /// @param  inferenceClient io.pinecone.clients.Inference
+    /// @param  models          java.util.List<io.pinecone.clients.Inference.ModelInfo>
+    /// @throws                 org.openapitools.inference.client.ApiException  If an error occurs using the inference client
+    private void describeModels(final Inference inferenceClient, final List<ModelInfo> models) throws ApiException {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(inferenceClient, models));
+        }
 
-            // list sparse embedding models by filtering with type and vector type
-            ModelInfoList sparseEmbeddingModels = inferenceClient.listModels("embed", "sparse");
+        final ModelInfoList allModels = inferenceClient.listModels();
+        final List<ModelInfo> allModelsList = allModels.getModels();
 
-            for (final ModelInfo model : sparseEmbeddingModels.getModels()) {
-                this.logger.info("Sparse embedding model: {}", model.getModel());
-            }
+        assert allModelsList != null;
 
-            // describe a model
-            ModelInfo modelInfo = inferenceClient.describeModel("llama-text-embed-v2");
-            this.logger.info("Model info for llama-text-embed-v2: {}", modelInfo);
+        for (final ModelInfo model : allModelsList) {
+            final ModelInfo modelInfo = inferenceClient.describeModel(model.getModel());
 
-            // Display the model name,
-            // type,
-            // vector type,
-            // default dimension,
-            // modality,
-            // max sequence length,
-            // max batch size,
-            // provider name,
-            // supported dimensions,
-            // supported metrics,
-            // description
-        } catch (final Exception e) {
-            this.logger.error("Failed to list models", e);
+            this.logger.info("Name                : {}", modelInfo.getModel());
+            this.logger.info("Description         : {}", modelInfo.getShortDescription());
+            this.logger.info("Type                : {}", modelInfo.getType());
+            this.logger.info("Vector type         : {}", modelInfo.getVectorType());
+            this.logger.info("Dimension           : {}", modelInfo.getDefaultDimension());
+            this.logger.info("Modality            : {}", modelInfo.getModality());
+            this.logger.info("Provider            : {}", modelInfo.getProviderName());
+            this.logger.info("Max Sequence Length : {}", modelInfo.getMaxSequenceLength());
+            this.logger.info("Max Batch Size      : {}", modelInfo.getMaxBatchSize());
+            this.logger.info("Supported Metrics   : {}", modelInfo.getSupportedMetrics());
+            this.logger.info("Supported Dimensions: {}", modelInfo.getSupportedDimensions());
         }
 
         if (this.logger.isTraceEnabled()) {
