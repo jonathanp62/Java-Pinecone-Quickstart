@@ -1,15 +1,16 @@
 Pinecone-Quickstart
 -------------------
 
-A demonstration of the Pinecone Quickstart.
+A demonstration of the Pinecone Quickstart that uses the Pinecone client in Java.
 
 Things I need
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 * A Pinecone account
 * A Pinecone API key
 * A MongoDB account
-* A MongoDB URI and two MongoDB collections
+* A MongoDB URI
+* Two MongoDB collections
 ** Categories
 ** Quickstart
 * An OpenAI API key
@@ -23,37 +24,67 @@ The unstructured text is initially placed in the UnstructeredText class in the t
  - delete
  - create
  - load
+ - update
 
 The store task deletes all the content from the collections in MongoDB and reloads them with the unstructured text in the above-mentioned class.
 
-The delete task deletes the indexes from Pinecone.
+The delete task deletes the indexes (dense and sparse) from Pinecone.
 
 The create task creates the indexes in Pinecone.
 
 The load task loads the Pinecone indexes from the MongoDB collections.
 
+The update task adds metadata to the Pinecone indexes.
+
 Gradle JavaExec Tasks
 ~~~~~~~~~~~~~~~~~~~~~
 
 [options="header"]
-|=======================
-|Task Name         |Application Invocation
-|create            |No arguments
-|delete            |No arguments
-|describe          |No arguments
-|describeNamespace |No arguments
-|describeModels    |No arguments
-|fetch             |No arguments
-|list              |No arguments
-|listIndexes       |No arguments
-|listNamespaces    |No arguments
-|load              |No arguments
-|query-by-id       |No arguments
-|query-monuments   |No arguments
-|query-persons     |No arguments
-|query-sparse      |No arguments
-|store             |No arguments
-|=======================
+|====================================================
+|Task Name            |Application Invocation
+|create               |Optional: --args="--log-level"
+|corenlp              |Optional: --args="--log-level"
+|delete               |Optional: --args="--log-level"
+|describe             |Optional: --args="--log-level"
+|describeNamespace    |Optional: --args="--log-level"
+|describeModels       |Optional: --args="--log-level"
+|fetch                |Optional: --args="--log-level"
+|list                 |Optional: --args="--log-level"
+|listIndexes          |Optional: --args="--log-level"
+|listModels           |Optional: --args="--log-level"
+|listNamespaces       |Optional: --args="--log-level"
+|load                 |Optional: --args="--log-level"
+|query-dense-by-id    |Optional: --args="--log-level"
+|query-dense-monuments|Optional: --args="--log-level"
+|query-dense-persons  |Optional: --args="--log-level"
+|query-hybrid         |Optional: --args="--log-level"
+|query-sparse         |Optional: --args="--log-level"
+|query-sparse-category|Optional: --args="--log-level"
+|store                |Optional: --args="--log-level"
+|update               |Optional: --args="--log-level"
+|====================================================
+
+System Properties
+~~~~~~~~~~~~~~~~~
+
+[options="header"]
+|===================================================
+|Property Name           |Value
+|app.chatModel           |gpt-4.1
+|app.denseEmbeddingModel |llama-text-embed-v2
+|app.denseIndexName      |quickstart-dense
+|app.mongoDbCollection   |quickstart
+|app.mongoDbName         |pinecone_quickstart
+|app.mongoDbUri          |etc/mongo-db-uri.txt
+|app.namespace           |quickstart-namespace
+|app.openaiApiKey        |etc/open-ai-api-key.txt
+|app.pineconeApiKey      |etc/pinecone-api-key.txt
+|app.rerankingModel      |bge-reranker-v2-m3
+|app.queryText           |Variable by Gradle task
+|app.sparseEmbeddingModel|pinecone-sparse-english-v0
+|app.sparseIndexName     |quickstart-sparse
+|app.topK                |10
+|===================================================
 
 Current version: 0.7.0.
 ~~~~~~~~~~~~~~~~~~~~~~~
