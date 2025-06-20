@@ -54,6 +54,7 @@ import net.jmp.pinecone.quickstart.describe.DescribeNamespace;
 import net.jmp.pinecone.quickstart.fetch.FetchIndex;
 import net.jmp.pinecone.quickstart.list.ListIndex;
 import net.jmp.pinecone.quickstart.list.ListIndexes;
+import net.jmp.pinecone.quickstart.list.ListModels;
 import net.jmp.pinecone.quickstart.list.ListNamespaces;
 import net.jmp.pinecone.quickstart.load.LoadIndex;
 import net.jmp.pinecone.quickstart.query.QueryDenseIndex;
@@ -166,6 +167,7 @@ final class Quickstart {
                 case "fetch" -> this.fetchIndex(pinecone);
                 case "list" -> this.listIndex(pinecone);
                 case "listIndexes" -> this.listIndexes(pinecone);
+                case "listModels" -> this.listModels(pinecone);
                 case "listNamespaces" -> this.listNamespaces(pinecone);
                 case "load" -> this.loadIndex(pinecone, mongoClient);
                 case "query-dense" -> this.queryDenseIndex(pinecone, mongoClient);
@@ -349,6 +351,25 @@ final class Quickstart {
             .build();
 
         listIndexes.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// List the models.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    private void listModels(final Pinecone pinecone) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone));
+        }
+
+        final ListModels listModels = ListModels.builder()
+                .pinecone(pinecone)
+                .build();
+
+        listModels.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
