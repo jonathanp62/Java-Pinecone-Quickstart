@@ -28,12 +28,15 @@ package net.jmp.pinecone.quickstart.list;
  * SOFTWARE.
  */
 
+import io.pinecone.clients.Inference;
 import io.pinecone.clients.Pinecone;
 
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
+import org.openapitools.inference.client.model.ModelInfo;
+import org.openapitools.inference.client.model.ModelInfoList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +71,62 @@ public final class ListModels extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.info("List models.");
+        final Inference inferenceClient = this.pinecone.getInferenceClient();
+
+        try {
+            ModelInfoList models = inferenceClient.listModels();
+            this.logger.info("Models: {}", models);
+
+            for (final ModelInfo model : models.getModels()) {
+                this.logger.info("Model: {}", model.getModel());
+            }
+
+            // list renaking models by filtering with type
+            ModelInfoList rerankMmodels = inferenceClient.listModels("rerank");
+
+            for (final ModelInfo model : rerankMmodels.getModels()) {
+                this.logger.info("Reranking model: {}", model.getModel());
+            }
+
+            // list embedding models by filtering with type
+            ModelInfoList embeddingModels = inferenceClient.listModels("embed");
+
+            for (final ModelInfo model : embeddingModels.getModels()) {
+                this.logger.info("Embedding model: {}", model.getModel());
+            }
+
+            // list dense embedding models by filtering with type and vector type
+            ModelInfoList denseEmbeddingModels = inferenceClient.listModels("embed", "dense");
+
+            for (final ModelInfo model : denseEmbeddingModels.getModels()) {
+                this.logger.info("Dense embedding model: {}", model.getModel());
+            }
+
+            // list sparse embedding models by filtering with type and vector type
+            ModelInfoList sparseEmbeddingModels = inferenceClient.listModels("embed", "sparse");
+
+            for (final ModelInfo model : sparseEmbeddingModels.getModels()) {
+                this.logger.info("Sparse embedding model: {}", model.getModel());
+            }
+
+            // describe a model
+            ModelInfo modelInfo = inferenceClient.describeModel("llama-text-embed-v2");
+            this.logger.info("Model info for llama-text-embed-v2: {}", modelInfo);
+
+            // Display the model name,
+            // type,
+            // vector type,
+            // default dimension,
+            // modality,
+            // max sequence length,
+            // max batch size,
+            // provider name,
+            // supported dimensions,
+            // supported metrics,
+            // description
+        } catch (final Exception e) {
+            this.logger.error("Failed to list models", e);
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
