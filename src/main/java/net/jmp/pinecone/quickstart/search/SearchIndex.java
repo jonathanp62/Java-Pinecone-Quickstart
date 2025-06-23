@@ -30,11 +30,25 @@ package net.jmp.pinecone.quickstart.search;
 
 import com.mongodb.client.*;
 
+import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+
+import java.util.List;
+import java.util.Map;
 
 import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
+
+import net.jmp.pinecone.quickstart.query.DenseVector;
+import net.jmp.pinecone.quickstart.query.QueryVector;
+
+import org.openapitools.db_data.client.ApiException;
+
+import org.openapitools.db_data.client.model.Hit;
+import org.openapitools.db_data.client.model.SearchRecordsResponse;
+import org.openapitools.db_data.client.model.SearchRecordsResponseResult;
+import org.openapitools.db_data.client.model.SearchRecordsVector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +60,9 @@ import org.slf4j.LoggerFactory;
 public final class SearchIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
+    /// The fields to return in the search response.
+    private final List<String> fields = List.of("category", "documentid", "mongoid", "words");
 
     /// The constructor.
     ///
@@ -75,13 +92,143 @@ public final class SearchIndex extends Operation {
     }
 
     /// The operate method.
+    ///
+    /// Search by records and probably search
+    /// by text most likely require the dense
+    /// index to be created using a model name.
     @Override
     public void operate() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        this.logger.info("Inside SearchIndex operate ...");
+        this.searchRecords();
+        this.searchRecordsByText();
+        this.searchRecordsByVectorId();
+        this.searchRecordsByVector();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Search records.
+    private void searchRecords() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        this.logger.warn("Search records is currently unimplemented");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Search records by text.
+    private void searchRecordsByText() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        this.logger.warn("Search records by text is currently unimplemented");
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Search records by vector ID.
+    private void searchRecordsByVectorId() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            final SearchRecordsResponse response = index.searchRecordsById(
+                    "rec11",
+                    this.namespace,
+                    this.fields,
+                    this.topK,
+                    null,
+                    null
+            );
+
+            final SearchRecordsResponseResult result = response.getResult();
+            final List<Hit> hits = result.getHits();
+
+            this.logger.info("Search by vector ID 'rec11' found {} hits: ", hits.size());
+
+            for (final Hit hit : hits) {
+                this.logHit(hit);
+            }
+        } catch (final ApiException e) {
+            this.logger.error(catching(e));
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Search records by vector.
+    private void searchRecordsByVector() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
+        final DenseVector denseVector = queryVector.queryTextToDenseVector(this.queryText);
+        final List<Float> denseVectorValues = denseVector.getDenseValues();
+        final SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
+
+        searchRecordsVector.setValues(denseVectorValues);
+
+        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            final SearchRecordsResponse response = index.searchRecordsByVector(
+                    searchRecordsVector,
+                    this.namespace,
+                    this.fields,
+                    this.topK,
+                    null,
+                    null
+            );
+
+            final SearchRecordsResponseResult result = response.getResult();
+            final List<Hit> hits = result.getHits();
+
+            this.logger.info("Search by vector found {} hits: ", hits.size());
+
+            for (final Hit hit : hits) {
+                this.logHit(hit);
+            }
+        } catch (final ApiException e) {
+            this.logger.error(catching(e));
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Log a hit.
+    ///
+    /// @param  hit org.openapitools.db_data.client.model.Hit
+    private void logHit(final Hit hit) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(hit));
+        }
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Score: {}", hit.getScore());
+            this.logger.debug("ID   : {}", hit.getId());
+
+            @SuppressWarnings("unchecked") final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
+
+            for (final Map.Entry<String, Object> entry : hitFields.entrySet()) {
+                this.logger.debug("{}: {}", entry.getKey(), entry.getValue());
+            }
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.query;
 
 /*
+ * (#)QueryVector.java  0.7.0   06/23/2025
  * (#)QueryVector.java  0.6.0   06/17/2025
  * (#)QueryVector.java  0.4.0   06/11/2025
  * (#)QueryVector.java  0.2.0   05/26/2025
@@ -49,9 +50,9 @@ import org.slf4j.LoggerFactory;
 
 /// The query vector class.
 ///
-/// @version    0.6.0
+/// @version    0.7.0
 /// @since      0.2.0
-final class QueryVector {
+public final class QueryVector {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -65,7 +66,7 @@ final class QueryVector {
     ///
     /// @param  pinecone        io.pinecone.clients.Pinecone
     /// @param  embeddingModel  java.lang.String
-    QueryVector(final Pinecone pinecone, final String embeddingModel) {
+    public QueryVector(final Pinecone pinecone, final String embeddingModel) {
         super();
 
         this.pinecone = pinecone;
@@ -76,7 +77,7 @@ final class QueryVector {
     ///
     /// @param  queryText  java.lang.String
     /// @return            net.jmp.pinecone.quickstart.query.DenseVector
-    DenseVector queryTextToDenseVector(final String queryText) {
+    public DenseVector queryTextToDenseVector(final String queryText) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(queryText));
         }
@@ -121,7 +122,7 @@ final class QueryVector {
     ///
     /// @param  queryText  java.lang.String
     /// @return            net.jmp.pinecone.quickstart.query.SparseVector
-    SparseVector queryTextToSparseVector(final String queryText) {
+    public SparseVector queryTextToSparseVector(final String queryText) {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entryWith(queryText));
         }
