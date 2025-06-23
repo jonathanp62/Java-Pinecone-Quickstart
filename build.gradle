@@ -244,6 +244,13 @@ tasks.register('store', JavaExec) {
 	getSystemProperties().put('app.operation', 'store')
 }
 
+tasks.register('search', JavaExec) {
+	var sysProps = getSystemProperties()
+
+	sysProps.put('app.operation', 'search')
+	sysProps.put('app.queryText', 'Tell me about the human body')
+}
+
 tasks.register('update', JavaExec) {
 	getSystemProperties().put('app.operation', 'update')
 }

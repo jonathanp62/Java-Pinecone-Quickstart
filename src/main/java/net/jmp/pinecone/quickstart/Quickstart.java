@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.7.0   06/23/2025
  * (#)Quickstart.java   0.6.0   06/19/2025
  * (#)Quickstart.java   0.5.0   06/14/2025
  * (#)Quickstart.java   0.4.0   06/04/2025
@@ -60,6 +61,7 @@ import net.jmp.pinecone.quickstart.load.LoadIndex;
 import net.jmp.pinecone.quickstart.query.QueryDenseIndex;
 import net.jmp.pinecone.quickstart.query.QueryHybrid;
 import net.jmp.pinecone.quickstart.query.QuerySparseIndex;
+import net.jmp.pinecone.quickstart.search.SearchIndex;
 import net.jmp.pinecone.quickstart.store.StoreUnstructuredText;
 import net.jmp.pinecone.quickstart.update.UpdateIndex;
 
@@ -70,7 +72,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.6.0
+/// @version    0.7.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -173,6 +175,7 @@ final class Quickstart {
                 case "query-dense" -> this.queryDenseIndex(pinecone, mongoClient);
                 case "query-hybrid" -> this.queryHybrid(pinecone, mongoClient);
                 case "query-sparse" -> this.querySparseIndex(pinecone, mongoClient);
+                case "search" -> this.searchIndex(pinecone, mongoClient);
                 case "store" -> this.storeUnstructuredText(mongoClient);
                 case "update" -> this.updateIndex(pinecone, mongoClient);
                 default -> this.logger.error("Unknown operation: {}", operation);
@@ -648,6 +651,37 @@ final class Quickstart {
             .build();
 
         queryDenseIndex.operate();
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Search the index.
+    ///
+    /// @param  pinecone    io.pinecone.clients.Pinecone
+    /// @param  mongoClient com.mongodb.client.MongoClient
+    private void searchIndex(final Pinecone pinecone, final MongoClient mongoClient) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pinecone, mongoClient));
+        }
+
+        final SearchIndex searchIndex = SearchIndex.builder()
+                .pinecone(pinecone)
+                .chatModel(this.chatModel)
+                .denseEmbeddingModel(this.denseEmbeddingModel)
+                .denseIndexName(this.denseIndexName)
+                .namespace(this.namespace)
+                .rerankingModel(this.rerankingModel)
+                .queryText(this.queryText)
+                .openAiApiKey(this.openAiApiKey)
+                .mongoClient(mongoClient)
+                .collectionName(this.mongoDbCollection)
+                .dbName(this.mongoDbName)
+                .topK(this.topK)
+                .build();
+
+        searchIndex.operate();
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());

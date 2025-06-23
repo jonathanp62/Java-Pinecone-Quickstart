@@ -60,6 +60,7 @@ Gradle JavaExec Tasks
 |query-hybrid         |Optional: --args="--log-level"
 |query-sparse         |Optional: --args="--log-level"
 |query-sparse-category|Optional: --args="--log-level"
+|search               |Optional: --args="--log-level"
 |store                |Optional: --args="--log-level"
 |update               |Optional: --args="--log-level"
 |====================================================
