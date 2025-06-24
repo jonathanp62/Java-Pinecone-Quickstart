@@ -66,6 +66,8 @@ ext {
 	project.version = '0.8.0'
 	project.description = 'to demonstrate the Pinecone Quickstart'
 	rerankingModel = 'bge-reranker-v2-m3'
+	searchableEmbeddingModel = 'multilingual-e5-large'
+	searchableIndexName = 'quickstart-searchable'
 	sparseEmbeddingModel = 'pinecone-sparse-english-v0'
 	sparseIndexName = 'quickstart-sparse'
 	topK = 10
@@ -137,6 +139,8 @@ tasks.withType(JavaExec).configureEach {
 			 'app.pineconeApiKey': pineconeApiKey,
 			 'app.rerankingModel': rerankingModel,
 			 'app.queryText': '',
+			 'app.searchableEmbeddingModel': searchableEmbeddingModel,
+			 'app.searchableIndexName': searchableIndexName,
 			 'app.sparseEmbeddingModel': sparseEmbeddingModel,
 			 'app.sparseIndexName': sparseIndexName,
 			 'app.topK': topK
@@ -241,15 +245,15 @@ tasks.register('query-sparse-category', JavaExec) {
 	sysProps.put('app.queryText', 'Tell me about the physics of light')
 }
 
-tasks.register('store', JavaExec) {
-	getSystemProperties().put('app.operation', 'store')
-}
-
 tasks.register('search', JavaExec) {
 	var sysProps = getSystemProperties()
 
 	sysProps.put('app.operation', 'search')
 	sysProps.put('app.queryText', 'Tell me about the human body')
+}
+
+tasks.register('store', JavaExec) {
+	getSystemProperties().put('app.operation', 'store')
 }
 
 tasks.register('update', JavaExec) {
