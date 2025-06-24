@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Main.java 0.8.0   06/24/2025
  * (#)Main.java 0.5.0   06/16/2025
  * (#)Main.java 0.4.0   06/04/2025
  * (#)Main.java 0.2.0   05/22/2025
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /// The main application class.
 ///
-/// @version    0.5.0
+/// @version    0.8.0
 /// @since      0.1.0
 public final class Main implements Runnable {
     /// The logger.
@@ -80,29 +81,35 @@ public final class Main implements Runnable {
         final String namespace = System.getProperty("app.namespace");
         final String rerankingModel = System.getProperty("app.rerankingModel");
         final String queryText = System.getProperty("app.queryText");
+        final String searchableEmbeddingModel = System.getProperty("app.searchableEmbeddingModel");
+        final String searchableIndexName = System.getProperty("app.searchableIndexName");
         final String sparseEmbeddingModel = System.getProperty("app.sparseEmbeddingModel");
         final String sparseIndexName = System.getProperty("app.sparseIndexName");
         final String topK = System.getProperty("app.topK");
 
-        this.logger.info("Operation             : {}", operation);
-        this.logger.info("Chat Model            : {}", chatModel);
-        this.logger.info("Dense Embedding Model : {}", denseEmbeddingModel);
-        this.logger.info("Dense Index Name      : {}", denseIndexName);
-        this.logger.info("MongoDB Collection    : {}", mongoDbCollection);
-        this.logger.info("MongoDB Name          : {}", mongoDbName);
-        this.logger.info("MongoDB URI File      : {}", mongoDbUriFile);
-        this.logger.info("Namespace             : {}", namespace);
-        this.logger.info("Reranking Model       : {}", rerankingModel);
-        this.logger.info("Query Text            : {}", queryText);
-        this.logger.info("Sparse Embedding Model: {}", sparseEmbeddingModel);
-        this.logger.info("Sparse Index Name     : {}", sparseIndexName);
-        this.logger.info("TopK                  : {}", topK);
+        this.logger.info("Operation                 : {}", operation);
+        this.logger.info("Chat Model                : {}", chatModel);
+        this.logger.info("Dense Embedding Model     : {}", denseEmbeddingModel);
+        this.logger.info("Dense Index Name          : {}", denseIndexName);
+        this.logger.info("MongoDB Collection        : {}", mongoDbCollection);
+        this.logger.info("MongoDB Name              : {}", mongoDbName);
+        this.logger.info("MongoDB URI File          : {}", mongoDbUriFile);
+        this.logger.info("Namespace                 : {}", namespace);
+        this.logger.info("Reranking Model           : {}", rerankingModel);
+        this.logger.info("Query Text                : {}", queryText);
+        this.logger.info("Searchable Embedding Model: {}", searchableEmbeddingModel);
+        this.logger.info("Searchable Index Name     : {}", searchableIndexName);
+        this.logger.info("Sparse Embedding Model    : {}", sparseEmbeddingModel);
+        this.logger.info("Sparse Index Name         : {}", sparseIndexName);
+        this.logger.info("TopK                      : {}", topK);
 
         final Quickstart quickstart = Quickstart.builder()
             .chatModel(chatModel)
             .denseEmbeddingModel(denseEmbeddingModel)
+            .searchableEmbeddingModel(searchableEmbeddingModel)
             .sparseEmbeddingModel(sparseEmbeddingModel)
             .denseIndexName(denseIndexName)
+            .searchableIndexName(searchableIndexName)
             .sparseIndexName(sparseIndexName)
             .mongoDbCollection(mongoDbCollection)
             .mongoDbName(mongoDbName)

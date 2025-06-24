@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Quickstart.java   0.8.0   06/24/2025
  * (#)Quickstart.java   0.7.0   06/23/2025
  * (#)Quickstart.java   0.6.0   06/19/2025
  * (#)Quickstart.java   0.5.0   06/14/2025
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 /// The quickstart class.
 ///
-/// @version    0.7.0
+/// @version    0.8.0
 /// @since      0.1.0
 final class Quickstart {
     /// The logger.
@@ -84,11 +85,17 @@ final class Quickstart {
     /// The dense embedding model.
     private final String denseEmbeddingModel;
 
+    /// The searchable embedding model.
+    private final String searchableEmbeddingModel;
+
     /// The sparse embedding model.
     private final String sparseEmbeddingModel;
 
     /// The dense index name.
     private final String denseIndexName;
+
+    /// The searchable index name.
+    private final String searchableIndexName;
 
     /// The sparse index name.
     private final String sparseIndexName;
@@ -125,8 +132,10 @@ final class Quickstart {
 
         this.chatModel = builder.chatModel;
         this.denseEmbeddingModel = builder.denseEmbeddingModel;
+        this.searchableEmbeddingModel = builder.searchableEmbeddingModel;
         this.sparseEmbeddingModel = builder.sparseEmbeddingModel;
         this.denseIndexName = builder.denseIndexName;
+        this.searchableIndexName = builder.searchableIndexName;
         this.sparseIndexName = builder.sparseIndexName;
         this.mongoDbCollection = builder.mongoDbCollection;
         this.mongoDbName = builder.mongoDbName;
@@ -717,11 +726,17 @@ final class Quickstart {
         /// The dense embedding model.
         private String denseEmbeddingModel;
 
+        /// The searchable embedding model.
+        private String searchableEmbeddingModel;
+
         /// The sparse embedding model.
         private String sparseEmbeddingModel;
 
         /// The dense index name.
         private String denseIndexName;
+
+        /// The searchable index name.
+        private String searchableIndexName;
 
         /// The sparse index name.
         private String sparseIndexName;
@@ -772,6 +787,16 @@ final class Quickstart {
             return this;
         }
 
+        /// Set the searchable embedding model.
+        ///
+        /// @param  searchableEmbeddingModel    java.lang.String
+        /// @return                             net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder searchableEmbeddingModel(final String searchableEmbeddingModel) {
+            this.searchableEmbeddingModel = searchableEmbeddingModel;
+
+            return this;
+        }
+
         /// Set the sparse embedding model.
         ///
         /// @param  sparseEmbeddingModel    java.lang.String
@@ -788,6 +813,16 @@ final class Quickstart {
         /// @return                 net.jmp.pinecone.quickstart.Quickstart.Builder
         public Builder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the searchable index name.
+        ///
+        /// @param  searchableIndexName java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Quickstart.Builder
+        public Builder searchableIndexName(final String searchableIndexName) {
+            this.searchableIndexName = searchableIndexName;
 
             return this;
         }
