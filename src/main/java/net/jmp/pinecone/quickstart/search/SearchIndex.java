@@ -43,6 +43,8 @@ import static net.jmp.util.logging.LoggerUtils.*;
 import net.jmp.pinecone.quickstart.query.DenseVector;
 import net.jmp.pinecone.quickstart.query.QueryVector;
 
+import net.jmp.pinecone.quickstart.text.UnstructuredText;
+
 import org.openapitools.db_data.client.ApiException;
 
 import org.openapitools.db_data.client.model.Hit;
@@ -61,8 +63,11 @@ public final class SearchIndex extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The fields to return in the search response.
-    private final List<String> fields = List.of("category", "documentid", "mongoid", "words");
+    /// The list of fields to be searched within the records.
+    private final List<String> fields = List.of("category");
+
+    /// The unstructured text object.
+    private final UnstructuredText unstructuredText = new UnstructuredText();
 
     /// The constructor.
     ///
@@ -161,6 +166,13 @@ public final class SearchIndex extends Operation {
 
             for (final Hit hit : hits) {
                 this.logHit(hit);
+
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
+                final String category = (String) hitFields.getOrDefault("category", "");
+                final String content = this.unstructuredText.lookup(hit.getId()).getContent();
+
+                this.logger.info("{}: {}", category, content);
             }
         } catch (final ApiException e) {
             this.logger.error(catching(e));
@@ -201,6 +213,13 @@ public final class SearchIndex extends Operation {
 
             for (final Hit hit : hits) {
                 this.logHit(hit);
+
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
+                final String category = (String) hitFields.getOrDefault("category", "");
+                final String content = this.unstructuredText.lookup(hit.getId()).getContent();
+
+                this.logger.info("{}: {}", category, content);
             }
         } catch (final ApiException e) {
             this.logger.error(catching(e));
