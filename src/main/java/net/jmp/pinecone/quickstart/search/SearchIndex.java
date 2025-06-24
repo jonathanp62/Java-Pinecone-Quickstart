@@ -166,13 +166,7 @@ public final class SearchIndex extends Operation {
 
             for (final Hit hit : hits) {
                 this.logHit(hit);
-
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
-                final String category = (String) hitFields.getOrDefault("category", "");
-                final String content = this.unstructuredText.lookup(hit.getId()).getContent();
-
-                this.logger.info("{}: {}", category, content);
+                this.logContent(hit);
             }
         } catch (final ApiException e) {
             this.logger.error(catching(e));
@@ -213,13 +207,7 @@ public final class SearchIndex extends Operation {
 
             for (final Hit hit : hits) {
                 this.logHit(hit);
-
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
-                final String category = (String) hitFields.getOrDefault("category", "");
-                final String content = this.unstructuredText.lookup(hit.getId()).getContent();
-
-                this.logger.info("{}: {}", category, content);
+                this.logContent(hit);
             }
         } catch (final ApiException e) {
             this.logger.error(catching(e));
@@ -248,6 +236,26 @@ public final class SearchIndex extends Operation {
                 this.logger.debug("{}: {}", entry.getKey(), entry.getValue());
             }
         }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Log the content.
+    ///
+    /// @param  hit org.openapitools.db_data.client.model.Hit
+    private void logContent(final Hit hit) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(hit));
+        }
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> hitFields = (Map<String, Object>) hit.getFields();
+        final String category = (String) hitFields.getOrDefault("category", "");
+        final String content = this.unstructuredText.lookup(hit.getId()).getContent();
+
+        this.logger.info("{}: {}", category, content);
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
