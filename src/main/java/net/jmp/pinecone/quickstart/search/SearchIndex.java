@@ -191,12 +191,13 @@ public final class SearchIndex extends Operation {
         searchRecordsVector.setValues(denseVectorValues);
 
         try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+            final Map<String, Object> filter = Map.of("category", "biology");
             final SearchRecordsResponse response = index.searchRecordsByVector(
                     searchRecordsVector,
                     this.namespace,
                     this.fields,
                     this.topK,
-                    null,
+                    filter,
                     null
             );
 
