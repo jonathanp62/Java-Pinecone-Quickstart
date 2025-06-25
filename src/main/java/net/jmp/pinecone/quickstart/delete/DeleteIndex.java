@@ -79,7 +79,15 @@ public final class DeleteIndex extends Operation {
 
             this.pinecone.deleteIndex(this.denseIndexName);
         } else {
-            this.logger.info("Dense index does not exist: {}", this.doesDenseIndexExist());
+            this.logger.info("Dense index does not exist: {}", this.denseIndexName);
+        }
+
+        if (this.doesSearchableIndexExist()) {
+            this.logger.info("Deleting searchable index: {}", this.searchableIndexName);
+
+            this.pinecone.deleteIndex(this.searchableIndexName);
+        } else {
+            this.logger.info("Searchable index does not exist: {}", this.searchableIndexName);
         }
 
         if (this.doesSparseIndexExist()) {
