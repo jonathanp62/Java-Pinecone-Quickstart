@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart;
 
 /*
+ * (#)Operation.java    0.8.0   06/16/2025
  * (#)Operation.java    0.5.0   06/16/2025
  * (#)Operation.java    0.4.0   06/04/2025
  * (#)Operation.java    0.2.0   05/21/2025
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
 ///
 /// The index operation class.
 ///
-/// @version    0.5.0
+/// @version    0.8.0
 /// @since      0.2.0
 public abstract class Operation {
     /// The logger.
@@ -68,11 +69,17 @@ public abstract class Operation {
     /// The dense embedding model.
     protected final String denseEmbeddingModel;
 
+    /// The searchable embedding model.
+    protected final String searchableEmbeddingModel;
+
     /// The sparse embedding model.
     protected final String sparseEmbeddingModel;
 
     /// The dense index name.
     protected final String denseIndexName;
+
+    /// The searchable index name.
+    protected final String searchableIndexName;
 
     /// The sparse index name.
     protected final String sparseIndexName;
@@ -113,8 +120,10 @@ public abstract class Operation {
         this.pinecone = operationBuilder.pinecone;
         this.chatModel = operationBuilder.chatModel;
         this.denseEmbeddingModel = operationBuilder.denseEmbeddingModel;
+        this.searchableEmbeddingModel = operationBuilder.searchableEmbeddingModel;
         this.sparseEmbeddingModel = operationBuilder.sparseEmbeddingModel;
         this.denseIndexName = operationBuilder.denseIndexName;
+        this.searchableIndexName = operationBuilder.searchableIndexName;
         this.sparseIndexName = operationBuilder.sparseIndexName;
         this.namespace = operationBuilder.namespace;
         this.rerankingModel = operationBuilder.rerankingModel;
@@ -279,11 +288,17 @@ public abstract class Operation {
         /// The dense embedding model.
         protected String denseEmbeddingModel;
 
+        /// The searchable embedding model.
+        protected String searchableEmbeddingModel;
+
         /// The sparse embedding model.
         protected String sparseEmbeddingModel;
 
         /// The dense index name.
         protected String denseIndexName;
+
+        /// The searchable index name.
+        protected String searchableIndexName;
 
         /// The sparse index name.
         protected String sparseIndexName;
@@ -347,6 +362,16 @@ public abstract class Operation {
             return this;
         }
 
+        /// Set the searchable embedding model.
+        ///
+        /// @param  searchableEmbeddingModel    java.lang.String
+        /// @return                             net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder searchableEmbeddingModel(final String searchableEmbeddingModel) {
+            this.searchableEmbeddingModel = searchableEmbeddingModel;
+
+            return this;
+        }
+
         /// Set the sparse embedding model.
         ///
         /// @param  sparseEmbeddingModel    java.lang.String
@@ -363,6 +388,16 @@ public abstract class Operation {
         /// @return                 net.jmp.pinecone.quickstart.Operation.OperationBuilder
         public OperationBuilder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the searchable index name.
+        ///
+        /// @param  searchableIndexName java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.Operation.OperationBuilder
+        public OperationBuilder searchableIndexName(final String searchableIndexName) {
+            this.searchableIndexName = searchableIndexName;
 
             return this;
         }
