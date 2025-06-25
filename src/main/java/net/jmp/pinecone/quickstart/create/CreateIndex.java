@@ -40,6 +40,10 @@ import net.jmp.pinecone.quickstart.Operation;
 
 import static net.jmp.util.logging.LoggerUtils.*;
 
+import org.openapitools.db_control.client.ApiException;
+
+import org.openapitools.db_control.client.model.CreateIndexForModelRequest;
+import org.openapitools.db_control.client.model.CreateIndexForModelRequestEmbed;
 import org.openapitools.db_control.client.model.DeletionProtection;
 import org.openapitools.db_control.client.model.IndexModel;
 
@@ -62,6 +66,7 @@ public final class CreateIndex extends Operation {
                 .pinecone(builder.pinecone)
                 .denseIndexName(builder.denseIndexName)
                 .searchableIndexName(builder.searchableIndexName)
+                .searchableEmbeddingModel(builder.searchableEmbeddingModel)
                 .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
         );
@@ -82,6 +87,7 @@ public final class CreateIndex extends Operation {
         }
 
         this.denseIndex();
+        this.searchableIndex();
         this.sparseIndex();
 
         if (this.logger.isTraceEnabled()) {
@@ -122,6 +128,46 @@ public final class CreateIndex extends Operation {
             this.indexStatus(indexModel);
         } else {
             this.logger.info("Dense index already exists: {}", this.denseIndexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// The searchable index method.
+    private void searchableIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (!this.doesSearchableIndexExist()) {
+            this.logger.info("Creating searchable index: {}", this.searchableIndexName);
+
+            final Map<String, String> fieldMap = Map.of("text", "text_segment");   // The name of the text field from your document model that will be embedded
+            final Map<String, String> tags = Map.of("env", "development");
+
+            final CreateIndexForModelRequestEmbed embed = new CreateIndexForModelRequestEmbed();
+
+            embed.model(this.searchableEmbeddingModel)
+                    .metric(CreateIndexForModelRequestEmbed.MetricEnum.COSINE)
+                    .dimension(1024)
+                    .fieldMap(fieldMap);
+
+            try {
+                this.pinecone.createIndexForModel(
+                        this.searchableIndexName,
+                        CreateIndexForModelRequest.CloudEnum.AWS,
+                        "us-east-1",
+                        embed,
+                        DeletionProtection.DISABLED,
+                        tags
+                );
+            } catch (final ApiException ae) {
+                this.logger.error(catching(ae));
+            }
+        } else {
+            this.logger.info("Searchable index already exists: {}", this.searchableIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -186,6 +232,9 @@ public final class CreateIndex extends Operation {
         /// The Pinecone client.
         private Pinecone pinecone;
 
+        /// The searchable embedding model.
+        private String searchableEmbeddingModel;
+
         /// The dense index name.
         private String denseIndexName;
 
@@ -209,6 +258,16 @@ public final class CreateIndex extends Operation {
         /// @return             net.jmp.pinecone.quickstart.create.CreateIndex.Builder
         public Builder pinecone(final Pinecone pinecone) {
             this.pinecone = pinecone;
+
+            return this;
+        }
+
+        /// Set the searchable embedding model.
+        ///
+        /// @param  searchableEmbeddingModel    java.lang.String
+        /// @return                             net.jmp.pinecone.quickstart.create.CreateIndex.Builder
+        public Builder searchableEmbeddingModel(final String searchableEmbeddingModel) {
+            this.searchableEmbeddingModel = searchableEmbeddingModel;
 
             return this;
         }

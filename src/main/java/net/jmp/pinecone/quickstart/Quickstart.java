@@ -420,6 +420,7 @@ final class Quickstart {
 
         final CreateIndex createIndex = CreateIndex.builder()
             .pinecone(pinecone)
+            .searchableEmbeddingModel(this.searchableEmbeddingModel)
             .denseIndexName(this.denseIndexName)
             .searchableIndexName(this.searchableIndexName)
             .sparseIndexName(this.sparseIndexName)
