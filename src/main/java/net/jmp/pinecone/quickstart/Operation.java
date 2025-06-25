@@ -162,6 +162,23 @@ public abstract class Operation {
         return result;
     }
 
+    /// Return true if the searchable index exists.
+    ///
+    /// @return boolean
+    protected boolean doesSearchableIndexExist() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.doesIndexExist(this.searchableIndexName);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
     /// Return true if the sparse index exists.
     ///
     /// @return boolean
@@ -227,6 +244,23 @@ public abstract class Operation {
         return result;
     }
 
+    /// Check if the searchable index is loaded.
+    ///
+    /// @return boolean
+    protected boolean isSearchableIndexLoaded() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final boolean result = this.isNamedIndexLoaded(this.searchableIndexName, this.namespace);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(result));
+        }
+
+        return result;
+    }
+
     /// Check if the sparse index is loaded.
     ///
     /// @return boolean
@@ -244,7 +278,7 @@ public abstract class Operation {
         return result;
     }
 
-    /// Check if the dense index is loaded.
+    /// Check if the named index is loaded.
     ///
     /// @param  indexName   java.lang.String
     /// @param  namespace   java.lang.String
