@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.search;
 
 /*
+ * (#)SearchIndex.java  0.8.0   06/25/2025
  * (#)SearchIndex.java  0.7.0   06/23/2025
  *
  * @author   Jonathan Parker
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 /// The search index class.
 ///
-/// @version    0.7.0
+/// @version    0.8.0
 /// @since      0.7.0
 public final class SearchIndex extends Operation {
     /// The logger.
@@ -77,7 +78,9 @@ public final class SearchIndex extends Operation {
                 .pinecone(builder.pinecone)
                 .chatModel(builder.chatModel)
                 .denseEmbeddingModel(builder.denseEmbeddingModel)
+                .searchableEmbeddingModel(builder.searchableEmbeddingModel)
                 .denseIndexName(builder.denseIndexName)
+                .searchableIndexName(builder.searchableIndexName)
                 .namespace(builder.namespace)
                 .rerankingModel(builder.rerankingModel)
                 .queryText(builder.queryText)
@@ -274,8 +277,14 @@ public final class SearchIndex extends Operation {
         /// The dense embedding model.
         private String denseEmbeddingModel;
 
+        /// The searchable embedding model.
+        private String searchableEmbeddingModel;
+
         /// The dense index name.
         private String denseIndexName;
+
+        /// The searchable index name.
+        private String searchableIndexName;
 
         /// The namespace.
         private String namespace;
@@ -336,12 +345,32 @@ public final class SearchIndex extends Operation {
             return this;
         }
 
+        /// Set the searchable embedding model.
+        ///
+        /// @param  searchableEmbeddingModel    java.lang.String
+        /// @return                             net.jmp.pinecone.quickstart.search.SearchIndex.Builder
+        public Builder searchableEmbeddingModel(final String searchableEmbeddingModel) {
+            this.searchableEmbeddingModel = searchableEmbeddingModel;
+
+            return this;
+        }
+
         /// Set the dense index name.
         ///
         /// @param  denseIndexName  java.lang.String
         /// @return                 net.jmp.pinecone.quickstart.search.SearchIndex.Builder
         public Builder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the searchable index name.
+        ///
+        /// @param  searchableIndexName java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.search.SearchIndex.Builder
+        public Builder searchableIndexName(final String searchableIndexName) {
+            this.searchableIndexName = searchableIndexName;
 
             return this;
         }

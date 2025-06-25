@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.load;
 
 /*
+ * (#)LoadIndex.java    0.8.0   06/25/2025
  * (#)LoadIndex.java    0.6.0   06/17/2025
  * (#)LoadIndex.java    0.4.0   06/04/2025
  * (#)LoadIndex.java    0.2.0   05/21/2025
@@ -74,7 +75,7 @@ import org.slf4j.LoggerFactory;
 
 /// The load index class.
 ///
-/// @version    0.6.0
+/// @version    0.8.0
 /// @since      0.2.0
 public final class LoadIndex extends Operation {
     /// The logger.
@@ -87,8 +88,10 @@ public final class LoadIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .denseEmbeddingModel(builder.denseEmbeddingModel)
+                .searchableEmbeddingModel(builder.searchableEmbeddingModel)
                 .sparseEmbeddingModel(builder.sparseEmbeddingModel)
                 .denseIndexName(builder.denseIndexName)
+                .searchableIndexName(builder.searchableIndexName)
                 .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
                 .mongoClient(builder.mongoClient)
@@ -375,11 +378,17 @@ public final class LoadIndex extends Operation {
         /// The dense embedding model.
         private String denseEmbeddingModel;
 
+        /// The searchable embedding model.
+        private String searchableEmbeddingModel;
+
         /// The sparse embedding model.
         private String sparseEmbeddingModel;
 
         /// The dense index name.
         private String denseIndexName;
+
+        /// The searchable index name.
+        private String searchableIndexName;
 
         /// The sparse index name.
         private String sparseIndexName;
@@ -421,6 +430,16 @@ public final class LoadIndex extends Operation {
             return this;
         }
 
+        /// Set the searchable embedding model.
+        ///
+        /// @param  searchableEmbeddingModel    java.lang.String
+        /// @return                             net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder searchableEmbeddingModel(final String searchableEmbeddingModel) {
+            this.searchableEmbeddingModel = searchableEmbeddingModel;
+
+            return this;
+        }
+
         /// Set the sparse embedding model.
         ///
         /// @param  sparseEmbeddingModel    java.lang.String
@@ -437,6 +456,16 @@ public final class LoadIndex extends Operation {
         /// @return                 net.jmp.pinecone.quickstart.load.LoadIndex.Builder
         public Builder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the searchable index name.
+        ///
+        /// @param  searchableIndexName java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.load.LoadIndex.Builder
+        public Builder searchableIndexName(final String searchableIndexName) {
+            this.searchableIndexName = searchableIndexName;
 
             return this;
         }

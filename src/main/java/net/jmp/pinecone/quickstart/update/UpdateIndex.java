@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.update;
 
 /*
+ * (#)UpdateIndex.java  0.8.0   06/25/2025
  * (#)UpdateIndex.java  0.6.0   06/19/2025
  *
  * @author   Jonathan Parker
@@ -62,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 /// The update index class.
 ///
-/// @version    0.6.0
+/// @version    0.8.0
 /// @since      0.6.0
 public final class UpdateIndex extends Operation {
     /// The logger.
@@ -75,6 +76,7 @@ public final class UpdateIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .denseIndexName(builder.denseIndexName)
+                .searchableIndexName(builder().searchableIndexName)
                 .sparseIndexName(builder.sparseIndexName)
                 .namespace(builder.namespace)
                 .mongoClient(builder.mongoClient)
@@ -212,6 +214,9 @@ public final class UpdateIndex extends Operation {
         /// The dense index name.
         private String denseIndexName;
 
+        /// The searchable index name.
+        private String searchableIndexName;
+
         /// The sparse index name.
         private String sparseIndexName;
 
@@ -248,6 +253,16 @@ public final class UpdateIndex extends Operation {
         /// @return                 net.jmp.pinecone.quickstart.update.UpdateIndex.Builder
         public Builder denseIndexName(final String denseIndexName) {
             this.denseIndexName = denseIndexName;
+
+            return this;
+        }
+
+        /// Set the searchable index name.
+        ///
+        /// @param  searchableIndexName java.lang.String
+        /// @return                     net.jmp.pinecone.quickstart.update.UpdateIndex.Builder
+        public Builder searchableIndexName(final String searchableIndexName) {
+            this.searchableIndexName = searchableIndexName;
 
             return this;
         }
