@@ -48,6 +48,7 @@ import io.pinecone.clients.Pinecone;
 
 import static io.pinecone.commons.IndexInterface.buildUpsertVectorWithUnsignedIndices;
 
+import io.pinecone.proto.ListResponse;
 import io.pinecone.proto.UpsertResponse;
 
 import io.pinecone.unsigned_indices_model.VectorWithUnsignedIndices;
@@ -115,6 +116,7 @@ public final class LoadIndex extends Operation {
         }
 
         this.loadDenseIndex();
+        this.loadSearchableIndex();
         this.loadSparseIndex();
 
         if (this.logger.isTraceEnabled()) {
@@ -165,6 +167,49 @@ public final class LoadIndex extends Operation {
             }
         } else {
             this.logger.info("Dense index either does not exist or is already loaded: {}", this.denseIndexName);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Load the searchable index.
+    private void loadSearchableIndex() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        if (this.doesSearchableIndexExist() && !this.isSearchableIndexLoaded()) {
+            this.logger.info("Loading searchable index: {}", this.searchableIndexName);
+
+            List<Map<String, String>> upsertRecords = new ArrayList<>();
+            final List<UnstructuredTextDocument> documents = this.createContent();
+
+            for (final UnstructuredTextDocument document : documents) {
+                final Map<String, String> upsertRecord = new HashMap<>();
+
+                upsertRecord.put("_id", document.getDocumentId());
+                upsertRecord.put("text_segment", document.getContent());
+                upsertRecord.put("category", document.getCategory());
+                upsertRecord.put("documentid", document.getDocumentId());
+                upsertRecord.put("mongoid", document.getMongoId());
+
+                upsertRecords.add(upsertRecord);
+            }
+
+            try (final Index index = this.pinecone.getIndexConnection(this.searchableIndexName)) {
+                index.upsertRecords(this.namespace, upsertRecords);
+
+                final ListResponse response = index.list(namespace);
+                final int vectorsCount = response.getVectorsCount();
+
+                this.logger.info("Upserted {} records", vectorsCount);
+            } catch (final org.openapitools.db_data.client.ApiException ae) {
+                this.logger.error(catching(ae));
+            }
+        } else {
+            this.logger.info("Searchable index either does not exist or is already loaded: {}", this.searchableIndexName);
         }
 
         if (this.logger.isTraceEnabled()) {
