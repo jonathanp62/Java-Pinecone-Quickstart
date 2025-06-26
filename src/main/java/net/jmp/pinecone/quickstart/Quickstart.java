@@ -684,8 +684,6 @@ final class Quickstart {
         final SearchIndex searchIndex = SearchIndex.builder()
                 .pinecone(pinecone)
                 .chatModel(this.chatModel)
-                .denseEmbeddingModel(this.denseEmbeddingModel)
-                .denseIndexName(this.denseIndexName)
                 .searchableEmbeddingModel(this.searchableEmbeddingModel)
                 .searchableIndexName(this.searchableIndexName)
                 .namespace(this.namespace)

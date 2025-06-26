@@ -77,9 +77,7 @@ public final class SearchIndex extends Operation {
         super(Operation.operationBuilder()
                 .pinecone(builder.pinecone)
                 .chatModel(builder.chatModel)
-                .denseEmbeddingModel(builder.denseEmbeddingModel)
                 .searchableEmbeddingModel(builder.searchableEmbeddingModel)
-                .denseIndexName(builder.denseIndexName)
                 .searchableIndexName(builder.searchableIndexName)
                 .namespace(builder.namespace)
                 .rerankingModel(builder.rerankingModel)
@@ -152,7 +150,7 @@ public final class SearchIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+        try (final Index index = this.pinecone.getIndexConnection(this.searchableIndexName)) {
             final SearchRecordsResponse response = index.searchRecordsById(
                     "rec11",
                     this.namespace,
@@ -186,14 +184,14 @@ public final class SearchIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        final QueryVector queryVector = new QueryVector(this.pinecone, this.denseEmbeddingModel);
+        final QueryVector queryVector = new QueryVector(this.pinecone, this.searchableEmbeddingModel);
         final DenseVector denseVector = queryVector.queryTextToDenseVector(this.queryText);
         final List<Float> denseVectorValues = denseVector.getDenseValues();
         final SearchRecordsVector searchRecordsVector = new SearchRecordsVector();
 
         searchRecordsVector.setValues(denseVectorValues);
 
-        try (final Index index = this.pinecone.getIndexConnection(this.denseIndexName)) {
+        try (final Index index = this.pinecone.getIndexConnection(this.searchableIndexName)) {
             final Map<String, Object> filter = Map.of("category", "biology");
             final SearchRecordsResponse response = index.searchRecordsByVector(
                     searchRecordsVector,
@@ -274,14 +272,8 @@ public final class SearchIndex extends Operation {
         /// The chat model.
         private String chatModel;
 
-        /// The dense embedding model.
-        private String denseEmbeddingModel;
-
         /// The searchable embedding model.
         private String searchableEmbeddingModel;
-
-        /// The dense index name.
-        private String denseIndexName;
 
         /// The searchable index name.
         private String searchableIndexName;
@@ -335,32 +327,12 @@ public final class SearchIndex extends Operation {
             return this;
         }
 
-        /// Set the dense embedding model.
-        ///
-        /// @param  denseEmbeddingModel java.lang.String
-        /// @return                     net.jmp.pinecone.quickstart.search.SearchIndex.Builder
-        public Builder denseEmbeddingModel(final String denseEmbeddingModel) {
-            this.denseEmbeddingModel = denseEmbeddingModel;
-
-            return this;
-        }
-
         /// Set the searchable embedding model.
         ///
         /// @param  searchableEmbeddingModel    java.lang.String
         /// @return                             net.jmp.pinecone.quickstart.search.SearchIndex.Builder
         public Builder searchableEmbeddingModel(final String searchableEmbeddingModel) {
             this.searchableEmbeddingModel = searchableEmbeddingModel;
-
-            return this;
-        }
-
-        /// Set the dense index name.
-        ///
-        /// @param  denseIndexName  java.lang.String
-        /// @return                 net.jmp.pinecone.quickstart.search.SearchIndex.Builder
-        public Builder denseIndexName(final String denseIndexName) {
-            this.denseIndexName = denseIndexName;
 
             return this;
         }
