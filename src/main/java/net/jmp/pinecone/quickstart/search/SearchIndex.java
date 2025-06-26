@@ -34,7 +34,6 @@ import com.mongodb.client.*;
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -129,12 +128,19 @@ public final class SearchIndex extends Operation {
             requestQuery.setInputs(inputs);
             requestQuery.setTopK(this.topK);
 
+            final SearchRecordsRequestRerank requestRerank = new SearchRecordsRequestRerank();
+
+            requestRerank.model(this.rerankingModel);
+            requestRerank.setQuery(this.queryText);
+            requestRerank.setTopN(this.topK);
+            requestRerank.setRankFields(List.of("text_segment"));
+
             try {
                 final SearchRecordsResponse response = index.searchRecords(
                         this.namespace,
                         requestQuery,
                         this.fields,
-                        null
+                        requestRerank
                 );
 
                 final SearchRecordsResponseResult result = response.getResult();
