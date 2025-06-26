@@ -34,6 +34,7 @@ import com.mongodb.client.*;
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,10 +49,7 @@ import net.jmp.pinecone.quickstart.text.UnstructuredText;
 
 import org.openapitools.db_data.client.ApiException;
 
-import org.openapitools.db_data.client.model.Hit;
-import org.openapitools.db_data.client.model.SearchRecordsResponse;
-import org.openapitools.db_data.client.model.SearchRecordsResponseResult;
-import org.openapitools.db_data.client.model.SearchRecordsVector;
+import org.openapitools.db_data.client.model.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +63,7 @@ public final class SearchIndex extends Operation {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     /// The list of fields to be searched within the records.
-    private final List<String> fields = List.of("category");
+    private final List<String> fields = List.of("text_segment", "category");
 
     /// The unstructured text object.
     private final UnstructuredText unstructuredText = new UnstructuredText();
@@ -124,7 +122,34 @@ public final class SearchIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.warn("Search records is currently unimplemented");
+        try (final Index index = this.pinecone.getIndexConnection(this.searchableIndexName)) {
+            final Map<String, String> inputs = Map.of("text", this.queryText);
+            final SearchRecordsRequestQuery requestQuery = new SearchRecordsRequestQuery();
+
+            requestQuery.setInputs(inputs);
+            requestQuery.setTopK(this.topK);
+
+            try {
+                final SearchRecordsResponse response = index.searchRecords(
+                        this.namespace,
+                        requestQuery,
+                        this.fields,
+                        null
+                );
+
+                final SearchRecordsResponseResult result = response.getResult();
+                final List<Hit> hits = result.getHits();
+
+                this.logger.info("Search records found {} hits: ", hits.size());
+
+                for (final Hit hit : hits) {
+                    this.logHit(hit);
+                    this.logContent(hit);
+                }
+            } catch (final ApiException e) {
+                this.logger.error(catching(e));
+            }
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
@@ -137,7 +162,30 @@ public final class SearchIndex extends Operation {
             this.logger.trace(entry());
         }
 
-        this.logger.warn("Search records by text is currently unimplemented");
+        try (final Index index = this.pinecone.getIndexConnection(this.searchableIndexName)) {
+            try {
+                final SearchRecordsResponse response = index.searchRecordsByText(
+                        this.queryText,
+                        this.namespace,
+                        this.fields,
+                        this.topK,
+                        null,
+                        null
+                );
+
+                final SearchRecordsResponseResult result = response.getResult();
+                final List<Hit> hits = result.getHits();
+
+                this.logger.info("Search records by text found {} hits: ", hits.size());
+
+                for (final Hit hit : hits) {
+                    this.logHit(hit);
+                    this.logContent(hit);
+                }
+            } catch (final ApiException e) {
+                this.logger.error(catching(e));
+            }
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
