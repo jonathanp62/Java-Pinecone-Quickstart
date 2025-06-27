@@ -34,10 +34,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 
 import edu.stanford.nlp.trees.Tree;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import net.jmp.pinecone.quickstart.Operation;
 
@@ -91,10 +88,20 @@ public final class CoreNLP extends Operation {
 
             pipeline.annotate(document);    // Annotate the document
 
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Document tokens: {}", document.tokens());
+            }
+
             /* Use the second sentence for POS, NER, and constituency and dependency parses */
 
             for (final CoreSentence sentence : document.sentences()) {
-                this.logger.info("Core sentence: {}", sentence.text());
+                if (this.logger.isInfoEnabled()) {
+                    this.logger.info("Core sentence: {}", sentence.text());
+                }
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+                }
 
                 final Set<String> significantWords = this.getNouns(sentence);
 
@@ -110,6 +117,14 @@ public final class CoreNLP extends Operation {
                     this.logger.debug("Dependency parse: {}", dependencyParse);
                 }
             }
+        }
+
+        final List<String> strings = this.tokenizeForEmbeddings(pipeline);
+
+        this.logger.info("Strings for embeddings: {}", strings.size());
+
+        if (this.logger.isDebugEnabled()) {
+            strings.forEach(this.logger::debug);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -186,5 +201,99 @@ public final class CoreNLP extends Operation {
         }
 
         return results;
+    }
+
+    /// Tokenize text for embeddings.
+    ///
+    /// @param  pipeline edu.stanford.nlp.pipeline.StanfordCoreNLP
+    /// @return          java.util.List<java.lang.String>
+    private List<String> tokenizeForEmbeddings(final StanfordCoreNLP pipeline) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pipeline));
+        }
+
+        final int maxTokens = 128;
+
+        final String text = """
+                Four score and seven years ago our fathers brought forth on this continent, a new nation, 
+                conceived in liberty, and dedicated to the proposition that all men are created equal.
+                
+                Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived
+                and so dedicated, can long endure. We are met on a great battlefield of that war. We have come
+                to dedicate a portion of that field, as a final resting place for those who here gave their
+                lives that that nation might live. It is altogether fitting and proper that we should do this.
+                
+                But in a larger sense, we cannot dedicate - we cannot consecrate - we cannot hallow -
+                this ground. The brave men, living and dead, who struggled here, have consecrated it, 
+                far above our poor power to add or detract. The world will little note, nor long remember, 
+                what we say here, but it can never forget what they did here. It is for us the living,
+                rather, to be dedicated here to the unfinished work which they who fought here have thus 
+                far so nobly advanced. It is rather for us to be here dedicated to the great task remaining 
+                before us - that from these honored dead we take increased devotion to that cause for which
+                they gave the last full measure of devotion - that we here highly resolve that these dead
+                shall not have died in vain - that this nation, under God, shall have a new birth of
+                freedom - and that government of the people, by the people, for the people, shall not
+                perish from the earth.
+                """;
+
+        final CoreDocument document = new CoreDocument(text);
+
+        pipeline.annotate(document);
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.debug("Document tokens: {}", document.tokens().size());  // This matches total tokens below
+        }
+
+        /* Check the document as a whole */
+
+        if (document.tokens().size() <= maxTokens) {
+            if (this.logger.isTraceEnabled()) {
+                this.logger.trace(exitWith(List.of(text)));
+            }
+
+            return List.of(text);
+        }
+
+        /* Process the document by sentences */
+
+        final List<String> strings = new ArrayList<>();
+        final StringBuilder sb = new StringBuilder();
+
+        int totalTokens = 0;
+
+        for (final CoreSentence sentence : document.sentences()) {
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Core sentence: {}", sentence.text());
+            }
+
+            final int tokensInSentence = sentence.tokensAsStrings().size();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Sentence tokens: {}", tokensInSentence);
+                this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+            }
+
+            if (totalTokens + tokensInSentence <= maxTokens) {  // Sentence fits
+                sb.append(sentence.text()); // Add the sentence
+
+                totalTokens += tokensInSentence;
+            } else {    // Sentence will exceed the token limit
+                strings.add(sb.toString()); // Add to the result strings
+                sb.setLength(0);            // Reset the string builder
+                sb.append(sentence.text()); // Add the sentence
+
+                totalTokens = tokensInSentence;
+            }
+        }
+
+        strings.add(sb.toString());         // Add the last sentence to the result strings
+
+        this.logger.info("Total results: {}", strings.size());
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+
+        return strings;
     }
 }
