@@ -123,8 +123,8 @@ public final class CoreNLP extends Operation {
 
         this.logger.info("Strings for embeddings: {}", strings.size());
 
-        if (this.logger.isDebugEnabled()) {
-            strings.forEach(this.logger::debug);
+        if (this.logger.isInfoEnabled()) {
+            strings.forEach(this.logger::info);
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -213,6 +213,7 @@ public final class CoreNLP extends Operation {
         }
 
         final int maxTokens = 64;
+        final int averageEnglishWordLength = 5;
 
         final String text = """
                 Four score and seven years ago our fathers brought forth on this continent, a new nation, 
@@ -259,7 +260,7 @@ public final class CoreNLP extends Operation {
         /* Process the document by sentences */
 
         final List<String> strings = new ArrayList<>();
-        final StringBuilder sentenceBuilder = new StringBuilder();
+        final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
 
         int totalTokens = 0;
 
@@ -269,7 +270,7 @@ public final class CoreNLP extends Operation {
             }
 
             /* todo: Here through line 321 is a sentence handler method. */
-            
+
             final int tokensInSentence = sentence.tokensAsStrings().size();
 
             if (this.logger.isDebugEnabled()) {
@@ -287,7 +288,7 @@ public final class CoreNLP extends Operation {
 
                 /* Process the sentence by words */
 
-                final StringBuilder wordBuilder = new StringBuilder();
+                final StringBuilder wordBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
 
                 int wordTokens = 0;
 
