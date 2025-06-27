@@ -273,16 +273,26 @@ public final class CoreNLP extends Operation {
                 this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
             }
 
-            if (totalTokens + tokensInSentence <= maxTokens) {  // Sentence fits
-                sb.append(sentence.text()); // Add the sentence
+            /* todo:
+                Check to see if the number of tokens in the sentence exceeds the limit
+                If so, get the tokens in the sentence and fit as many as possible into a string
+                Back up a word and repeat
+            */
 
-                totalTokens += tokensInSentence;
-            } else {    // Sentence will exceed the token limit
-                strings.add(sb.toString()); // Add to the result strings
-                sb.setLength(0);            // Reset the string builder
-                sb.append(sentence.text()); // Add the sentence
+            if (tokensInSentence > maxTokens) {
+                throw new RuntimeException("Sentence exceeds the token limit");
+            } else {
+                if (totalTokens + tokensInSentence <= maxTokens) {  // Sentence fits
+                    sb.append(sentence.text()); // Add the sentence
 
-                totalTokens = tokensInSentence;
+                    totalTokens += tokensInSentence;
+                } else {    // Sentence will exceed the token limit
+                    strings.add(sb.toString()); // Add to the result strings
+                    sb.setLength(0);            // Reset the string builder
+                    sb.append(sentence.text()); // Add the sentence
+
+                    totalTokens = tokensInSentence;
+                }
             }
         }
 
