@@ -212,7 +212,7 @@ public final class CoreNLP extends Operation {
             this.logger.trace(entryWith(pipeline));
         }
 
-        final int maxTokens = 128;
+        final int maxTokens = 64;
 
         final String text = """
                 Four score and seven years ago our fathers brought forth on this continent, a new nation, 
@@ -234,6 +234,8 @@ public final class CoreNLP extends Operation {
                 shall not have died in vain - that this nation, under God, shall have a new birth of
                 freedom - and that government of the people, by the people, for the people, shall not
                 perish from the earth.
+                
+                President Abraham Lincoln - November 19, 1863
                 """;
 
         final CoreDocument document = new CoreDocument(text);
@@ -257,7 +259,7 @@ public final class CoreNLP extends Operation {
         /* Process the document by sentences */
 
         final List<String> strings = new ArrayList<>();
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sentenceBuilder = new StringBuilder();
 
         int totalTokens = 0;
 
@@ -273,32 +275,51 @@ public final class CoreNLP extends Operation {
                 this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
             }
 
-            /* todo:
-                Check to see if the number of tokens in the sentence exceeds the limit
-                If so, get the tokens in the sentence and fit as many as possible into a string
-                Back up a word and repeat
-            */
-
             if (tokensInSentence > maxTokens) {
-                throw new RuntimeException("Sentence exceeds the token limit");
+                /* Flush any sentences in the sentence builder to the result strings */
+
+                strings.add(sentenceBuilder.toString());    // Add to the result strings
+                sentenceBuilder.setLength(0);               // Reset the sentence builder
+
+                /* Process the sentence by words */
+
+                final StringBuilder wordBuilder = new StringBuilder();
+
+                int wordTokens = 0;
+
+                for (final String word : sentence.tokensAsStrings()) {
+                    if (wordTokens + 1 <= maxTokens) {
+                        wordBuilder.append(word).append(" ");
+
+                        ++wordTokens;
+                    } else {
+                        strings.add(wordBuilder.toString());    // Add to the result strings
+                        wordBuilder.setLength(0);               // Reset the word builder
+                        wordBuilder.append(word).append(" ");   // Add the word
+
+                        wordTokens = 1;
+                    }
+                }
+
+                strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
             } else {
-                if (totalTokens + tokensInSentence <= maxTokens) {  // Sentence fits
-                    sb.append(sentence.text()); // Add the sentence
+                if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
+                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
 
                     totalTokens += tokensInSentence;
-                } else {    // Sentence will exceed the token limit
-                    strings.add(sb.toString()); // Add to the result strings
-                    sb.setLength(0);            // Reset the string builder
-                    sb.append(sentence.text()); // Add the sentence
+                } else {                                                    // Sentence will exceed the token limit
+                    strings.add(sentenceBuilder.toString());                // Add to the result strings
+                    sentenceBuilder.setLength(0);                           // Reset the sentence builder
+                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
 
                     totalTokens = tokensInSentence;
                 }
             }
         }
 
-        strings.add(sb.toString());         // Add the last sentence to the result strings
+        strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
 
-        this.logger.info("Total results: {}", strings.size());
+        this.logger.info("Total result strings: {}", strings.size());
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
