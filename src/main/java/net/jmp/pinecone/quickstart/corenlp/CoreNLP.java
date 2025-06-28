@@ -52,6 +52,31 @@ public final class CoreNLP extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    /// The Gettysburg address.
+    private final String gettysburgAddress = """
+                Four score and seven years ago our fathers brought forth on this continent, a new nation, 
+                conceived in liberty, and dedicated to the proposition that all men are created equal.
+                
+                Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived
+                and so dedicated, can long endure. We are met on a great battlefield of that war. We have come
+                to dedicate a portion of that field, as a final resting place for those who here gave their
+                lives that that nation might live. It is altogether fitting and proper that we should do this.
+                
+                But in a larger sense, we cannot dedicate - we cannot consecrate - we cannot hallow -
+                this ground. The brave men, living and dead, who struggled here, have consecrated it, 
+                far above our poor power to add or detract. The world will little note, nor long remember, 
+                what we say here, but it can never forget what they did here. It is for us the living,
+                rather, to be dedicated here to the unfinished work which they who fought here have thus 
+                far so nobly advanced. It is rather for us to be here dedicated to the great task remaining 
+                before us - that from these honored dead we take increased devotion to that cause for which
+                they gave the last full measure of devotion - that we here highly resolve that these dead
+                shall not have died in vain - that this nation, under God, shall have a new birth of
+                freedom - and that government of the people, by the people, for the people, shall not
+                perish from the earth.
+                
+                President Abraham Lincoln - November 19, 1863
+                """;
+
     /// The constructor.
     ///
     /// @param  queryText   java.lang.String
@@ -72,60 +97,93 @@ public final class CoreNLP extends Operation {
 
         props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,depparse");
 
+        /* Set up the pipeline */
+
         final StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-        final List<String> documents = List.of(
-            this.queryText,
-            "Famous historical structures and monuments",
-            "Tell me about famous persons in history and science",
-            "Tell me about the physics of light",
-            "The Great Wall of China was built to protect against invasions",
-            "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
-            "Albert Einstein developed the theory of relativity."
-        );
+        /* Perform some basic analysis */
 
-        for (final String documentText : documents) {
-            final CoreDocument document = new CoreDocument(documentText);   // Create a document object
+        this.basicAnalysis(pipeline);
 
-            pipeline.annotate(document);    // Annotate the document
+        /* Chunk text for embeddings */
 
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Document tokens: {}", document.tokens());
-            }
-
-            /* Use the second sentence for POS, NER, and constituency and dependency parses */
-
-            for (final CoreSentence sentence : document.sentences()) {
-                if (this.logger.isInfoEnabled()) {
-                    this.logger.info("Core sentence: {}", sentence.text());
-                }
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
-                }
-
-                final Set<String> significantWords = this.getNouns(sentence);
-
-                significantWords.addAll(this.getAdjectives(sentence));
-
-                this.logger.info("Significant words: {}", significantWords);
-
-                if (this.logger.isDebugEnabled()) {
-                    final Tree constituencyParse = sentence.constituencyParse();
-                    final SemanticGraph dependencyParse = sentence.dependencyParse();
-
-                    this.logger.debug("Constituency parse: {}", constituencyParse);
-                    this.logger.debug("Dependency parse: {}", dependencyParse);
-                }
-            }
-        }
-
-        final List<String> strings = this.tokenizeForEmbeddings(pipeline);
+        final List<String> strings = this.chunkTextForEmbeddings(pipeline, this.gettysburgAddress, 64);
 
         this.logger.info("Strings for embeddings: {}", strings.size());
 
         if (this.logger.isInfoEnabled()) {
             strings.forEach(this.logger::info);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Perform some basic analysis.
+    ///
+    /// @param  pipeline edu.stanford.nlp.pipeline.StanfordCoreNLP
+    private void basicAnalysis(final StanfordCoreNLP pipeline) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pipeline));
+        }
+
+        final List<String> documents = List.of(
+                this.queryText,
+                "Famous historical structures and monuments",
+                "Tell me about famous persons in history and science",
+                "Tell me about the physics of light",
+                "The Great Wall of China was built to protect against invasions",
+                "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
+                "Albert Einstein developed the theory of relativity."
+        );
+
+        documents.forEach(documentText -> this.basicDocumentHandler(pipeline, new CoreDocument(documentText)));
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Basic document handler.
+    ///
+    /// @param  pipeline edu.stanford.nlp.pipeline.StanfordCoreNLP
+    /// @param  document edu.stanford.nlp.pipeline.CoreDocument
+    private void basicDocumentHandler(final StanfordCoreNLP pipeline, final CoreDocument document) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pipeline, document));
+        }
+
+        pipeline.annotate(document);    // Annotate the document
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Document tokens: {}", document.tokens());
+        }
+
+        /* Use the second sentence for POS, NER, and constituency and dependency parses */
+
+        for (final CoreSentence sentence : document.sentences()) {
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Core sentence: {}", sentence.text());
+            }
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+            }
+
+            final Set<String> significantWords = this.getNouns(sentence);
+
+            significantWords.addAll(this.getAdjectives(sentence));
+
+            this.logger.info("Significant words: {}", significantWords);
+
+            if (this.logger.isDebugEnabled()) {
+                final Tree constituencyParse = sentence.constituencyParse();
+                final SemanticGraph dependencyParse = sentence.dependencyParse();
+
+                this.logger.debug("Constituency parse: {}", constituencyParse);
+                this.logger.debug("Dependency parse: {}", dependencyParse);
+            }
         }
 
         if (this.logger.isTraceEnabled()) {
@@ -204,42 +262,20 @@ public final class CoreNLP extends Operation {
         return results;
     }
 
-    /// Tokenize text for embeddings.
+    /// Chunk text for embeddings.
     ///
-    /// @param  pipeline edu.stanford.nlp.pipeline.StanfordCoreNLP
-    /// @return          java.util.List<java.lang.String>
-    private List<String> tokenizeForEmbeddings(final StanfordCoreNLP pipeline) {
+    /// @param  pipeline    edu.stanford.nlp.pipeline.StanfordCoreNLP
+    /// @param  text        java.lang.String
+    /// @param  maxTokens   int
+    /// @return             java.util.List<java.lang.String>
+    private List<String> chunkTextForEmbeddings(final StanfordCoreNLP pipeline,
+                                                final String text,
+                                                final int maxTokens) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(pipeline));
+            this.logger.trace(entryWith(pipeline, text, maxTokens));
         }
 
-        final int maxTokens = 64;
         final int averageEnglishWordLength = 5;
-
-        final String text = """
-                Four score and seven years ago our fathers brought forth on this continent, a new nation, 
-                conceived in liberty, and dedicated to the proposition that all men are created equal.
-                
-                Now we are engaged in a great civil war, testing whether that nation, or any nation so conceived
-                and so dedicated, can long endure. We are met on a great battlefield of that war. We have come
-                to dedicate a portion of that field, as a final resting place for those who here gave their
-                lives that that nation might live. It is altogether fitting and proper that we should do this.
-                
-                But in a larger sense, we cannot dedicate - we cannot consecrate - we cannot hallow -
-                this ground. The brave men, living and dead, who struggled here, have consecrated it, 
-                far above our poor power to add or detract. The world will little note, nor long remember, 
-                what we say here, but it can never forget what they did here. It is for us the living,
-                rather, to be dedicated here to the unfinished work which they who fought here have thus 
-                far so nobly advanced. It is rather for us to be here dedicated to the great task remaining 
-                before us - that from these honored dead we take increased devotion to that cause for which
-                they gave the last full measure of devotion - that we here highly resolve that these dead
-                shall not have died in vain - that this nation, under God, shall have a new birth of
-                freedom - and that government of the people, by the people, for the people, shall not
-                perish from the earth.
-                
-                President Abraham Lincoln - November 19, 1863
-                """;
-
         final List<String> strings = new ArrayList<>();
         final String[] paragraphs = text.split("\\R\\R");
 
