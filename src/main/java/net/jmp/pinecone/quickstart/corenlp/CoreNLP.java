@@ -1,6 +1,7 @@
 package net.jmp.pinecone.quickstart.corenlp;
 
 /*
+ * (#)CoreNLP.java  0.9.0   06/27/2025
  * (#)CoreNLP.java  0.5.0   06/12/2025
  *
  * @author   Jonathan Parker
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /// The core natural language processing class.
 ///
-/// @version    0.5.0
+/// @version    0.9.0
 /// @since      0.5.0
 public final class CoreNLP extends Operation {
     /// The logger.
