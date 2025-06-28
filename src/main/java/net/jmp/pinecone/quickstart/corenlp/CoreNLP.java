@@ -77,6 +77,9 @@ public final class CoreNLP extends Operation {
                 President Abraham Lincoln - November 19, 1863
                 """;
 
+    /// The average length of an English word.
+    private final int averageEnglishWordLength = 5;
+
     /// The constructor.
     ///
     /// @param  queryText   java.lang.String
@@ -275,7 +278,6 @@ public final class CoreNLP extends Operation {
             this.logger.trace(entryWith(pipeline, text, maxTokens));
         }
 
-        final int averageEnglishWordLength = 5;
         final List<String> strings = new ArrayList<>();
         final String[] paragraphs = text.split("\\R\\R");
 
@@ -300,7 +302,7 @@ public final class CoreNLP extends Operation {
 
             /* Process the paragraph by sentences */
 
-            final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
+            final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * this.averageEnglishWordLength);
 
             int totalTokens = 0;
 
@@ -324,29 +326,7 @@ public final class CoreNLP extends Operation {
                     strings.add(sentenceBuilder.toString());    // Add to the result strings
                     sentenceBuilder.setLength(0);               // Reset the sentence builder
 
-                    /* todo: Here through line 349 is a long sentence handler method. */
-
-                    /* Process the sentence by words */
-
-                    final StringBuilder wordBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
-
-                    int wordTokens = 0;
-
-                    for (final String word : sentence.tokensAsStrings()) {
-                        if (wordTokens + 1 <= maxTokens) {
-                            wordBuilder.append(word).append(" ");
-
-                            ++wordTokens;
-                        } else {
-                            strings.add(wordBuilder.toString());    // Add to the result strings
-                            wordBuilder.setLength(0);               // Reset the word builder
-                            wordBuilder.append(word).append(" ");   // Add the word
-
-                            wordTokens = 1;
-                        }
-                    }
-
-                    strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
+                    strings.addAll(this.handleLongSentence(sentence, maxTokens));
                 } else {
                     if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
                         sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
@@ -373,6 +353,47 @@ public final class CoreNLP extends Operation {
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
+        }
+
+        return strings;
+    }
+
+    /// Handle a long sentence.
+    ///
+    /// @param  sentence    edu.stanford.nlp.trees.CoreSentence
+    /// @param  maxTokens   int
+    /// @return             java.util.List<java.lang.String>
+    private List<String> handleLongSentence(final CoreSentence sentence, final int maxTokens) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sentence, maxTokens));
+        }
+
+        final List<String> strings = new ArrayList<>();
+
+        /* Process the sentence by words */
+
+        final StringBuilder wordBuilder = new StringBuilder(maxTokens * this.averageEnglishWordLength);
+
+        int wordTokens = 0;
+
+        for (final String word : sentence.tokensAsStrings()) {
+            if (wordTokens + 1 <= maxTokens) {
+                wordBuilder.append(word).append(" ");
+
+                ++wordTokens;
+            } else {
+                strings.add(wordBuilder.toString());    // Add to the result strings
+                wordBuilder.setLength(0);               // Reset the word builder
+                wordBuilder.append(word).append(" ");   // Add the word
+
+                wordTokens = 1;
+            }
+        }
+
+        strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(strings));
         }
 
         return strings;
