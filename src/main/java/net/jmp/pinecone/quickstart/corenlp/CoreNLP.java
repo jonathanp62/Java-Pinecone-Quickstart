@@ -344,6 +344,8 @@ public final class CoreNLP extends Operation {
                 this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
             }
 
+            // todo - Begin refactor into handleSentence
+
             if (tokensInSentence > maxTokens) {
                 /* Flush any sentences in the sentence builder to the result strings */
 
@@ -351,6 +353,8 @@ public final class CoreNLP extends Operation {
                     strings.add(sentenceBuilder.toString());    // Add to the result strings
                     sentenceBuilder.setLength(0);               // Reset the sentence builder
                 }
+
+                /* Process the sentence by words */
 
                 strings.addAll(this.handleLongSentence(sentence, maxTokens));
             } else {
@@ -369,6 +373,8 @@ public final class CoreNLP extends Operation {
                     totalTokens = tokensInSentence;
                 }
             }
+
+            // todo - End refactor into handleSentence
         }
 
         if (!sentenceBuilder.isEmpty()) {
