@@ -302,49 +302,7 @@ public final class CoreNLP extends Operation {
 
             /* Process the paragraph by sentences */
 
-            final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * this.averageEnglishWordLength);
-
-            int totalTokens = 0;
-
-            for (final CoreSentence sentence : document.sentences()) {
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Core sentence: {}", sentence.text());
-                }
-
-                /* todo: Here through line 362 is a sentence handler method. */
-
-                final int tokensInSentence = sentence.tokensAsStrings().size();
-
-                if (this.logger.isDebugEnabled()) {
-                    this.logger.debug("Sentence tokens: {}", tokensInSentence);
-                    this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
-                }
-
-                if (tokensInSentence > maxTokens) {
-                    /* Flush any sentences in the sentence builder to the result strings */
-
-                    strings.add(sentenceBuilder.toString());    // Add to the result strings
-                    sentenceBuilder.setLength(0);               // Reset the sentence builder
-
-                    strings.addAll(this.handleLongSentence(sentence, maxTokens));
-                } else {
-                    if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
-                        sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                        totalTokens += tokensInSentence;
-                    } else {                                                    // Sentence will exceed the token limit
-                        strings.add(sentenceBuilder.toString());                // Add to the result strings
-                        sentenceBuilder.setLength(0);                           // Reset the sentence builder
-                        sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                        totalTokens = tokensInSentence;
-                    }
-                }
-            }
-
-            if (!sentenceBuilder.isEmpty()) {
-                strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
-            }
+            strings.addAll(this.handleLongParagraph(document, maxTokens));
         }
 
         if (this.logger.isDebugEnabled()) {
@@ -358,7 +316,73 @@ public final class CoreNLP extends Operation {
         return strings;
     }
 
-    /// Handle a long sentence.
+    /// Handle a long paragraph by breaking it into sentences.
+    ///
+    /// @param  document    edu.stanford.nlp.pipeline.CoreDocument
+    /// @param  maxTokens   int
+    /// @return             java.util.List<java.lang.String>
+    private List<String> handleLongParagraph(final CoreDocument document, final int maxTokens) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(document, maxTokens));
+        }
+
+        final List<String> strings = new ArrayList<>();
+
+        final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * this.averageEnglishWordLength);
+
+        int totalTokens = 0;
+
+        for (final CoreSentence sentence : document.sentences()) {
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Core sentence: {}", sentence.text());
+            }
+
+            final int tokensInSentence = sentence.tokensAsStrings().size();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Sentence tokens: {}", tokensInSentence);
+                this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+            }
+
+            if (tokensInSentence > maxTokens) {
+                /* Flush any sentences in the sentence builder to the result strings */
+
+                if (!sentenceBuilder.isEmpty()) {
+                    strings.add(sentenceBuilder.toString());    // Add to the result strings
+                    sentenceBuilder.setLength(0);               // Reset the sentence builder
+                }
+
+                strings.addAll(this.handleLongSentence(sentence, maxTokens));
+            } else {
+                if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
+                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                    totalTokens += tokensInSentence;
+                } else {
+                    if (!sentenceBuilder.isEmpty()) {                       // Sentence will exceed the token limit
+                        strings.add(sentenceBuilder.toString());            // Add to the result strings
+                        sentenceBuilder.setLength(0);                       // Reset the sentence builder
+                    }
+
+                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                    totalTokens = tokensInSentence;
+                }
+            }
+        }
+
+        if (!sentenceBuilder.isEmpty()) {
+            strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(strings));
+        }
+
+        return strings;
+    }
+
+    /// Handle a long sentence by breaking it into words.
     ///
     /// @param  sentence    edu.stanford.nlp.trees.CoreSentence
     /// @param  maxTokens   int
