@@ -309,7 +309,7 @@ public final class CoreNLP extends Operation {
                     this.logger.debug("Core sentence: {}", sentence.text());
                 }
 
-                /* todo: Here through line 321 is a sentence handler method. */
+                /* todo: Here through line 362 is a sentence handler method. */
 
                 final int tokensInSentence = sentence.tokensAsStrings().size();
 
@@ -324,7 +324,7 @@ public final class CoreNLP extends Operation {
                     strings.add(sentenceBuilder.toString());    // Add to the result strings
                     sentenceBuilder.setLength(0);               // Reset the sentence builder
 
-                    /* todo: Here through line 308 is a long sentence handler method. */
+                    /* todo: Here through line 349 is a long sentence handler method. */
 
                     /* Process the sentence by words */
 
