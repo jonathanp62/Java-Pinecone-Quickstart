@@ -344,37 +344,7 @@ public final class CoreNLP extends Operation {
                 this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
             }
 
-            // todo - Begin refactor into handleSentence
-
-            if (tokensInSentence > maxTokens) {
-                /* Flush any sentences in the sentence builder to the result strings */
-
-                if (!sentenceBuilder.isEmpty()) {
-                    strings.add(sentenceBuilder.toString());    // Add to the result strings
-                    sentenceBuilder.setLength(0);               // Reset the sentence builder
-                }
-
-                /* Process the sentence by words */
-
-                strings.addAll(this.handleLongSentence(sentence, maxTokens));
-            } else {
-                if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
-                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                    totalTokens += tokensInSentence;
-                } else {
-                    if (!sentenceBuilder.isEmpty()) {                       // Sentence will exceed the token limit
-                        strings.add(sentenceBuilder.toString());            // Add to the result strings
-                        sentenceBuilder.setLength(0);                       // Reset the sentence builder
-                    }
-
-                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                    totalTokens = tokensInSentence;
-                }
-            }
-
-            // todo - End refactor into handleSentence
+            totalTokens = this.handleSentence(sentence, sentenceBuilder, strings, totalTokens, maxTokens);
         }
 
         if (!sentenceBuilder.isEmpty()) {
@@ -386,6 +356,68 @@ public final class CoreNLP extends Operation {
         }
 
         return strings;
+    }
+
+    /// Handle a sentence. The updated
+    /// total number of tokens is returned.
+    ///
+    /// @param  sentence        edu.stanford.nlp.trees.CoreSentence
+    /// @param  sentenceBuilder java.lang.StringBuilder
+    /// @param  strings         java.util.List<java.lang.String>
+    /// @param  totalTokens     int
+    /// @param  maxTokens       int
+    /// @return                 int
+    private int handleSentence(final CoreSentence sentence,
+                                final StringBuilder sentenceBuilder,
+                                final List<String> strings,
+                                final int totalTokens,
+                                final int maxTokens) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(sentence, sentenceBuilder, strings, totalTokens, maxTokens));
+        }
+
+        int countTokens = totalTokens;
+
+        final int tokensInSentence = sentence.tokensAsStrings().size();
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Sentence tokens: {}", tokensInSentence);
+            this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+        }
+
+        if (tokensInSentence > maxTokens) {
+            /* Flush any sentences in the sentence builder to the result strings */
+
+            if (!sentenceBuilder.isEmpty()) {
+                strings.add(sentenceBuilder.toString());    // Add to the result strings
+                sentenceBuilder.setLength(0);               // Reset the sentence builder
+            }
+
+            /* Process the sentence by words */
+
+            strings.addAll(this.handleLongSentence(sentence, maxTokens));
+        } else {
+            if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
+                sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                countTokens += tokensInSentence;
+            } else {
+                if (!sentenceBuilder.isEmpty()) {                       // Sentence will exceed the token limit
+                    strings.add(sentenceBuilder.toString());            // Add to the result strings
+                    sentenceBuilder.setLength(0);                       // Reset the sentence builder
+                }
+
+                sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                countTokens = tokensInSentence;
+            }
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exitWith(countTokens));
+        }
+
+        return countTokens;
     }
 
     /// Handle a long sentence by breaking it into words.
