@@ -239,92 +239,100 @@ public final class CoreNLP extends Operation {
                 President Abraham Lincoln - November 19, 1863
                 """;
 
-        final CoreDocument document = new CoreDocument(text);
-
-        pipeline.annotate(document);
-
-        if (this.logger.isTraceEnabled()) {
-            this.logger.debug("Document tokens: {}", document.tokens().size());  // This matches total tokens below
-        }
-
-        /* Check the document as a whole */
-
-        if (document.tokens().size() <= maxTokens) {
-            if (this.logger.isTraceEnabled()) {
-                this.logger.trace(exitWith(List.of(text)));
-            }
-
-            return List.of(text);
-        }
-
-        /* Process the document by sentences */
-
         final List<String> strings = new ArrayList<>();
-        final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
+        final String[] paragraphs = text.split("\\R\\R");
 
-        int totalTokens = 0;
+        this.logger.debug("Paragraphs: {}", paragraphs.length);
 
-        for (final CoreSentence sentence : document.sentences()) {
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("Core sentence: {}", sentence.text());
-            }
+        for (final String paragraph : paragraphs) {
+            final CoreDocument document = new CoreDocument(paragraph);
 
-            /* todo: Here through line 321 is a sentence handler method. */
-
-            final int tokensInSentence = sentence.tokensAsStrings().size();
+            pipeline.annotate(document);
 
             if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Sentence tokens: {}", tokensInSentence);
-                this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+                this.logger.debug("Paragraph tokens: {}", document.tokens().size());  // This matches total tokens below
             }
 
-            if (tokensInSentence > maxTokens) {
-                /* Flush any sentences in the sentence builder to the result strings */
+            /* Check the paragraph as a whole */
 
-                strings.add(sentenceBuilder.toString());    // Add to the result strings
-                sentenceBuilder.setLength(0);               // Reset the sentence builder
+            if (document.tokens().size() <= maxTokens) {
+                strings.add(paragraph);
 
-                /* todo: Here through line 308 is a long sentence handler method. */
+                continue;
+            }
 
-                /* Process the sentence by words */
+            /* Process the paragraph by sentences */
 
-                final StringBuilder wordBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
+            final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
 
-                int wordTokens = 0;
+            int totalTokens = 0;
 
-                for (final String word : sentence.tokensAsStrings()) {
-                    if (wordTokens + 1 <= maxTokens) {
-                        wordBuilder.append(word).append(" ");
+            for (final CoreSentence sentence : document.sentences()) {
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Core sentence: {}", sentence.text());
+                }
 
-                        ++wordTokens;
-                    } else {
-                        strings.add(wordBuilder.toString());    // Add to the result strings
-                        wordBuilder.setLength(0);               // Reset the word builder
-                        wordBuilder.append(word).append(" ");   // Add the word
+                /* todo: Here through line 321 is a sentence handler method. */
 
-                        wordTokens = 1;
+                final int tokensInSentence = sentence.tokensAsStrings().size();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Sentence tokens: {}", tokensInSentence);
+                    this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
+                }
+
+                if (tokensInSentence > maxTokens) {
+                    /* Flush any sentences in the sentence builder to the result strings */
+
+                    strings.add(sentenceBuilder.toString());    // Add to the result strings
+                    sentenceBuilder.setLength(0);               // Reset the sentence builder
+
+                    /* todo: Here through line 308 is a long sentence handler method. */
+
+                    /* Process the sentence by words */
+
+                    final StringBuilder wordBuilder = new StringBuilder(maxTokens * averageEnglishWordLength);
+
+                    int wordTokens = 0;
+
+                    for (final String word : sentence.tokensAsStrings()) {
+                        if (wordTokens + 1 <= maxTokens) {
+                            wordBuilder.append(word).append(" ");
+
+                            ++wordTokens;
+                        } else {
+                            strings.add(wordBuilder.toString());    // Add to the result strings
+                            wordBuilder.setLength(0);               // Reset the word builder
+                            wordBuilder.append(word).append(" ");   // Add the word
+
+                            wordTokens = 1;
+                        }
+                    }
+
+                    strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
+                } else {
+                    if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
+                        sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                        totalTokens += tokensInSentence;
+                    } else {                                                    // Sentence will exceed the token limit
+                        strings.add(sentenceBuilder.toString());                // Add to the result strings
+                        sentenceBuilder.setLength(0);                           // Reset the sentence builder
+                        sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
+
+                        totalTokens = tokensInSentence;
                     }
                 }
+            }
 
-                strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
-            } else {
-                if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
-                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                    totalTokens += tokensInSentence;
-                } else {                                                    // Sentence will exceed the token limit
-                    strings.add(sentenceBuilder.toString());                // Add to the result strings
-                    sentenceBuilder.setLength(0);                           // Reset the sentence builder
-                    sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
-
-                    totalTokens = tokensInSentence;
-                }
+            if (!sentenceBuilder.isEmpty()) {
+                strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
             }
         }
 
-        strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
-
-        this.logger.info("Total result strings: {}", strings.size());
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Total result strings: {}", strings.size());
+        }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
