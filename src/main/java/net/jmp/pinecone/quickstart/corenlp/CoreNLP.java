@@ -118,6 +118,21 @@ public final class CoreNLP extends Operation {
             strings.forEach(this.logger::info);
         }
 
+        /* Use the text splitter */
+
+        final TextSplitter textSplitter = TextSplitter.builder()
+                .document(this.gettysburgAddress)
+                .maxTokens(64)
+                .build();
+
+        final List<String> splits = textSplitter.split();
+
+        this.logger.info("Splits for embeddings: {}", splits.size());
+
+        if (this.logger.isInfoEnabled()) {
+            splits.forEach(this.logger::info);
+        }
+
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
