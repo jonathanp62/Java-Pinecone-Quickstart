@@ -1,4 +1,0 @@
-Simply for getting Github tokens in place.
-Updated by IDEA on Studio.
-Updated on the command line on Mini.
-Updated by IDEA on Mini.
