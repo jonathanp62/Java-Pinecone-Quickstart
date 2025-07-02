@@ -52,7 +52,7 @@ public final class CoreNLP extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    /// The Gettysburg address.
+    /// The Gettysburg address. It contains 318 tokens.
     private final String gettysburgAddress = """
                 Four score and seven years ago our fathers brought forth on this continent, a new nation, 
                 conceived in liberty, and dedicated to the proposition that all men are created equal.
@@ -122,7 +122,7 @@ public final class CoreNLP extends Operation {
 
         final TextSplitter textSplitter = TextSplitter.builder()
                 .document(this.gettysburgAddress)
-                .maxTokens(64)
+                .maxTokens(256)
                 .build();
 
         final List<String> splits = textSplitter.split();
@@ -294,30 +294,47 @@ public final class CoreNLP extends Operation {
         }
 
         final List<String> strings = new ArrayList<>();
-        final String[] paragraphs = text.split("\\R\\R");
 
-        this.logger.debug("Paragraphs: {}", paragraphs.length);
+        /* Determine the total number of tokens in the text */
 
-        for (final String paragraph : paragraphs) {
-            final CoreDocument document = new CoreDocument(paragraph);
+        final CoreDocument allTextDocument = new CoreDocument(text);
 
-            pipeline.annotate(document);
+        pipeline.annotate(allTextDocument);
 
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Paragraph tokens: {}", document.tokens().size());  // This matches total tokens below
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Total tokens: {}", allTextDocument.tokens().size());
+        }
+
+        if (allTextDocument.tokens().size() <= maxTokens) {
+            strings.add(text);
+        } else {
+            /* Split the text into paragraphs */
+
+            final String[] paragraphs = text.split("\\R\\R");
+
+            this.logger.debug("Paragraphs: {}", paragraphs.length);
+
+            for (final String paragraph : paragraphs) {
+                final CoreDocument document = new CoreDocument(paragraph);
+
+                pipeline.annotate(document);
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Paragraph tokens: {}", document.tokens().size());  // This matches total tokens below
+                }
+
+                /* Check the paragraph as a whole */
+
+                if (document.tokens().size() <= maxTokens) {
+                    strings.add(paragraph);
+
+                    continue;
+                }
+
+                /* Process the paragraph by sentences */
+
+                strings.addAll(this.handleLongParagraph(document, maxTokens));
             }
-
-            /* Check the paragraph as a whole */
-
-            if (document.tokens().size() <= maxTokens) {
-                strings.add(paragraph);
-
-                continue;
-            }
-
-            /* Process the paragraph by sentences */
-
-            strings.addAll(this.handleLongParagraph(document, maxTokens));
         }
 
         if (this.logger.isDebugEnabled()) {

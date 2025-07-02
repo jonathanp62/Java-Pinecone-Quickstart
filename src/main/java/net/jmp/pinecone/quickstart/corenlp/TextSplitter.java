@@ -95,31 +95,50 @@ public final class TextSplitter {
         }
 
         final List<String> strings = new ArrayList<>();
-        final String[] paragraphs = this.document.split("\\R\\R");
 
-        this.logger.debug("Max tokens: {}", this.maxTokens);
-        this.logger.debug("Paragraphs: {}", paragraphs.length);
+        /* Determine the total number of tokens in the document */
 
-        for (final String paragraph : paragraphs) {
-            final CoreDocument coreDocument = new CoreDocument(paragraph);
+        final CoreDocument entireDocument = new CoreDocument(this.document);
 
-            this.pipeline.annotate(coreDocument);
+        pipeline.annotate(entireDocument);
 
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Paragraph tokens: {}", coreDocument.tokens().size());  // This matches total tokens below
+        final int entireDocumentTotalTokens = entireDocument.tokens().size();
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Max tokens  : {}", this.maxTokens);
+            this.logger.debug("Total tokens: {}", entireDocumentTotalTokens);
+        }
+
+        if (entireDocumentTotalTokens <= this.maxTokens) {
+            strings.add(this.document);
+        } else {
+            final String[] paragraphs = this.document.split("\\R\\R");
+
+            this.logger.debug("Paragraphs: {}", paragraphs.length);
+
+            for (final String paragraph : paragraphs) {
+                final CoreDocument coreDocument = new CoreDocument(paragraph);
+
+                this.pipeline.annotate(coreDocument);
+
+                final int paragraphTotalTokens = coreDocument.tokens().size();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Paragraph tokens: {}", paragraphTotalTokens);    // This matches total tokens below
+                }
+
+                /* Check the paragraph as a whole */
+
+                if (paragraphTotalTokens <= this.maxTokens) {
+                    strings.add(paragraph);
+
+                    continue;
+                }
+
+                /* Process the paragraph by sentences */
+
+                strings.addAll(this.handleLongParagraph(coreDocument));
             }
-
-            /* Check the paragraph as a whole */
-
-            if (coreDocument.tokens().size() <= this.maxTokens) {
-                strings.add(paragraph);
-
-                continue;
-            }
-
-            /* Process the paragraph by sentences */
-
-            strings.addAll(this.handleLongParagraph(coreDocument));
         }
 
         if (this.logger.isDebugEnabled()) {
