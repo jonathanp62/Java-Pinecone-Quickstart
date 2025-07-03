@@ -88,15 +88,16 @@ public final class TextSplitter {
     }
 
     /// Split the document into text segments
-    /// and return a list of them.
+    /// and returns a text splitter response.
     ///
-    /// @return java.util.List<java.lang.String>
-    public List<String> split() {
+    /// @return net.jmp.pinecone.quickstart.corenlp.TextSplitterResponse
+    public TextSplitterResponse split() {
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(entry());
         }
 
-        final List<String> textSegments = new ArrayList<>();
+        final TextSplitterResponse response = new TextSplitterResponse();
+        final List<String> textSegments = response.getTextSegments();
 
         /* Determine the total number of tokens in the document */
 
@@ -105,6 +106,9 @@ public final class TextSplitter {
         pipeline.annotate(entireDocument);
 
         final int entireDocumentTotalTokens = entireDocument.tokens().size();
+
+        response.setMaxTokens(this.maxTokens);
+        response.setTotalTokens(entireDocumentTotalTokens);
 
         if (this.logger.isDebugEnabled()) {
             this.logger.debug("Max tokens  : {}", this.maxTokens);
@@ -115,6 +119,8 @@ public final class TextSplitter {
             textSegments.add(this.document);
         } else {
             final String[] paragraphs = this.document.split("\\R\\R");
+
+            response.setNumberOfParagraphs(paragraphs.length);
 
             this.logger.debug("Paragraphs: {}", paragraphs.length);
 
@@ -148,10 +154,10 @@ public final class TextSplitter {
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exit());
+            this.logger.trace(exitWith(response));
         }
 
-        return textSegments;
+        return response;
     }
 
     /// Handle a long paragraph by breaking it into sentences.
