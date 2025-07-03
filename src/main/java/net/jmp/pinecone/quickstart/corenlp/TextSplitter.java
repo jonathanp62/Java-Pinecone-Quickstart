@@ -54,6 +54,7 @@ public final class TextSplitter {
     /// The average length of an English word.
     private static final int AVERAGE_ENGLISH_WORD_LENGTH = 5;
 
+    /// The sentence tokens logging message.
     private static final String SENTENCE_TOKENS = "Sentence tokens: {}";
 
     /// The core NLP pipeline.
@@ -86,7 +87,8 @@ public final class TextSplitter {
         return new Builder();
     }
 
-    /// Split the document into text strings.
+    /// Split the document into text segments
+    /// and return a list of them.
     ///
     /// @return java.util.List<java.lang.String>
     public List<String> split() {
@@ -94,7 +96,7 @@ public final class TextSplitter {
             this.logger.trace(entry());
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         /* Determine the total number of tokens in the document */
 
@@ -110,7 +112,7 @@ public final class TextSplitter {
         }
 
         if (entireDocumentTotalTokens <= this.maxTokens) {
-            strings.add(this.document);
+            textSegments.add(this.document);
         } else {
             final String[] paragraphs = this.document.split("\\R\\R");
 
@@ -130,29 +132,30 @@ public final class TextSplitter {
                 /* Check the paragraph as a whole */
 
                 if (paragraphTotalTokens <= this.maxTokens) {
-                    strings.add(paragraph);
+                    textSegments.add(paragraph);
 
                     continue;
                 }
 
                 /* Process the paragraph by sentences */
 
-                strings.addAll(this.handleLongParagraph(coreDocument));
+                textSegments.addAll(this.handleLongParagraph(coreDocument));
             }
         }
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Total split strings: {}", strings.size());
+            this.logger.debug("Total text segments: {}", textSegments.size());
         }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
 
-        return strings;
+        return textSegments;
     }
 
     /// Handle a long paragraph by breaking it into sentences.
+    /// A list of text segments is returned.
     ///
     /// @param  coreDocument    edu.stanford.nlp.pipeline.CoreDocument
     /// @return                 java.util.List<java.lang.String>
@@ -161,7 +164,7 @@ public final class TextSplitter {
             this.logger.trace(entryWith(coreDocument));
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         final StringBuilder sentenceBuilder = new StringBuilder(this.maxTokens * AVERAGE_ENGLISH_WORD_LENGTH);
 
@@ -179,18 +182,18 @@ public final class TextSplitter {
                 this.logger.debug(SENTENCE_TOKENS, sentence.tokensAsStrings());
             }
 
-            totalTokens = this.handleSentence(sentence, sentenceBuilder, strings, totalTokens);
+            totalTokens = this.handleSentence(sentence, sentenceBuilder, textSegments, totalTokens);
         }
 
         if (!sentenceBuilder.isEmpty()) {
-            strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
+            textSegments.add(sentenceBuilder.toString());    // Add any remaining sentences to the text segments
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(strings));
+            this.logger.trace(exitWith(textSegments));
         }
 
-        return strings;
+        return textSegments;
     }
 
     /// Handle a sentence. The updated
@@ -198,15 +201,15 @@ public final class TextSplitter {
     ///
     /// @param  sentence        edu.stanford.nlp.trees.CoreSentence
     /// @param  sentenceBuilder java.lang.StringBuilder
-    /// @param  strings         java.util.List<java.lang.String>
+    /// @param  textSegments    java.util.List<java.lang.String>
     /// @param  totalTokens     int
     /// @return                 int
     private int handleSentence(final CoreSentence sentence,
                                final StringBuilder sentenceBuilder,
-                               final List<String> strings,
+                               final List<String> textSegments,
                                final int totalTokens) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(sentence, sentenceBuilder, strings, totalTokens));
+            this.logger.trace(entryWith(sentence, sentenceBuilder, textSegments, totalTokens));
         }
 
         int countTokens = totalTokens;
@@ -222,13 +225,13 @@ public final class TextSplitter {
             /* Flush any sentences in the sentence builder to the result strings */
 
             if (!sentenceBuilder.isEmpty()) {
-                strings.add(sentenceBuilder.toString());    // Add to the result strings
-                sentenceBuilder.setLength(0);               // Reset the sentence builder
+                textSegments.add(sentenceBuilder.toString());   // Add to the text segments
+                sentenceBuilder.setLength(0);                   // Reset the sentence builder
             }
 
             /* Process the sentence by words */
 
-            strings.addAll(this.handleLongSentence(sentence));
+            textSegments.addAll(this.handleLongSentence(sentence));
         } else {
             if (totalTokens + tokensInSentence <= this.maxTokens) {     // Sentence fits
                 sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
@@ -236,7 +239,7 @@ public final class TextSplitter {
                 countTokens += tokensInSentence;
             } else {
                 if (!sentenceBuilder.isEmpty()) {                       // Sentence will exceed the token limit
-                    strings.add(sentenceBuilder.toString());            // Add to the result strings
+                    textSegments.add(sentenceBuilder.toString());       // Add to the text segments
                     sentenceBuilder.setLength(0);                       // Reset the sentence builder
                 }
 
@@ -254,6 +257,7 @@ public final class TextSplitter {
     }
 
     /// Handle a long sentence by breaking it into words.
+    /// A list of text segments is returned.
     ///
     /// @param  sentence    edu.stanford.nlp.trees.CoreSentence
     /// @return             java.util.List<java.lang.String>
@@ -262,7 +266,7 @@ public final class TextSplitter {
             this.logger.trace(entryWith(sentence));
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         /* Process the sentence by words */
 
@@ -276,21 +280,21 @@ public final class TextSplitter {
 
                 ++wordTokens;
             } else {
-                strings.add(wordBuilder.toString());    // Add to the result strings
-                wordBuilder.setLength(0);               // Reset the word builder
-                wordBuilder.append(word).append(" ");   // Add the word
+                textSegments.add(wordBuilder.toString());   // Add to the text segments
+                wordBuilder.setLength(0);                   // Reset the word builder
+                wordBuilder.append(word).append(" ");       // Add the word
 
                 wordTokens = 1;
             }
         }
 
-        strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
+        textSegments.add(wordBuilder.toString());   // Add any remaining words to the text segments
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(strings));
+            this.logger.trace(exitWith(textSegments));
         }
 
-        return strings;
+        return textSegments;
     }
 
     /// The builder class.

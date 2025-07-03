@@ -125,12 +125,12 @@ public final class CoreNLP extends Operation {
                 .maxTokens(256)
                 .build();
 
-        final List<String> splits = textSplitter.split();
+        final List<String> splitTextSegments = textSplitter.split();
 
-        this.logger.info("Splits for embeddings: {}", splits.size());
+        this.logger.info("Text segments for embeddings: {}", splitTextSegments.size());
 
         if (this.logger.isInfoEnabled()) {
-            splits.forEach(this.logger::info);
+            splitTextSegments.forEach(this.logger::info);
         }
 
         if (this.logger.isTraceEnabled()) {
