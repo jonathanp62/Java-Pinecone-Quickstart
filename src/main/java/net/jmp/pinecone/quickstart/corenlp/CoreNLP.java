@@ -133,6 +133,11 @@ public final class CoreNLP extends Operation {
             this.logger.info("Paragraphs   : {}", textSplitterResponse.getNumberOfParagraphs());
             this.logger.info("Text segments: {}", textSplitterResponse.getNumberOfTextSegments());
 
+            textSplitterResponse.getParagraphs().forEach(paragraph -> {
+                this.logger.info("Paragraph number: {}", paragraph.getParagraphNumber());
+                this.logger.info("Paragraph tokens: {}", paragraph.getParagraphTokens());
+            });
+
             textSplitterResponse.getTextSegments().forEach(this.logger::info);
         }
 

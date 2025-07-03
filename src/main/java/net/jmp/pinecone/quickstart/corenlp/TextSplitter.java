@@ -60,6 +60,9 @@ public final class TextSplitter {
     /// The core NLP pipeline.
     final StanfordCoreNLP pipeline;
 
+    /// The response.
+    final TextSplitterResponse response = new TextSplitterResponse();
+
     /// The constructor.
     ///
     /// @param  builder net.jmp.pinecone.quickstart.corenlp.TextSplitter.Builder
@@ -96,8 +99,7 @@ public final class TextSplitter {
             this.logger.trace(entry());
         }
 
-        final TextSplitterResponse response = new TextSplitterResponse();
-        final List<String> textSegments = response.getTextSegments();
+        final List<String> textSegments = this.response.getTextSegments();
 
         /* Determine the total number of tokens in the document */
 
@@ -107,8 +109,8 @@ public final class TextSplitter {
 
         final int entireDocumentTotalTokens = entireDocument.tokens().size();
 
-        response.setMaxTokens(this.maxTokens);
-        response.setTotalTokens(entireDocumentTotalTokens);
+        this.response.setMaxTokens(this.maxTokens);
+        this.response.setTotalTokens(entireDocumentTotalTokens);
 
         if (this.logger.isDebugEnabled()) {
             this.logger.debug("Max tokens  : {}", this.maxTokens);
@@ -120,9 +122,11 @@ public final class TextSplitter {
         } else {
             final String[] paragraphs = this.document.split("\\R\\R");
 
-            response.setNumberOfParagraphs(paragraphs.length);
+            this.response.setNumberOfParagraphs(paragraphs.length);
 
             this.logger.debug("Paragraphs: {}", paragraphs.length);
+
+            int countParapgraphs = 0;
 
             for (final String paragraph : paragraphs) {
                 final CoreDocument coreDocument = new CoreDocument(paragraph);
@@ -134,6 +138,14 @@ public final class TextSplitter {
                 if (this.logger.isDebugEnabled()) {
                     this.logger.debug("Paragraph tokens: {}", paragraphTotalTokens);    // This matches total tokens below
                 }
+
+                final TextSplitterResponse.Paragraph responseParagraph = new TextSplitterResponse.Paragraph(
+                        ++countParapgraphs,
+                        paragraph,
+                        paragraphTotalTokens
+                );
+
+                this.response.getParagraphs().add(responseParagraph);
 
                 /* Check the paragraph as a whole */
 
@@ -154,10 +166,10 @@ public final class TextSplitter {
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(response));
+            this.logger.trace(exitWith(this.response));
         }
 
-        return response;
+        return this.response;
     }
 
     /// Handle a long paragraph by breaking it into sentences.
