@@ -139,17 +139,16 @@ public final class TextSplitter {
                     this.logger.debug("Paragraph tokens: {}", paragraphTotalTokens);    // This matches total tokens below
                 }
 
-                final TextSplitterResponse.Paragraph responseParagraph = new TextSplitterResponse.Paragraph(
-                        ++countParapgraphs,
-                        paragraph,
-                        paragraphTotalTokens
-                );
-
-                this.response.getParagraphs().add(responseParagraph);
-
                 /* Check the paragraph as a whole */
 
                 if (paragraphTotalTokens <= this.maxTokens) {
+                    this.response.getParagraphs().add(new TextSplitterResponse.Paragraph(
+                            ++countParapgraphs,
+                            paragraph,
+                            paragraphTotalTokens,
+                            1
+                    ));
+
                     textSegments.add(paragraph);
 
                     continue;
@@ -157,7 +156,16 @@ public final class TextSplitter {
 
                 /* Process the paragraph by sentences */
 
-                textSegments.addAll(this.handleLongParagraph(coreDocument));
+                final List<String> addedTextSegments = this.handleLongParagraph(coreDocument);
+
+                this.response.getParagraphs().add(new TextSplitterResponse.Paragraph(
+                        ++countParapgraphs,
+                        paragraph,
+                        paragraphTotalTokens,
+                        addedTextSegments.size()
+                ));
+
+                textSegments.addAll(addedTextSegments);
             }
         }
 

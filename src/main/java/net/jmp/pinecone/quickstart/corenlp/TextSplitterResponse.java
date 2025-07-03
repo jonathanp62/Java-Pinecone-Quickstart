@@ -122,48 +122,61 @@ public final class TextSplitterResponse {
     /// The paragraph class.
     public static class Paragraph {
         /// The paragraph number.
-        private final int paragraphNumber;
+        private final int number;
 
         /// The paragraph text.
-        private final String paragraphText;
+        private final String text;
 
         /// The number of tokens in the paragraph.
-        private final int paragraphTokens;
+        private final int tokens;
+
+        /// The number of text segments in the paragraph.
+        private final int textSegments;
 
         /// The constructor.
         ///
-        /// @param  paragraphNumber     int
-        /// @param  paragraphText       java.lang.String
-        /// @param  paragraphTokens     int
-        public Paragraph(final int paragraphNumber,
-                         final String paragraphText,
-                         final int paragraphTokens) {
+        /// @param  number          int
+        /// @param  text            java.lang.String
+        /// @param  tokens          int
+        /// @param  textSegments    int
+        public Paragraph(final int number,
+                         final String text,
+                         final int tokens,
+                         final int textSegments) {
             super();
 
-            this.paragraphNumber = paragraphNumber;
-            this.paragraphText = paragraphText;
-            this.paragraphTokens = paragraphTokens;
+            this.number = number;
+            this.text = text;
+            this.tokens = tokens;
+            this.textSegments = textSegments;
         }
 
         /// Get the paragraph number.
         ///
         /// @return int
-        public int getParagraphNumber() {
-            return this.paragraphNumber;
+        public int getNumber() {
+            return this.number;
         }
 
         /// Get the paragraph text.
         ///
         /// @return java.lang.String
-        public String getParagraphText() {
-            return this.paragraphText;
+        public String getText() {
+            return this.text;
         }
 
         /// Get the paragraph tokens.
         ///
         /// @return int
-        public int getParagraphTokens() {
-            return this.paragraphTokens;
+        public int getTokens() {
+            return this.tokens;
+        }
+
+        /// Get the paragraph text segments.
+        ///
+        /// @return int
+        public int getTextSegments() {
+            return this.textSegments;
         }
     }
 }
