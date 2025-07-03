@@ -110,12 +110,12 @@ public final class CoreNLP extends Operation {
 
         /* Chunk text for embeddings */
 
-        final List<String> strings = this.chunkTextForEmbeddings(pipeline, this.gettysburgAddress, 64);
+        final List<String> chunkedTextSegments = this.chunkTextForEmbeddings(pipeline, this.gettysburgAddress, 64);
 
-        this.logger.info("Strings for embeddings: {}", strings.size());
+        this.logger.info("Text segments for embeddings: {}", chunkedTextSegments.size());
 
         if (this.logger.isInfoEnabled()) {
-            strings.forEach(this.logger::info);
+            chunkedTextSegments.forEach(this.logger::info);
         }
 
         /* Use the text splitter */
@@ -280,7 +280,8 @@ public final class CoreNLP extends Operation {
         return results;
     }
 
-    /// Chunk text for embeddings.
+    /// Chunk text for embeddings. A list
+    /// of text segments is returned.
     ///
     /// @param  pipeline    edu.stanford.nlp.pipeline.StanfordCoreNLP
     /// @param  text        java.lang.String
@@ -293,7 +294,7 @@ public final class CoreNLP extends Operation {
             this.logger.trace(entryWith(pipeline, text, maxTokens));
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         /* Determine the total number of tokens in the text */
 
@@ -306,7 +307,7 @@ public final class CoreNLP extends Operation {
         }
 
         if (allTextDocument.tokens().size() <= maxTokens) {
-            strings.add(text);
+            textSegments.add(text);
         } else {
             /* Split the text into paragraphs */
 
@@ -326,29 +327,30 @@ public final class CoreNLP extends Operation {
                 /* Check the paragraph as a whole */
 
                 if (document.tokens().size() <= maxTokens) {
-                    strings.add(paragraph);
+                    textSegments.add(paragraph);
 
                     continue;
                 }
 
                 /* Process the paragraph by sentences */
 
-                strings.addAll(this.handleLongParagraph(document, maxTokens));
+                textSegments.addAll(this.handleLongParagraph(document, maxTokens));
             }
         }
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Total result strings: {}", strings.size());
+            this.logger.debug("Total text segments: {}", textSegments.size());
         }
 
         if (this.logger.isTraceEnabled()) {
             this.logger.trace(exit());
         }
 
-        return strings;
+        return textSegments;
     }
 
     /// Handle a long paragraph by breaking it into sentences.
+    /// A list of text segments is returned.
     ///
     /// @param  document    edu.stanford.nlp.pipeline.CoreDocument
     /// @param  maxTokens   int
@@ -358,7 +360,7 @@ public final class CoreNLP extends Operation {
             this.logger.trace(entryWith(document, maxTokens));
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         final StringBuilder sentenceBuilder = new StringBuilder(maxTokens * this.averageEnglishWordLength);
 
@@ -376,18 +378,18 @@ public final class CoreNLP extends Operation {
                 this.logger.debug("Sentence tokens: {}", sentence.tokensAsStrings());
             }
 
-            totalTokens = this.handleSentence(sentence, sentenceBuilder, strings, totalTokens, maxTokens);
+            totalTokens = this.handleSentence(sentence, sentenceBuilder, textSegments, totalTokens, maxTokens);
         }
 
         if (!sentenceBuilder.isEmpty()) {
-            strings.add(sentenceBuilder.toString());    // Add any remaining sentences to the result strings
+            textSegments.add(sentenceBuilder.toString());   // Add any remaining sentences to the text segments
         }
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(strings));
+            this.logger.trace(exitWith(textSegments));
         }
 
-        return strings;
+        return textSegments;
     }
 
     /// Handle a sentence. The updated
@@ -395,17 +397,17 @@ public final class CoreNLP extends Operation {
     ///
     /// @param  sentence        edu.stanford.nlp.trees.CoreSentence
     /// @param  sentenceBuilder java.lang.StringBuilder
-    /// @param  strings         java.util.List<java.lang.String>
+    /// @param  textSegments    java.util.List<java.lang.String>
     /// @param  totalTokens     int
     /// @param  maxTokens       int
     /// @return                 int
     private int handleSentence(final CoreSentence sentence,
                                 final StringBuilder sentenceBuilder,
-                                final List<String> strings,
+                                final List<String> textSegments,
                                 final int totalTokens,
                                 final int maxTokens) {
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(entryWith(sentence, sentenceBuilder, strings, totalTokens, maxTokens));
+            this.logger.trace(entryWith(sentence, sentenceBuilder, textSegments, totalTokens, maxTokens));
         }
 
         int countTokens = totalTokens;
@@ -421,13 +423,13 @@ public final class CoreNLP extends Operation {
             /* Flush any sentences in the sentence builder to the result strings */
 
             if (!sentenceBuilder.isEmpty()) {
-                strings.add(sentenceBuilder.toString());    // Add to the result strings
-                sentenceBuilder.setLength(0);               // Reset the sentence builder
+                textSegments.add(sentenceBuilder.toString());   // Add to the text segments
+                sentenceBuilder.setLength(0);                   // Reset the sentence builder
             }
 
             /* Process the sentence by words */
 
-            strings.addAll(this.handleLongSentence(sentence, maxTokens));
+            textSegments.addAll(this.handleLongSentence(sentence, maxTokens));
         } else {
             if (totalTokens + tokensInSentence <= maxTokens) {          // Sentence fits
                 sentenceBuilder.append(sentence.text()).append(" ");    // Add the sentence
@@ -435,7 +437,7 @@ public final class CoreNLP extends Operation {
                 countTokens += tokensInSentence;
             } else {
                 if (!sentenceBuilder.isEmpty()) {                       // Sentence will exceed the token limit
-                    strings.add(sentenceBuilder.toString());            // Add to the result strings
+                    textSegments.add(sentenceBuilder.toString());       // Add to the text segments
                     sentenceBuilder.setLength(0);                       // Reset the sentence builder
                 }
 
@@ -453,6 +455,7 @@ public final class CoreNLP extends Operation {
     }
 
     /// Handle a long sentence by breaking it into words.
+    /// A list of text segments is returned.
     ///
     /// @param  sentence    edu.stanford.nlp.trees.CoreSentence
     /// @param  maxTokens   int
@@ -462,7 +465,7 @@ public final class CoreNLP extends Operation {
             this.logger.trace(entryWith(sentence, maxTokens));
         }
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> textSegments = new ArrayList<>();
 
         /* Process the sentence by words */
 
@@ -476,20 +479,20 @@ public final class CoreNLP extends Operation {
 
                 ++wordTokens;
             } else {
-                strings.add(wordBuilder.toString());    // Add to the result strings
-                wordBuilder.setLength(0);               // Reset the word builder
-                wordBuilder.append(word).append(" ");   // Add the word
+                textSegments.add(wordBuilder.toString());   // Add to the text segments
+                wordBuilder.setLength(0);                   // Reset the word builder
+                wordBuilder.append(word).append(" ");       // Add the word
 
                 wordTokens = 1;
             }
         }
 
-        strings.add(wordBuilder.toString());    // Add any remaining words to the result strings
+        textSegments.add(wordBuilder.toString());   // Add any remaining words to the text segments
 
         if (this.logger.isTraceEnabled()) {
-            this.logger.trace(exitWith(strings));
+            this.logger.trace(exitWith(textSegments));
         }
 
-        return strings;
+        return textSegments;
     }
 }
