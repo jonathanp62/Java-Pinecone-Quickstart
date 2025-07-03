@@ -178,5 +178,32 @@ public final class TextSplitterResponse {
         public int getTextSegments() {
             return this.textSegments;
         }
+
+        /// The to-string method.
+        ///
+        /// @return java.lang.String
+        @Override
+        public String toString() {
+            return "Paragraph{" +
+                    "number=" + this.number +
+                    ", text='" + this.text + '\'' +
+                    ", tokens=" + this.tokens +
+                    ", textSegments=" + this.textSegments +
+                    '}';
+        }
+    }
+
+    /// The to-string method.
+    ///
+    /// @return java.lang.String
+    @Override
+    public String toString() {
+        return "TextSplitterResponse{" +
+                "maxTokens=" + this.maxTokens +
+                ", totalTokens=" + this.totalTokens +
+                ", numberOfParagraphs=" + this.numberOfParagraphs +
+                ", paragraphs=" + this.paragraphs +
+                ", textSegments=" + this.textSegments +
+                '}';
     }
 }
