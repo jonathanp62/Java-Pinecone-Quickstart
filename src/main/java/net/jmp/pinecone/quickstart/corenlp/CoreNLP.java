@@ -52,6 +52,18 @@ public final class CoreNLP extends Operation {
     /// The logger.
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
+    /// Run the basic analysis when true.
+    private static final boolean RUN_BASICS = false;
+
+    /// Run the chunker when true.
+    private static final boolean RUN_CHUNKER = false;
+
+    /// Run the splitter when true.
+    private static final boolean RUN_SPLITTER = true;
+
+    /// Run the analyzer when true.
+    private static final boolean RUN_ANALYZER = true;
+
     /// The Gettysburg address. It contains 318 tokens.
     private final String gettysburgAddress = """
                 Four score and seven years ago our fathers brought forth on this continent, a new nation, 
@@ -106,40 +118,74 @@ public final class CoreNLP extends Operation {
 
         /* Perform some basic analysis */
 
-        this.basicAnalysis(pipeline);
+        if (RUN_BASICS)
+            this.basicAnalysis(pipeline);
 
         /* Chunk text for embeddings */
 
-        final List<String> chunkedTextSegments = this.chunkTextForEmbeddings(pipeline, this.gettysburgAddress, 64);
+        if (RUN_CHUNKER) {
+            final List<String> chunkedTextSegments = this.chunkTextForEmbeddings(
+                    pipeline,
+                    this.gettysburgAddress,
+                    64
+            );
 
-        this.logger.info("Text segments for embeddings: {}", chunkedTextSegments.size());
+            this.logger.info("Text segments for embeddings: {}", chunkedTextSegments.size());
 
-        if (this.logger.isInfoEnabled()) {
-            chunkedTextSegments.forEach(this.logger::info);
+            if (this.logger.isInfoEnabled()) {
+                chunkedTextSegments.forEach(this.logger::info);
+            }
         }
 
         /* Use the text splitter */
 
-        final TextSplitter textSplitter = TextSplitter.builder()
-                .document(this.gettysburgAddress)
-                .maxTokens(256)
-                .build();
+        if (RUN_SPLITTER) {
+            final TextSplitter textSplitter = TextSplitter.builder()
+                    .document(this.gettysburgAddress)
+                    .maxTokens(256)
+                    .build();
 
-        final TextSplitterResponse textSplitterResponse = textSplitter.split();
+            final TextSplitterResponse textSplitterResponse = textSplitter.split();
 
-        if (this.logger.isInfoEnabled()) {
-            this.logger.info("Max tokens   : {}", textSplitterResponse.getMaxTokens());
-            this.logger.info("Total tokens : {}", textSplitterResponse.getTotalTokens());
-            this.logger.info("Paragraphs   : {}", textSplitterResponse.getNumberOfParagraphs());
-            this.logger.info("Text segments: {}", textSplitterResponse.getNumberOfTextSegments());
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Max tokens   : {}", textSplitterResponse.getMaxTokens());
+                this.logger.info("Total tokens : {}", textSplitterResponse.getTotalTokens());
+                this.logger.info("Paragraphs   : {}", textSplitterResponse.getNumberOfParagraphs());
+                this.logger.info("Text segments: {}", textSplitterResponse.getNumberOfTextSegments());
 
-            textSplitterResponse.getParagraphs().forEach(paragraph -> {
-                this.logger.info("Paragraph number       : {}", paragraph.getNumber());
-                this.logger.info("Paragraph tokens       : {}", paragraph.getTokens());
-                this.logger.info("Paragraph text segments: {}", paragraph.getTextSegments());
-            });
+                textSplitterResponse.getParagraphs().forEach(paragraph -> {
+                    this.logger.info("Paragraph number       : {}", paragraph.getNumber());
+                    this.logger.info("Paragraph tokens       : {}", paragraph.getTokens());
+                    this.logger.info("Paragraph text segments: {}", paragraph.getTextSegments());
+                });
 
-            textSplitterResponse.getTextSegments().forEach(this.logger::info);
+                textSplitterResponse.getTextSegments().forEach(this.logger::info);
+            }
+        }
+
+        /* Use the text analyzer */
+
+        if (RUN_ANALYZER) {
+            final TextAnalyzer textAnalyzer = TextAnalyzer.builder()
+                    .text(this.gettysburgAddress)
+                    .title("Gettysburg Address")
+                    .author("Abraham Lincoln")
+                    .build();
+
+            final TextAnalyzerResponse textAnalyzerResponse = textAnalyzer.analyze();
+
+            if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Response  : {}", textAnalyzerResponse);
+            }
+
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("Title     : {}", textAnalyzerResponse.getTitle());
+                this.logger.info("Author    : {}", textAnalyzerResponse.getAuthor());
+                this.logger.info("Size      : {}", textAnalyzerResponse.getSize());
+                this.logger.info("Paragraphs: {}", textAnalyzerResponse.getNumberOfParagraphs());
+                this.logger.info("Sentences : {}", textAnalyzerResponse.getNumberOfSentences());
+                this.logger.info("Tokens    : {}", textAnalyzerResponse.getNumberOfTokens());
+            }
         }
 
         if (this.logger.isTraceEnabled()) {
