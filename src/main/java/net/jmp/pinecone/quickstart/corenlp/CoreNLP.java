@@ -123,69 +123,107 @@ public final class CoreNLP extends Operation {
 
         /* Chunk text for embeddings */
 
-        if (RUN_CHUNKER) {
-            final List<String> chunkedTextSegments = this.chunkTextForEmbeddings(
-                    pipeline,
-                    this.gettysburgAddress,
-                    64
-            );
-
-            this.logger.info("Text segments for embeddings: {}", chunkedTextSegments.size());
-
-            if (this.logger.isInfoEnabled()) {
-                chunkedTextSegments.forEach(this.logger::info);
-            }
-        }
+        if (RUN_CHUNKER)
+            this.chunking(pipeline);
 
         /* Use the text splitter */
 
-        if (RUN_SPLITTER) {
-            final TextSplitter textSplitter = TextSplitter.builder()
-                    .document(this.gettysburgAddress)
-                    .maxTokens(256)
-                    .build();
-
-            final TextSplitterResponse textSplitterResponse = textSplitter.split();
-
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("Max tokens   : {}", textSplitterResponse.getMaxTokens());
-                this.logger.info("Total tokens : {}", textSplitterResponse.getTotalTokens());
-                this.logger.info("Paragraphs   : {}", textSplitterResponse.getNumberOfParagraphs());
-                this.logger.info("Text segments: {}", textSplitterResponse.getNumberOfTextSegments());
-
-                textSplitterResponse.getParagraphs().forEach(paragraph -> {
-                    this.logger.info("Paragraph number       : {}", paragraph.getNumber());
-                    this.logger.info("Paragraph tokens       : {}", paragraph.getTokens());
-                    this.logger.info("Paragraph text segments: {}", paragraph.getTextSegments());
-                });
-
-                textSplitterResponse.getTextSegments().forEach(this.logger::info);
-            }
-        }
+        if (RUN_SPLITTER)
+            this.textSplitting();
 
         /* Use the text analyzer */
 
-        if (RUN_ANALYZER) {
-            final TextAnalyzer textAnalyzer = TextAnalyzer.builder()
-                    .text(this.gettysburgAddress)
-                    .title("Gettysburg Address")
-                    .author("Abraham Lincoln")
-                    .build();
+        if (RUN_ANALYZER)
+            this.textAnalyzing();
 
-            final TextAnalyzerResponse textAnalyzerResponse = textAnalyzer.analyze();
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
 
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Response  : {}", textAnalyzerResponse);
-            }
+    /// Use the text analyzer.
+    private void textAnalyzing() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
 
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("Title     : {}", textAnalyzerResponse.getTitle());
-                this.logger.info("Author    : {}", textAnalyzerResponse.getAuthor());
-                this.logger.info("Size      : {}", textAnalyzerResponse.getSize());
-                this.logger.info("Paragraphs: {}", textAnalyzerResponse.getNumberOfParagraphs());
-                this.logger.info("Sentences : {}", textAnalyzerResponse.getNumberOfSentences());
-                this.logger.info("Tokens    : {}", textAnalyzerResponse.getNumberOfTokens());
-            }
+        final TextAnalyzer textAnalyzer = TextAnalyzer.builder()
+                .text(this.gettysburgAddress)
+                .title("Gettysburg Address")
+                .author("Abraham Lincoln")
+                .build();
+
+        final TextAnalyzerResponse textAnalyzerResponse = textAnalyzer.analyze();
+
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Response  : {}", textAnalyzerResponse);
+        }
+
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("Title     : {}", textAnalyzerResponse.getTitle());
+            this.logger.info("Author    : {}", textAnalyzerResponse.getAuthor());
+            this.logger.info("Size      : {}", textAnalyzerResponse.getSize());
+            this.logger.info("Paragraphs: {}", textAnalyzerResponse.getNumberOfParagraphs());
+            this.logger.info("Sentences : {}", textAnalyzerResponse.getNumberOfSentences());
+            this.logger.info("Tokens    : {}", textAnalyzerResponse.getNumberOfTokens());
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Use the text splitter.
+    private void textSplitting() {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entry());
+        }
+
+        final TextSplitter textSplitter = TextSplitter.builder()
+                .document(this.gettysburgAddress)
+                .maxTokens(256)
+                .build();
+
+        final TextSplitterResponse textSplitterResponse = textSplitter.split();
+
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("Max tokens   : {}", textSplitterResponse.getMaxTokens());
+            this.logger.info("Total tokens : {}", textSplitterResponse.getTotalTokens());
+            this.logger.info("Paragraphs   : {}", textSplitterResponse.getNumberOfParagraphs());
+            this.logger.info("Text segments: {}", textSplitterResponse.getNumberOfTextSegments());
+
+            textSplitterResponse.getParagraphs().forEach(paragraph -> {
+                this.logger.info("Paragraph number       : {}", paragraph.getNumber());
+                this.logger.info("Paragraph tokens       : {}", paragraph.getTokens());
+                this.logger.info("Paragraph text segments: {}", paragraph.getTextSegments());
+            });
+
+            textSplitterResponse.getTextSegments().forEach(this.logger::info);
+        }
+
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(exit());
+        }
+    }
+
+    /// Chunk text for embeddings.
+    ///
+    /// @param  pipeline edu.stanford.nlp.pipeline.StanfordCoreNLP
+    private void chunking(final StanfordCoreNLP pipeline) {
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(entryWith(pipeline));
+        }
+
+        final List<String> chunkedTextSegments = this.chunkTextForEmbeddings(
+                pipeline,
+                this.gettysburgAddress,
+                64
+        );
+
+        this.logger.info("Text segments for embeddings: {}", chunkedTextSegments.size());
+
+        if (this.logger.isInfoEnabled()) {
+            chunkedTextSegments.forEach(this.logger::info);
         }
 
         if (this.logger.isTraceEnabled()) {
